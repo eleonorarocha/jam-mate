@@ -4,11 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut, MessageSquare, User } from 'lucide-react';
+import { LogOut, MessageSquare, User, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import MapComponent from '@/components/MapComponent';
 import MessagesPanel from '@/components/MessagesPanel';
 import ProfilePanel from '@/components/ProfilePanel';
+import CalendarPanel from '@/components/CalendarPanel';
 
 const Map = () => {
   const { user, loading, signOut } = useAuth();
@@ -18,6 +19,7 @@ const Map = () => {
   const [tokenSaved, setTokenSaved] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -107,6 +109,14 @@ const Map = () => {
         <Button
           variant="secondary"
           size="icon"
+          onClick={() => setShowCalendar(!showCalendar)}
+          title="Agenda"
+        >
+          <Calendar className="h-5 w-5" />
+        </Button>
+        <Button
+          variant="secondary"
+          size="icon"
           onClick={() => setShowMessages(!showMessages)}
           title="Mensagens"
         >
@@ -121,6 +131,10 @@ const Map = () => {
           <LogOut className="h-5 w-5" />
         </Button>
       </div>
+
+      {showCalendar && (
+        <CalendarPanel onClose={() => setShowCalendar(false)} />
+      )}
 
       {showMessages && (
         <MessagesPanel onClose={() => setShowMessages(false)} />
