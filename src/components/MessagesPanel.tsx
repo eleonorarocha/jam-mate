@@ -1,0 +1,208 @@
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { X, Send } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+
+interface MessagesPanelProps {
+  onClose: () => void;
+}
+
+const MessagesPanel = ({ onClose }: MessagesPanelProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+
+  useEffect(() => {
+    if (!user) return;
+
+    loadConversations();
+    
+    const channel = supabase
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+        },
+        () => {
+          loadConversations();
+          if (selectedConversation) {
+            loadMessages(selectedConversation.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, selectedConversation]);
+
+  const loadConversations = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('messages')
+      .select('*, sender:profiles!sender_id(*), receiver:profiles!receiver_id(*)')
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order('created_at', { ascending: false });
+
+    if (data) {
+      const uniqueConversations = Array.from(
+        new Map(
+          data.map((msg) => {
+            const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+            const other = msg.sender_id === user.id ? msg.receiver : msg.sender;
+            return [otherId, { id: otherId, profile: other, lastMessage: msg }];
+          })
+        ).values()
+      );
+      setConversations(uniqueConversations);
+    }
+  };
+
+  const loadMessages = async (otherUserId: string) => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
+      .order('created_at', { ascending: true });
+
+    if (data) {
+      setMessages(data);
+      
+      const unreadIds = data
+        .filter((msg) => msg.receiver_id === user.id && !msg.read)
+        .map((msg) => msg.id);
+      
+      if (unreadIds.length > 0) {
+        await supabase
+          .from('messages')
+          .update({ read: true })
+          .in('id', unreadIds);
+      }
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!user || !selectedConversation || !newMessage.trim()) return;
+
+    const { error } = await supabase.from('messages').insert({
+      sender_id: user.id,
+      receiver_id: selectedConversation.id,
+      content: newMessage,
+    });
+
+    if (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível enviar a mensagem.',
+        variant: 'destructive',
+      });
+    } else {
+      setNewMessage('');
+    }
+  };
+
+  return (
+    <div className="absolute top-0 right-0 h-full w-full max-w-2xl bg-background/95 backdrop-blur-sm shadow-2xl z-30 flex">
+      <div className="w-1/3 border-r border-border">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h3 className="font-semibold">Conversas</h3>
+        </div>
+        <ScrollArea className="h-[calc(100vh-73px)]">
+          {conversations.map((conv) => (
+            <button
+              key={conv.id}
+              onClick={() => {
+                setSelectedConversation(conv);
+                loadMessages(conv.id);
+              }}
+              className={`w-full p-4 text-left border-b border-border hover:bg-accent/50 transition-colors ${
+                selectedConversation?.id === conv.id ? 'bg-accent' : ''
+              }`}
+            >
+              <p className="font-medium">{conv.profile?.username}</p>
+              <p className="text-sm text-muted-foreground truncate">
+                {conv.lastMessage?.content}
+              </p>
+            </button>
+          ))}
+        </ScrollArea>
+      </div>
+
+      <div className="flex-1 flex flex-col">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h3 className="font-semibold">
+            {selectedConversation?.profile?.username || 'Mensagens'}
+          </h3>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+
+        {selectedConversation ? (
+          <>
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${
+                      msg.sender_id === user?.id ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[70%] p-3 rounded-lg ${
+                        msg.sender_id === user?.id
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-accent'
+                      }`}
+                    >
+                      <p className="text-sm">{msg.content}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {new Date(msg.created_at).toLocaleTimeString('pt-PT', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="p-4 border-t border-border flex gap-2">
+              <Input
+                placeholder="Escreva a sua mensagem..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              />
+              <Button onClick={sendMessage} size="icon">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            Selecione uma conversa
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default MessagesPanel;
