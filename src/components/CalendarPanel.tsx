@@ -12,6 +12,7 @@ import { pt } from 'date-fns/locale';
 
 interface CalendarPanelProps {
   onClose: () => void;
+  embedded?: boolean;
 }
 
 interface Booking {
@@ -29,7 +30,7 @@ interface Booking {
   };
 }
 
-const CalendarPanel = ({ onClose }: CalendarPanelProps) => {
+const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -111,6 +112,89 @@ const CalendarPanel = ({ onClose }: CalendarPanelProps) => {
         return status;
     }
   };
+
+  if (embedded) {
+    return (
+      <Card className="w-full">
+        <CardContent className="pt-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="flex flex-col items-center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                locale={pt}
+                modifiers={{
+                  booked: datesWithBookings,
+                }}
+                modifiersStyles={{
+                  booked: {
+                    fontWeight: 'bold',
+                    textDecoration: 'underline',
+                  },
+                }}
+                className="rounded-md border pointer-events-auto"
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <h3 className="text-lg font-semibold mb-4">
+                {format(selectedDate, "d 'de' MMMM 'de' yyyy", { locale: pt })}
+              </h3>
+              <ScrollArea className="h-[300px] pr-4">
+                {loading ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    A carregar...
+                  </div>
+                ) : bookingsForSelectedDate.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Sem jam sessions agendadas para este dia.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {bookingsForSelectedDate.map((booking) => (
+                      <Card key={booking.id} className="p-4">
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="font-medium">
+                                  {booking.profiles.full_name || booking.profiles.username}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {booking.profiles.instrument}
+                                </p>
+                              </div>
+                            </div>
+                            <Badge className={getStatusColor(booking.status)}>
+                              {getStatusLabel(booking.status)}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>
+                              {format(parseISO(booking.scheduled_date), 'HH:mm')} -{' '}
+                              {booking.duration_hours}h
+                            </span>
+                          </div>
+                          {booking.message && (
+                            <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">
+                              {booking.message}
+                            </p>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">

@@ -1,0 +1,108 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+
+const UserMenu = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<{ username: string; avatar_url: string | null } | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user]);
+
+  const loadProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('username, avatar_url')
+      .eq('id', user.id)
+      .single();
+    
+    if (data) {
+      setProfile(data);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const getInitials = () => {
+    if (profile?.username) {
+      return profile.username.substring(0, 2).toUpperCase();
+    }
+    return user?.email?.substring(0, 2).toUpperCase() || 'U';
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="relative h-10 w-10 rounded-full ring-2 ring-border hover:ring-primary transition-all focus:outline-none focus:ring-primary">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || 'User'} />
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {getInitials()}
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{profile?.username || 'Utilizador'}</p>
+            <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/map')} className="cursor-pointer">
+          <MapPin className="mr-2 h-4 w-4" />
+          <span>Explorar Mapa</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+          <User className="mr-2 h-4 w-4" />
+          <span>Meu Perfil</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/messages')} className="cursor-pointer">
+          <MessageSquare className="mr-2 h-4 w-4" />
+          <span>Mensagens</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/calendar')} className="cursor-pointer">
+          <Calendar className="mr-2 h-4 w-4" />
+          <span>Agenda</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/ratings')} className="cursor-pointer">
+          <Star className="mr-2 h-4 w-4" />
+          <span>Avaliações</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Configurações</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sair</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export default UserMenu;
