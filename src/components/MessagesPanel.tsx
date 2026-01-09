@@ -10,9 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface MessagesPanelProps {
   onClose: () => void;
+  embedded?: boolean;
 }
 
-const MessagesPanel = ({ onClose }: MessagesPanelProps) => {
+const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [conversations, setConversations] = useState<any[]>([]);
@@ -116,8 +117,12 @@ const MessagesPanel = ({ onClose }: MessagesPanelProps) => {
     }
   };
 
+  const containerClass = embedded 
+    ? "h-[600px] border rounded-lg flex"
+    : "absolute top-0 right-0 h-full w-full max-w-2xl bg-background/95 backdrop-blur-sm shadow-2xl z-30 flex";
+
   return (
-    <div className="absolute top-0 right-0 h-full w-full max-w-2xl bg-background/95 backdrop-blur-sm shadow-2xl z-30 flex">
+    <div className={containerClass}>
       <div className="w-1/3 border-r border-border">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <h3 className="font-semibold">Conversas</h3>
@@ -148,9 +153,11 @@ const MessagesPanel = ({ onClose }: MessagesPanelProps) => {
           <h3 className="font-semibold">
             {selectedConversation?.profile?.username || 'Mensagens'}
           </h3>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
+          {!embedded && (
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </Button>
+          )}
         </div>
 
         {selectedConversation ? (

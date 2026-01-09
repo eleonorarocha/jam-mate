@@ -7,6 +7,11 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Map from "./pages/Map";
+import Profile from "./pages/Profile";
+import Messages from "./pages/Messages";
+import CalendarPage from "./pages/CalendarPage";
+import Ratings from "./pages/Ratings";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +25,11 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/map" element={<Map />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/ratings" element={<Ratings />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

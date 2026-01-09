@@ -1,25 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut, MessageSquare, User, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import MapComponent from '@/components/MapComponent';
-import MessagesPanel from '@/components/MessagesPanel';
-import ProfilePanel from '@/components/ProfilePanel';
-import CalendarPanel from '@/components/CalendarPanel';
+import Header from '@/components/Header';
 
 const Map = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [mapboxToken, setMapboxToken] = useState('');
   const [tokenSaved, setTokenSaved] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -36,11 +30,6 @@ const Map = () => {
         description: 'Pode agora ver o mapa.',
       });
     }
-  };
-
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
   };
 
   if (loading) {
@@ -60,33 +49,36 @@ const Map = () => {
 
   if (!tokenSaved && !savedToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="max-w-md w-full space-y-4 bg-card p-6 rounded-lg border">
-          <div>
-            <h2 className="text-2xl font-bold mb-2">Configure o Mapbox</h2>
-            <p className="text-muted-foreground mb-4">
-              Para visualizar o mapa, precisa de um token público do Mapbox.
-              Pode obtê-lo em{' '}
-              <a
-                href="https://mapbox.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Input
-              type="text"
-              placeholder="Cole aqui o seu token público do Mapbox"
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-            />
-            <Button onClick={handleSaveToken} className="w-full">
-              Guardar Token
-            </Button>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-24 flex items-center justify-center p-4">
+          <div className="max-w-md w-full space-y-4 bg-card p-6 rounded-lg border">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Configure o Mapbox</h2>
+              <p className="text-muted-foreground mb-4">
+                Para visualizar o mapa, precisa de um token público do Mapbox.
+                Pode obtê-lo em{' '}
+                <a
+                  href="https://mapbox.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  mapbox.com
+                </a>
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="Cole aqui o seu token público do Mapbox"
+                value={mapboxToken}
+                onChange={(e) => setMapboxToken(e.target.value)}
+              />
+              <Button onClick={handleSaveToken} className="w-full">
+                Guardar Token
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -95,54 +87,10 @@ const Map = () => {
 
   return (
     <div className="relative w-full h-screen">
-      <MapComponent token={savedToken || mapboxToken} />
-      
-      <div className="absolute top-4 right-4 flex gap-2 z-10">
-        <Button
-          variant="secondary"
-          size="icon"
-          onClick={() => setShowProfile(!showProfile)}
-          title="Perfil"
-        >
-          <User className="h-5 w-5" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          onClick={() => setShowCalendar(!showCalendar)}
-          title="Agenda"
-        >
-          <Calendar className="h-5 w-5" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          onClick={() => setShowMessages(!showMessages)}
-          title="Mensagens"
-        >
-          <MessageSquare className="h-5 w-5" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          onClick={handleLogout}
-          title="Sair"
-        >
-          <LogOut className="h-5 w-5" />
-        </Button>
+      <Header />
+      <div className="pt-16 h-full">
+        <MapComponent token={savedToken || mapboxToken} />
       </div>
-
-      {showCalendar && (
-        <CalendarPanel onClose={() => setShowCalendar(false)} />
-      )}
-
-      {showMessages && (
-        <MessagesPanel onClose={() => setShowMessages(false)} />
-      )}
-
-      {showProfile && (
-        <ProfilePanel onClose={() => setShowProfile(false)} />
-      )}
     </div>
   );
 };
