@@ -12,6 +12,7 @@ import Messages from "./pages/Messages";
 import CalendarPage from "./pages/CalendarPage";
 import Ratings from "./pages/Ratings";
 import Settings from "./pages/Settings";
+import Gallery from "./pages/Gallery";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,7 @@ const App = () => (
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/ratings" element={<Ratings />} />
           <Route path="/settings" element={<Settings />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

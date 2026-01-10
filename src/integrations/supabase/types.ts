@@ -65,6 +65,53 @@ export type Database = {
           },
         ]
       }
+      jam_media: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          media_type: string
+          media_url: string
+          thumbnail_url: string | null
+          title: string | null
+          uploader_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          media_type: string
+          media_url: string
+          thumbnail_url?: string | null
+          title?: string | null
+          uploader_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          media_type?: string
+          media_url?: string
+          thumbnail_url?: string | null
+          title?: string | null
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jam_media_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           booking_id: string | null
@@ -125,13 +172,17 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
-          exact_address: string | null
+          email_verified: boolean | null
+          first_name: string | null
           full_name: string | null
           id: string
+          identity_verified: boolean | null
           instrument: string
+          last_name: string | null
           latitude: number | null
           longitude: number | null
-          postal_code: string | null
+          phone: string | null
+          phone_verified: boolean | null
           skill_level: Database["public"]["Enums"]["skill_level"]
           total_ratings: number | null
           updated_at: string
@@ -144,13 +195,17 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
-          exact_address?: string | null
+          email_verified?: boolean | null
+          first_name?: string | null
           full_name?: string | null
           id: string
+          identity_verified?: boolean | null
           instrument: string
+          last_name?: string | null
           latitude?: number | null
           longitude?: number | null
-          postal_code?: string | null
+          phone?: string | null
+          phone_verified?: boolean | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           total_ratings?: number | null
           updated_at?: string
@@ -163,13 +218,17 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
-          exact_address?: string | null
+          email_verified?: boolean | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
+          identity_verified?: boolean | null
           instrument?: string
+          last_name?: string | null
           latitude?: number | null
           longitude?: number | null
-          postal_code?: string | null
+          phone?: string | null
+          phone_verified?: boolean | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           total_ratings?: number | null
           updated_at?: string
@@ -182,28 +241,40 @@ export type Database = {
           booking_id: string
           comment: string | null
           created_at: string
+          enjoyment_rating: number | null
           id: string
+          location_rating: number | null
+          punctuality_rating: number | null
           rated_user_id: string
           rater_id: string
           rating: number
+          respect_rating: number | null
         }
         Insert: {
           booking_id: string
           comment?: string | null
           created_at?: string
+          enjoyment_rating?: number | null
           id?: string
+          location_rating?: number | null
+          punctuality_rating?: number | null
           rated_user_id: string
           rater_id: string
           rating: number
+          respect_rating?: number | null
         }
         Update: {
           booking_id?: string
           comment?: string | null
           created_at?: string
+          enjoyment_rating?: number | null
           id?: string
+          location_rating?: number | null
+          punctuality_rating?: number | null
           rated_user_id?: string
           rater_id?: string
           rating?: number
+          respect_rating?: number | null
         }
         Relationships: [
           {
@@ -234,29 +305,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_profile_with_address: {
-        Args: { profile_id: string }
-        Returns: {
-          avatar_url: string
-          average_rating: number
-          bio: string
-          city: string
-          country: string
-          created_at: string
-          exact_address: string
-          full_name: string
-          id: string
-          instrument: string
-          latitude: number
-          longitude: number
-          postal_code: string
-          skill_level: Database["public"]["Enums"]["skill_level"]
-          total_ratings: number
-          updated_at: string
-          username: string
-        }[]
-      }
-      has_accepted_booking: { Args: { profile_id: string }; Returns: boolean }
+      [_ in never]: never
     }
     Enums: {
       booking_status:

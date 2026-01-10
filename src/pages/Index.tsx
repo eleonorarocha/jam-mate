@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Music, MapPin, MessageSquare, Star, Shield, Users } from 'lucide-react';
+import { Music, MapPin, MessageSquare, Star, Users, Calendar } from 'lucide-react';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import { useAuth } from '@/hooks/useAuth';
@@ -80,28 +80,35 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Trust & Safety Section */}
+      {/* Community Section */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-4xl text-center">
-          <Shield className="w-12 h-12 text-primary mx-auto mb-6" />
-          <h2 className="text-3xl font-bold mb-4">A sua segurança é prioridade</h2>
+          <Users className="w-12 h-12 text-primary mx-auto mb-6" />
+          <h2 className="text-3xl font-bold mb-4">Comunidade de Músicos</h2>
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-            No JamMate, a morada exata só é partilhada após confirmação mútua do agendamento.
-            Avaliações verificadas ajudam a construir uma comunidade de confiança.
+            Junte-se a uma comunidade vibrante de músicos apaixonados. 
+            Partilhe experiências, aprenda com outros e cresça musicalmente.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <div className="p-4 bg-card rounded-lg border">
-              <Users className="w-6 h-6 text-primary mb-2 mx-auto" />
-              <h4 className="font-medium mb-1">Perfis Verificados</h4>
+              <Calendar className="w-6 h-6 text-primary mb-2 mx-auto" />
+              <h4 className="font-medium mb-1">Agende Jam Sessions</h4>
               <p className="text-sm text-muted-foreground">
-                Utilizadores autenticados e avaliados pela comunidade
+                Organize encontros musicais facilmente
               </p>
             </div>
             <div className="p-4 bg-card rounded-lg border">
               <Star className="w-6 h-6 text-primary mb-2 mx-auto" />
-              <h4 className="font-medium mb-1">Sistema de Avaliações</h4>
+              <h4 className="font-medium mb-1">Avaliações Verificadas</h4>
               <p className="text-sm text-muted-foreground">
-                Avalie e seja avaliado após cada jam session
+                Sistema de avaliação detalhado
+              </p>
+            </div>
+            <div className="p-4 bg-card rounded-lg border">
+              <Music className="w-6 h-6 text-primary mb-2 mx-auto" />
+              <h4 className="font-medium mb-1">Galeria de Jams</h4>
+              <p className="text-sm text-muted-foreground">
+                Partilhe fotos e gravações
               </p>
             </div>
           </div>

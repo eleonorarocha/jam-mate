@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, MapPin, Star, MessageSquare, Calendar } from 'lucide-react';
+import { X, MapPin, Star, MessageSquare, Calendar, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -17,21 +17,6 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showBooking, setShowBooking] = useState(false);
-  const [hasAcceptedBooking, setHasAcceptedBooking] = useState(false);
-
-  const checkBookingStatus = async () => {
-    if (!user) return;
-
-    const { data } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('status', 'accepted')
-      .or(`requester_id.eq.${user.id},musician_id.eq.${user.id}`)
-      .or(`requester_id.eq.${musician.id},musician_id.eq.${musician.id}`)
-      .single();
-
-    setHasAcceptedBooking(!!data);
-  };
 
   const handleMessage = async () => {
     if (!user) return;
@@ -57,6 +42,10 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
     }
   };
 
+  const displayName = musician.first_name && musician.last_name 
+    ? `${musician.first_name} ${musician.last_name}` 
+    : musician.username;
+
   return (
     <>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 w-full max-w-md p-4">
@@ -74,33 +63,41 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
               {musician.avatar_url && (
                 <img
                   src={musician.avatar_url}
-                  alt={musician.username}
+                  alt={displayName}
                   className="w-16 h-16 rounded-full object-cover border-2 border-primary"
                 />
               )}
               <div className="flex-1">
                 <CardTitle className="text-xl mb-1">
-                  {musician.username}
+                  {displayName}
                 </CardTitle>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
                   <MapPin className="h-3 w-3" />
                   {musician.city}, {musician.country}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-primary text-primary" />
-                  <span className="text-sm font-medium">
-                    {musician.average_rating.toFixed(1)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({musician.total_ratings} avaliações)
-                  </span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-primary text-primary" />
+                    <span className="text-sm font-medium">
+                      {musician.average_rating?.toFixed(1) || '0.0'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ({musician.total_ratings || 0} avaliações)
+                    </span>
+                  </div>
+                  {musician.phone_verified && (
+                    <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Verificado
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Badge variant="secondary">{musician.instrument}</Badge>
+            <div className="flex gap-2 flex-wrap">
+              <Badge variant="secondary">{musician.instrument || 'Não especificado'}</Badge>
               <Badge variant="outline">{musician.skill_level}</Badge>
             </div>
             
@@ -108,17 +105,12 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
               <p className="text-sm text-muted-foreground">{musician.bio}</p>
             )}
 
-            {hasAcceptedBooking && musician.exact_address && (
-              <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-                <p className="text-sm font-medium mb-1">Morada Completa:</p>
-                <p className="text-sm">{musician.exact_address}</p>
-                {musician.postal_code && (
-                  <p className="text-sm text-muted-foreground">
-                    {musician.postal_code}
-                  </p>
-                )}
-              </div>
-            )}
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-xs text-muted-foreground">
+                <strong>Nota:</strong> O local exato do encontro é combinado entre os participantes 
+                após confirmação mútua do agendamento.
+              </p>
+            </div>
 
             <div className="flex gap-2">
               <Button
