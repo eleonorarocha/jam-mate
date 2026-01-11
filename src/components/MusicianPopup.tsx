@@ -1,15 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, MapPin, Star, MessageSquare, Calendar, CheckCircle } from 'lucide-react';
+import { X, MapPin, Star, MessageSquare, Calendar, CheckCircle, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import BookingDialog from './BookingDialog';
 
 interface MusicianPopupProps {
-  musician: any;
+  musician: {
+    id: string;
+    username: string;
+    instrument: string;
+    skill_level: string;
+    city: string | null;
+    country: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    average_rating: number | null;
+    total_ratings: number | null;
+    avatar_url: string | null;
+    bio: string | null;
+  };
   onClose: () => void;
 }
 
@@ -17,6 +30,37 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showBooking, setShowBooking] = useState(false);
+  const [hasAcceptedBooking, setHasAcceptedBooking] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+
+  // Check if there's an accepted booking and get verification status
+  useEffect(() => {
+    const checkBookingAndVerification = async () => {
+      if (!user) return;
+
+      // Check for accepted/completed booking
+      const { data: booking } = await supabase
+        .from('bookings')
+        .select('id')
+        .or(`and(requester_id.eq.${user.id},musician_id.eq.${musician.id}),and(musician_id.eq.${user.id},requester_id.eq.${musician.id})`)
+        .in('status', ['accepted', 'completed'])
+        .limit(1)
+        .single();
+
+      setHasAcceptedBooking(!!booking);
+
+      // Get verification status (public field)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone_verified, email_verified, identity_verified')
+        .eq('id', musician.id)
+        .single();
+
+      setIsVerified(profile?.phone_verified || profile?.email_verified || false);
+    };
+
+    checkBookingAndVerification();
+  }, [user, musician.id]);
 
   const handleMessage = async () => {
     if (!user) return;
@@ -42,9 +86,8 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
     }
   };
 
-  const displayName = musician.first_name && musician.last_name 
-    ? `${musician.first_name} ${musician.last_name}` 
-    : musician.username;
+  // Only show username publicly - name is protected
+  const displayName = musician.username;
 
   return (
     <>
@@ -85,7 +128,7 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
                       ({musician.total_ratings || 0} avaliações)
                     </span>
                   </div>
-                  {musician.phone_verified && (
+                  {isVerified && (
                     <Badge variant="secondary" className="text-xs flex items-center gap-1">
                       <CheckCircle className="h-3 w-3" />
                       Verificado
