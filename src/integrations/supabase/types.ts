@@ -53,7 +53,28 @@ export type Database = {
             foreignKeyName: "bookings_musician_id_fkey"
             columns: ["musician_id"]
             isOneToOne: false
+            referencedRelation: "booking_partner_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_musician_id_fkey"
+            columns: ["musician_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_musician_id_fkey"
+            columns: ["musician_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "booking_partner_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -61,6 +82,13 @@ export type Database = {
             columns: ["requester_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -152,7 +180,28 @@ export type Database = {
             foreignKeyName: "messages_receiver_id_fkey"
             columns: ["receiver_id"]
             isOneToOne: false
+            referencedRelation: "booking_partner_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "booking_partner_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -160,6 +209,13 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -288,7 +344,28 @@ export type Database = {
             foreignKeyName: "ratings_rated_user_id_fkey"
             columns: ["rated_user_id"]
             isOneToOne: false
+            referencedRelation: "booking_partner_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rated_user_id_fkey"
+            columns: ["rated_user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rated_user_id_fkey"
+            columns: ["rated_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_rater_id_fkey"
+            columns: ["rater_id"]
+            isOneToOne: false
+            referencedRelation: "booking_partner_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -298,14 +375,143 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ratings_rater_id_fkey"
+            columns: ["rater_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      booking_partner_profiles: {
+        Row: {
+          avatar_url: string | null
+          average_rating: number | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          email_verified: boolean | null
+          first_name: string | null
+          full_name: string | null
+          id: string | null
+          identity_verified: boolean | null
+          instrument: string | null
+          last_name: string | null
+          latitude: number | null
+          longitude: number | null
+          phone: string | null
+          phone_verified: boolean | null
+          skill_level: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings: number | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          email_verified?: boolean | null
+          first_name?: string | null
+          full_name?: string | null
+          id?: string | null
+          identity_verified?: boolean | null
+          instrument?: string | null
+          last_name?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          phone?: string | null
+          phone_verified?: boolean | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          email_verified?: boolean | null
+          first_name?: string | null
+          full_name?: string | null
+          id?: string | null
+          identity_verified?: boolean | null
+          instrument?: string | null
+          last_name?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          phone?: string | null
+          phone_verified?: boolean | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          average_rating: number | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          id: string | null
+          instrument: string | null
+          latitude: number | null
+          longitude: number | null
+          skill_level: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings: number | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          instrument?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings?: number | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          instrument?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings?: number | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      has_accepted_booking_with: {
+        Args: { _profile_id: string; _viewer_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       booking_status:
