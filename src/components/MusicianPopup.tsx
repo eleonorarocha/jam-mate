@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, MapPin, Star, MessageSquare, Calendar } from 'lucide-react';
+import { X, MapPin, Star, MessageSquare, Calendar, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,9 +24,14 @@ interface MusicianPopupProps {
 }
 
 const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [showBooking, setShowBooking] = useState(false);
+
+  const handleViewProfile = () => {
+    navigate(`/profile/${musician.id}`);
+  };
 
   const handleMessage = async () => {
     if (!user) return;
@@ -79,7 +85,12 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
                 )}
               </div>
               <div className="flex-1">
-                <CardTitle className="text-lg">{musician.username}</CardTitle>
+                <button 
+                  onClick={handleViewProfile}
+                  className="text-left hover:underline"
+                >
+                  <CardTitle className="text-lg">{musician.username}</CardTitle>
+                </button>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3" />
                   {musician.city}{musician.country ? `, ${musician.country}` : ''}
@@ -101,26 +112,37 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               <Button
                 size="sm"
-                className="flex-1"
-                onClick={handleMessage}
-                disabled={user?.id === musician.id}
+                variant="outline"
+                onClick={handleViewProfile}
+                className="w-full"
               >
-                <MessageSquare className="h-4 w-4 mr-1" />
-                Mensagem
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Ver Perfil Completo
               </Button>
-              <Button
-                size="sm"
-                className="flex-1"
-                variant="secondary"
-                onClick={() => setShowBooking(true)}
-                disabled={user?.id === musician.id}
-              >
-                <Calendar className="h-4 w-4 mr-1" />
-                Agendar
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  onClick={handleMessage}
+                  disabled={user?.id === musician.id}
+                >
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  Mensagem
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1"
+                  variant="secondary"
+                  onClick={() => setShowBooking(true)}
+                  disabled={user?.id === musician.id}
+                >
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Agendar
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
