@@ -175,6 +175,7 @@ export type Database = {
           email_verified: boolean | null
           first_name: string | null
           full_name: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           identity_verified: boolean | null
           instrument: string
@@ -198,6 +199,7 @@ export type Database = {
           email_verified?: boolean | null
           first_name?: string | null
           full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
           id: string
           identity_verified?: boolean | null
           instrument: string
@@ -221,6 +223,7 @@ export type Database = {
           email_verified?: boolean | null
           first_name?: string | null
           full_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           identity_verified?: boolean | null
           instrument?: string
@@ -321,6 +324,7 @@ export type Database = {
         | "rejected"
         | "completed"
         | "cancelled"
+      gender_type: "male" | "female" | "other" | "prefer_not_to_say"
       skill_level: "beginner" | "intermediate" | "advanced" | "professional"
     }
     CompositeTypes: {
@@ -456,6 +460,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      gender_type: ["male", "female", "other", "prefer_not_to_say"],
       skill_level: ["beginner", "intermediate", "advanced", "professional"],
     },
   },

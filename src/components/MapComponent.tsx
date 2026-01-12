@@ -35,10 +35,10 @@ const MapComponent = ({ token }: MapComponentProps) => {
   }, [token]);
 
   const loadMusicians = async () => {
-    // Only fetch public, non-sensitive fields for the map
+    // Only fetch minimal public fields for the map popup
     const { data: musicians } = await supabase
       .from('profiles')
-      .select('id, username, instrument, skill_level, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, bio')
+      .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url')
       .not('latitude', 'is', null)
       .not('longitude', 'is', null);
 

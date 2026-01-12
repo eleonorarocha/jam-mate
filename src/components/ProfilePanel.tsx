@@ -31,6 +31,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
     phone: '',
     phone_verified: false,
     email_verified: false,
+    gender: '' as 'male' | 'female' | 'other' | 'prefer_not_to_say' | '',
   });
 
   useEffect(() => {
@@ -59,6 +60,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
         phone: data.phone || '',
         phone_verified: data.phone_verified || false,
         email_verified: data.email_verified || false,
+        gender: data.gender || '',
       });
     }
   };
@@ -100,6 +102,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           city: profile.city,
           country: profile.country,
           phone: profile.phone,
+          gender: profile.gender || null,
         })
         .eq('id', user.id);
 
@@ -207,6 +210,26 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
             <SelectItem value="intermediate">Intermediário</SelectItem>
             <SelectItem value="advanced">Avançado</SelectItem>
             <SelectItem value="professional">Profissional</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="gender">Género</Label>
+        <Select
+          value={profile.gender}
+          onValueChange={(value: 'male' | 'female' | 'other' | 'prefer_not_to_say') => 
+            setProfile({ ...profile, gender: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione o género" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="male">Masculino</SelectItem>
+            <SelectItem value="female">Feminino</SelectItem>
+            <SelectItem value="other">Outro</SelectItem>
+            <SelectItem value="prefer_not_to_say">Prefiro não dizer</SelectItem>
           </SelectContent>
         </Select>
       </div>
