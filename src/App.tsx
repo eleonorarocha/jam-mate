@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Map from "./pages/Map";
 import Profile from "./pages/Profile";
+import PublicProfile from "./pages/PublicProfile";
 import Messages from "./pages/Messages";
 import CalendarPage from "./pages/CalendarPage";
 import Ratings from "./pages/Ratings";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/map" element={<Map />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:id" element={<PublicProfile />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/ratings" element={<Ratings />} />
