@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import MapComponent from '@/components/MapComponent';
+import MapFilters, { MapFiltersState } from '@/components/MapFilters';
 import Header from '@/components/Header';
 
 const Map = () => {
@@ -14,6 +15,11 @@ const Map = () => {
   const [searchParams] = useSearchParams();
   const [mapboxToken, setMapboxToken] = useState('');
   const [tokenSaved, setTokenSaved] = useState(false);
+  const [filters, setFilters] = useState<MapFiltersState>({
+    instrument: '',
+    skillLevel: '',
+    gender: '',
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -88,8 +94,13 @@ const Map = () => {
   return (
     <div className="relative w-full h-screen">
       <Header />
-      <div className="pt-16 h-full">
-        <MapComponent token={savedToken || mapboxToken} />
+      <div className="pt-16 h-full relative">
+        <MapComponent token={savedToken || mapboxToken} filters={filters} />
+        
+        {/* Filter button positioned on map */}
+        <div className="absolute top-4 left-4 z-10">
+          <MapFilters filters={filters} onFiltersChange={setFilters} />
+        </div>
       </div>
     </div>
   );
