@@ -184,6 +184,8 @@ export type Database = {
           longitude: number | null
           phone: string | null
           phone_verified: boolean | null
+          preferred_instruments: string[] | null
+          preferred_skill_levels: string[] | null
           skill_level: Database["public"]["Enums"]["skill_level"]
           total_ratings: number | null
           updated_at: string
@@ -208,6 +210,8 @@ export type Database = {
           longitude?: number | null
           phone?: string | null
           phone_verified?: boolean | null
+          preferred_instruments?: string[] | null
+          preferred_skill_levels?: string[] | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           total_ratings?: number | null
           updated_at?: string
@@ -232,6 +236,8 @@ export type Database = {
           longitude?: number | null
           phone?: string | null
           phone_verified?: boolean | null
+          preferred_instruments?: string[] | null
+          preferred_skill_levels?: string[] | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           total_ratings?: number | null
           updated_at?: string
