@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Key, Bell, Shield, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
+import PartnerPreferences from '@/components/PartnerPreferences';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,6 +99,8 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            <PartnerPreferences userId={user.id} />
 
             <Card>
               <CardHeader>
