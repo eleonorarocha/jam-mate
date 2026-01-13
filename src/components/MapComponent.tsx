@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import MusicianPopup from './MusicianPopup';
 import { MapFiltersState } from './MapFilters';
 
@@ -25,12 +26,64 @@ interface Musician {
   gender?: string;
 }
 
+interface UserPreferences {
+  preferred_skill_levels: string[];
+  preferred_instruments: string[];
+}
+
 const MapComponent = ({ token, filters }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
+  const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
+  const { user } = useAuth();
+
+  // Load user preferences
+  useEffect(() => {
+    const loadUserPreferences = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('preferred_skill_levels, preferred_instruments')
+        .eq('id', user.id)
+        .single();
+
+      if (data) {
+        setUserPreferences({
+          preferred_skill_levels: data.preferred_skill_levels || [],
+          preferred_instruments: data.preferred_instruments || [],
+        });
+      }
+    };
+
+    loadUserPreferences();
+  }, [user]);
+
+  // Check if a musician is compatible with user preferences
+  const isCompatibleMatch = useCallback((musician: Musician): boolean => {
+    if (!userPreferences) return false;
+    if (!user || musician.id === user.id) return false;
+
+    const { preferred_skill_levels, preferred_instruments } = userPreferences;
+
+    // If no preferences set, no special highlighting
+    if (preferred_skill_levels.length === 0 && preferred_instruments.length === 0) {
+      return false;
+    }
+
+    // Check skill level match (empty array means accepts all)
+    const skillMatch = preferred_skill_levels.length === 0 || 
+      (musician.skill_level && preferred_skill_levels.includes(musician.skill_level));
+
+    // Check instrument match (empty array means accepts all)
+    const instrumentMatch = preferred_instruments.length === 0 || 
+      preferred_instruments.includes(musician.instrument);
+
+    return skillMatch && instrumentMatch;
+  }, [userPreferences, user]);
 
   // Load musicians from database
   const loadMusicians = useCallback(async () => {
@@ -91,23 +144,40 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
     // Create markers for filtered musicians
     filteredMusicians.forEach((musician) => {
+      const isMatch = isCompatibleMatch(musician);
+      
       const el = document.createElement('div');
       el.className = 'musician-marker';
       el.style.backgroundImage = musician.avatar_url
         ? `url(${musician.avatar_url})`
         : '';
-      el.style.width = '40px';
-      el.style.height = '40px';
+      el.style.width = isMatch ? '48px' : '40px';
+      el.style.height = isMatch ? '48px' : '40px';
       el.style.borderRadius = '50%';
       el.style.cursor = 'pointer';
       el.style.backgroundColor = 'hsl(var(--primary))';
-      el.style.border = '3px solid white';
-      el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+      el.style.border = isMatch ? '4px solid hsl(142, 76%, 36%)' : '3px solid white';
+      el.style.boxShadow = isMatch 
+        ? '0 0 12px 4px hsla(142, 76%, 36%, 0.5), 0 2px 8px rgba(0,0,0,0.3)' 
+        : '0 2px 8px rgba(0,0,0,0.3)';
       el.style.backgroundSize = 'cover';
       el.style.backgroundPosition = 'center';
+      el.style.transition = 'transform 0.2s ease';
+      
+      if (isMatch) {
+        el.style.animation = 'pulse 2s infinite';
+      }
 
       el.addEventListener('click', () => {
         setSelectedMusician(musician);
+      });
+      
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.1)';
+      });
+      
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)';
       });
 
       const marker = new mapboxgl.Marker(el)
@@ -116,10 +186,18 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters]);
+  }, [musicians, filters, isCompatibleMatch]);
 
   return (
     <>
+      <style>
+        {`
+          @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 12px 4px hsla(142, 76%, 36%, 0.5), 0 2px 8px rgba(0,0,0,0.3); }
+            50% { box-shadow: 0 0 20px 8px hsla(142, 76%, 36%, 0.3), 0 2px 8px rgba(0,0,0,0.3); }
+          }
+        `}
+      </style>
       <div ref={mapContainer} className="absolute inset-0" />
       {selectedMusician && (
         <MusicianPopup
