@@ -3,10 +3,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { X, Clock, User } from 'lucide-react';
+import { X, Clock, User, Check, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -32,9 +33,59 @@ interface Booking {
 
 const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
+
+  const handleUpdateBookingStatus = async (booking: Booking, newStatus: 'accepted' | 'rejected') => {
+    if (!user) return;
+    
+    setUpdatingBookingId(booking.id);
+    
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', booking.id);
+
+      if (error) throw error;
+
+      // Send email notification if accepted
+      if (newStatus === 'accepted') {
+        await supabase.functions.invoke('send-booking-accepted', {
+          body: {
+            bookingId: booking.id,
+            musicianId: booking.musician_id,
+            requesterId: booking.requester_id,
+            scheduledDate: booking.scheduled_date,
+            durationHours: booking.duration_hours,
+          },
+        });
+      }
+
+      toast({
+        title: newStatus === 'accepted' ? 'Jam aceite!' : 'Pedido recusado',
+        description: newStatus === 'accepted' 
+          ? 'O músico foi notificado por email.' 
+          : 'O pedido foi recusado.',
+      });
+
+      // Update local state
+      setBookings(prev => prev.map(b => 
+        b.id === booking.id ? { ...b, status: newStatus } : b
+      ));
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingBookingId(null);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -152,40 +203,68 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {bookingsForSelectedDate.map((booking) => (
-                      <Card key={booking.id} className="p-4">
-                        <div className="space-y-2">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="font-medium">
-                                  {booking.profiles.full_name || booking.profiles.username}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {booking.profiles.instrument}
-                                </p>
+                    {bookingsForSelectedDate.map((booking) => {
+                      const isPending = booking.status === 'pending';
+                      const isReceivedRequest = isPending && booking.musician_id === user?.id;
+                      
+                      return (
+                        <Card key={booking.id} className="p-4">
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <div>
+                                  <p className="font-medium">
+                                    {booking.profiles.full_name || booking.profiles.username}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {booking.profiles.instrument}
+                                  </p>
+                                </div>
                               </div>
+                              <Badge className={getStatusColor(booking.status)}>
+                                {getStatusLabel(booking.status)}
+                              </Badge>
                             </div>
-                            <Badge className={getStatusColor(booking.status)}>
-                              {getStatusLabel(booking.status)}
-                            </Badge>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span>
+                                {format(parseISO(booking.scheduled_date), 'HH:mm')} -{' '}
+                                {booking.duration_hours}h
+                              </span>
+                            </div>
+                            {booking.message && (
+                              <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">
+                                {booking.message}
+                              </p>
+                            )}
+                            {isReceivedRequest && (
+                              <div className="flex gap-2 pt-2">
+                                <Button
+                                  size="sm"
+                                  className="flex-1 bg-green-600 hover:bg-green-700"
+                                  disabled={updatingBookingId === booking.id}
+                                  onClick={() => handleUpdateBookingStatus(booking, 'accepted')}
+                                >
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Aceitar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="flex-1"
+                                  disabled={updatingBookingId === booking.id}
+                                  onClick={() => handleUpdateBookingStatus(booking, 'rejected')}
+                                >
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  Recusar
+                                </Button>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>
-                              {format(parseISO(booking.scheduled_date), 'HH:mm')} -{' '}
-                              {booking.duration_hours}h
-                            </span>
-                          </div>
-                          {booking.message && (
-                            <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">
-                              {booking.message}
-                            </p>
-                          )}
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </ScrollArea>
@@ -241,40 +320,68 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {bookingsForSelectedDate.map((booking) => (
-                      <Card key={booking.id} className="p-4">
-                        <div className="space-y-2">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <div>
-                                <p className="font-medium">
-                                  {booking.profiles.full_name || booking.profiles.username}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {booking.profiles.instrument}
-                                </p>
+                    {bookingsForSelectedDate.map((booking) => {
+                      const isPending = booking.status === 'pending';
+                      const isReceivedRequest = isPending && booking.musician_id === user?.id;
+                      
+                      return (
+                        <Card key={booking.id} className="p-4">
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <div>
+                                  <p className="font-medium">
+                                    {booking.profiles.full_name || booking.profiles.username}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {booking.profiles.instrument}
+                                  </p>
+                                </div>
                               </div>
+                              <Badge className={getStatusColor(booking.status)}>
+                                {getStatusLabel(booking.status)}
+                              </Badge>
                             </div>
-                            <Badge className={getStatusColor(booking.status)}>
-                              {getStatusLabel(booking.status)}
-                            </Badge>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4" />
+                              <span>
+                                {format(parseISO(booking.scheduled_date), 'HH:mm')} -{' '}
+                                {booking.duration_hours}h
+                              </span>
+                            </div>
+                            {booking.message && (
+                              <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">
+                                {booking.message}
+                              </p>
+                            )}
+                            {isReceivedRequest && (
+                              <div className="flex gap-2 pt-2">
+                                <Button
+                                  size="sm"
+                                  className="flex-1 bg-green-600 hover:bg-green-700"
+                                  disabled={updatingBookingId === booking.id}
+                                  onClick={() => handleUpdateBookingStatus(booking, 'accepted')}
+                                >
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Aceitar
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="flex-1"
+                                  disabled={updatingBookingId === booking.id}
+                                  onClick={() => handleUpdateBookingStatus(booking, 'rejected')}
+                                >
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  Recusar
+                                </Button>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            <span>
-                              {format(parseISO(booking.scheduled_date), 'HH:mm')} -{' '}
-                              {booking.duration_hours}h
-                            </span>
-                          </div>
-                          {booking.message && (
-                            <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">
-                              {booking.message}
-                            </p>
-                          )}
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </ScrollArea>
