@@ -2,3 +2,6 @@ project_id = "gmlwpcadioqwqirplxlo"
 
 [functions.send-booking-notification]
 verify_jwt = false
+
+[functions.send-booking-accepted]
+verify_jwt = false
