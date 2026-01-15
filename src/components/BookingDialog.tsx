@@ -38,6 +38,17 @@ const BookingDialog = ({ musicianId, onClose }: BookingDialogProps) => {
 
       if (error) throw error;
 
+      // Send email notification to musician
+      await supabase.functions.invoke('send-booking-notification', {
+        body: {
+          musicianId,
+          requesterId: user.id,
+          scheduledDate: date,
+          durationHours: parseInt(duration),
+          message: message || undefined,
+        },
+      });
+
       toast({
         title: 'Pedido enviado!',
         description: 'O músico irá receber o seu pedido de agendamento.',
