@@ -52,24 +52,23 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
 
       if (error) throw error;
 
-      // Send email notification if accepted
-      if (newStatus === 'accepted') {
-        await supabase.functions.invoke('send-booking-accepted', {
-          body: {
-            bookingId: booking.id,
-            musicianId: booking.musician_id,
-            requesterId: booking.requester_id,
-            scheduledDate: booking.scheduled_date,
-            durationHours: booking.duration_hours,
-          },
-        });
-      }
+      // Send email notification
+      const functionName = newStatus === 'accepted' ? 'send-booking-accepted' : 'send-booking-rejected';
+      await supabase.functions.invoke(functionName, {
+        body: {
+          bookingId: booking.id,
+          musicianId: booking.musician_id,
+          requesterId: booking.requester_id,
+          scheduledDate: booking.scheduled_date,
+          durationHours: booking.duration_hours,
+        },
+      });
 
       toast({
         title: newStatus === 'accepted' ? 'Jam aceite!' : 'Pedido recusado',
         description: newStatus === 'accepted' 
           ? 'O músico foi notificado por email.' 
-          : 'O pedido foi recusado.',
+          : 'O músico foi notificado por email.',
       });
 
       // Update local state
