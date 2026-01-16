@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { X, Clock, User, Check, XCircle } from 'lucide-react';
+import { X, Clock, User, Check, XCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import RejectBookingDialog from './RejectBookingDialog';
+import RescheduleBookingDialog from './RescheduleBookingDialog';
 
 interface CalendarPanelProps {
   onClose: () => void;
@@ -41,6 +42,8 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [bookingToReject, setBookingToReject] = useState<Booking | null>(null);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [bookingToReschedule, setBookingToReschedule] = useState<Booking | null>(null);
 
   const handleUpdateBookingStatus = async (booking: Booking, newStatus: 'accepted' | 'rejected', rejectionReason?: string) => {
     if (!user) return;
@@ -103,6 +106,16 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
     }
   };
 
+  const handleRescheduleClick = (booking: Booking) => {
+    setBookingToReschedule(booking);
+    setRescheduleDialogOpen(true);
+  };
+
+  const handleRescheduleSuccess = () => {
+    setRescheduleDialogOpen(false);
+    setBookingToReschedule(null);
+  };
+
   useEffect(() => {
     if (!user) return;
 
@@ -114,7 +127,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           profiles!bookings_musician_id_fkey(username, full_name, instrument)
         `)
         .or(`requester_id.eq.${user.id},musician_id.eq.${user.id}`)
-        .in('status', ['pending', 'accepted'])
+        .in('status', ['pending', 'accepted', 'rejected'])
         .order('scheduled_date', { ascending: true });
 
       if (!error && data) {
@@ -158,6 +171,8 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         return 'bg-green-500/20 text-green-700 dark:text-green-400';
       case 'pending':
         return 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-400';
+      case 'rejected':
+        return 'bg-red-500/20 text-red-700 dark:text-red-400';
       default:
         return 'bg-gray-500/20 text-gray-700 dark:text-gray-400';
     }
@@ -221,7 +236,9 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   <div className="space-y-4">
                     {bookingsForSelectedDate.map((booking) => {
                       const isPending = booking.status === 'pending';
+                      const isRejected = booking.status === 'rejected';
                       const isReceivedRequest = isPending && booking.musician_id === user?.id;
+                      const canReschedule = isRejected && booking.requester_id === user?.id;
                       
                       return (
                         <Card key={booking.id} className="p-4">
@@ -277,6 +294,19 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 </Button>
                               </div>
                             )}
+                            {canReschedule && (
+                              <div className="pt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full"
+                                  onClick={() => handleRescheduleClick(booking)}
+                                >
+                                  <RefreshCw className="h-4 w-4 mr-1" />
+                                  Reagendar
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </Card>
                       );
@@ -295,6 +325,18 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           isLoading={updatingBookingId !== null}
           musicianName={bookingToReject?.profiles.full_name || bookingToReject?.profiles.username || 'o músico'}
         />
+        
+        {bookingToReschedule && (
+          <RescheduleBookingDialog
+            open={rescheduleDialogOpen}
+            onOpenChange={setRescheduleDialogOpen}
+            bookingId={bookingToReschedule.id}
+            musicianId={bookingToReschedule.musician_id}
+            musicianName={bookingToReschedule.profiles.full_name || bookingToReschedule.profiles.username}
+            originalDate={bookingToReschedule.scheduled_date}
+            onSuccess={handleRescheduleSuccess}
+          />
+        )}
       </Card>
     );
   }
@@ -346,7 +388,9 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   <div className="space-y-4">
                     {bookingsForSelectedDate.map((booking) => {
                       const isPending = booking.status === 'pending';
+                      const isRejected = booking.status === 'rejected';
                       const isReceivedRequest = isPending && booking.musician_id === user?.id;
+                      const canReschedule = isRejected && booking.requester_id === user?.id;
                       
                       return (
                         <Card key={booking.id} className="p-4">
@@ -402,6 +446,19 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 </Button>
                               </div>
                             )}
+                            {canReschedule && (
+                              <div className="pt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full"
+                                  onClick={() => handleRescheduleClick(booking)}
+                                >
+                                  <RefreshCw className="h-4 w-4 mr-1" />
+                                  Reagendar
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </Card>
                       );
@@ -421,6 +478,18 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         isLoading={updatingBookingId !== null}
         musicianName={bookingToReject?.profiles.full_name || bookingToReject?.profiles.username || 'o músico'}
       />
+      
+      {bookingToReschedule && (
+        <RescheduleBookingDialog
+          open={rescheduleDialogOpen}
+          onOpenChange={setRescheduleDialogOpen}
+          bookingId={bookingToReschedule.id}
+          musicianId={bookingToReschedule.musician_id}
+          musicianName={bookingToReschedule.profiles.full_name || bookingToReschedule.profiles.username}
+          originalDate={bookingToReschedule.scheduled_date}
+          onSuccess={handleRescheduleSuccess}
+        />
+      )}
     </div>
   );
 };
