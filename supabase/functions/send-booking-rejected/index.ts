@@ -15,6 +15,7 @@ interface BookingRejectedRequest {
   requesterId: string;
   scheduledDate: string;
   durationHours: number;
+  rejectionReason?: string;
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -27,9 +28,9 @@ serve(async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { bookingId, musicianId, requesterId, scheduledDate, durationHours }: BookingRejectedRequest = await req.json();
+    const { bookingId, musicianId, requesterId, scheduledDate, durationHours, rejectionReason }: BookingRejectedRequest = await req.json();
 
-    console.log("Sending booking rejected notification:", { bookingId, musicianId, requesterId });
+    console.log("Sending booking rejected notification:", { bookingId, musicianId, requesterId, rejectionReason });
 
     // Fetch requester email
     const { data: requesterAuth, error: requesterAuthError } = await supabase.auth.admin.getUserById(requesterId);
@@ -93,6 +94,13 @@ serve(async (req: Request): Promise<Response> => {
               <p style="color: #3f3f46; line-height: 1.6; margin-bottom: 24px;">
                 Infelizmente, <strong>${musicianName}</strong> não pode aceitar o teu pedido de jam session desta vez.
               </p>
+              
+              ${rejectionReason ? `
+              <div style="background-color: #fef3c7; border-radius: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid #fcd34d;">
+                <h3 style="color: #92400e; margin: 0 0 12px 0; font-size: 16px;">💬 Mensagem do músico</h3>
+                <p style="color: #78350f; margin: 0; font-size: 14px; line-height: 1.6;">${rejectionReason}</p>
+              </div>
+              ` : ""}
               
               <div style="background-color: #f4f4f5; border-radius: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid #e4e4e7;">
                 <h3 style="color: #71717a; margin: 0 0 16px 0; font-size: 16px;">Detalhes do pedido</h3>

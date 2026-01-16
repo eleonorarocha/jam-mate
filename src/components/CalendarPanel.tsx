@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import RejectBookingDialog from './RejectBookingDialog';
 
 interface CalendarPanelProps {
   onClose: () => void;
@@ -38,8 +39,10 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [bookingToReject, setBookingToReject] = useState<Booking | null>(null);
 
-  const handleUpdateBookingStatus = async (booking: Booking, newStatus: 'accepted' | 'rejected') => {
+  const handleUpdateBookingStatus = async (booking: Booking, newStatus: 'accepted' | 'rejected', rejectionReason?: string) => {
     if (!user) return;
     
     setUpdatingBookingId(booking.id);
@@ -61,6 +64,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           requesterId: booking.requester_id,
           scheduledDate: booking.scheduled_date,
           durationHours: booking.duration_hours,
+          ...(newStatus === 'rejected' && { rejectionReason }),
         },
       });
 
@@ -83,6 +87,19 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
       });
     } finally {
       setUpdatingBookingId(null);
+      setRejectDialogOpen(false);
+      setBookingToReject(null);
+    }
+  };
+
+  const handleRejectClick = (booking: Booking) => {
+    setBookingToReject(booking);
+    setRejectDialogOpen(true);
+  };
+
+  const handleRejectConfirm = (reason: string) => {
+    if (bookingToReject) {
+      handleUpdateBookingStatus(bookingToReject, 'rejected', reason);
     }
   };
 
@@ -253,7 +270,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                   variant="destructive"
                                   className="flex-1"
                                   disabled={updatingBookingId === booking.id}
-                                  onClick={() => handleUpdateBookingStatus(booking, 'rejected')}
+                                  onClick={() => handleRejectClick(booking)}
                                 >
                                   <XCircle className="h-4 w-4 mr-1" />
                                   Recusar
@@ -270,6 +287,14 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
             </div>
           </div>
         </CardContent>
+        
+        <RejectBookingDialog
+          open={rejectDialogOpen}
+          onOpenChange={setRejectDialogOpen}
+          onConfirm={handleRejectConfirm}
+          isLoading={updatingBookingId !== null}
+          musicianName={bookingToReject?.profiles.full_name || bookingToReject?.profiles.username || 'o músico'}
+        />
       </Card>
     );
   }
@@ -370,7 +395,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                   variant="destructive"
                                   className="flex-1"
                                   disabled={updatingBookingId === booking.id}
-                                  onClick={() => handleUpdateBookingStatus(booking, 'rejected')}
+                                  onClick={() => handleRejectClick(booking)}
                                 >
                                   <XCircle className="h-4 w-4 mr-1" />
                                   Recusar
@@ -388,6 +413,14 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           </div>
         </CardContent>
       </Card>
+      
+      <RejectBookingDialog
+        open={rejectDialogOpen}
+        onOpenChange={setRejectDialogOpen}
+        onConfirm={handleRejectConfirm}
+        isLoading={updatingBookingId !== null}
+        musicianName={bookingToReject?.profiles.full_name || bookingToReject?.profiles.username || 'o músico'}
+      />
     </div>
   );
 };
