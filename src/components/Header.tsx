@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Music } from 'lucide-react';
 import UserMenu from './UserMenu';
 import NotificationsDropdown from './NotificationsDropdown';
+import PushNotificationToggle from './PushNotificationToggle';
 import { useAuth } from '@/hooks/useAuth';
 
 const Header = () => {
@@ -21,6 +22,7 @@ const Header = () => {
 
         {user && (
           <div className="flex items-center gap-2">
+            <PushNotificationToggle />
             <NotificationsDropdown />
             <UserMenu />
           </div>
