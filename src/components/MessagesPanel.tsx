@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Check, CheckCheck } from 'lucide-react';
 import { X, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -203,30 +204,40 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
           <>
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-4">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.sender_id === user?.id ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
+                {messages.map((msg) => {
+                  const isSentByMe = msg.sender_id === user?.id;
+                  return (
                     <div
-                      className={`max-w-[70%] p-3 rounded-lg ${
-                        msg.sender_id === user?.id
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-accent'
-                      }`}
+                      key={msg.id}
+                      className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}
                     >
-                      <p className="text-sm">{msg.content}</p>
-                      <p className="text-xs opacity-70 mt-1">
-                        {new Date(msg.created_at).toLocaleTimeString('pt-PT', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
+                      <div
+                        className={`max-w-[70%] p-3 rounded-lg ${
+                          isSentByMe
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-accent'
+                        }`}
+                      >
+                        <p className="text-sm">{msg.content}</p>
+                        <div className="flex items-center justify-end gap-1 mt-1">
+                          <p className="text-xs opacity-70">
+                            {new Date(msg.created_at).toLocaleTimeString('pt-PT', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                          {isSentByMe && (
+                            msg.read ? (
+                              <CheckCheck className="h-3.5 w-3.5 text-blue-400" />
+                            ) : (
+                              <Check className="h-3.5 w-3.5 opacity-70" />
+                            )
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
             
