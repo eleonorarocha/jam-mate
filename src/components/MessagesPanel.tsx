@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -7,6 +6,8 @@ import { X, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import TypingIndicator from '@/components/TypingIndicator';
 
 interface MessagesPanelProps {
   onClose: () => void;
@@ -20,6 +21,41 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [userProfile, setUserProfile] = useState<{ username: string } | null>(null);
+
+  // Load current user's profile for typing indicator
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadUserProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('id', user.id)
+        .single();
+      
+      if (data) {
+        setUserProfile(data);
+      }
+    };
+    
+    loadUserProfile();
+  }, [user]);
+
+  const { isOtherUserTyping, typingUsername, setTyping } = useTypingIndicator(
+    selectedConversation?.id || null,
+    user?.id || null,
+    userProfile?.username || null
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    if (e.target.value.length > 0) {
+      setTyping(true);
+    } else {
+      setTyping(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -99,6 +135,9 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
 
   const sendMessage = async () => {
     if (!user || !selectedConversation || !newMessage.trim()) return;
+
+    // Stop typing indicator when sending
+    setTyping(false);
 
     const { error } = await supabase.from('messages').insert({
       sender_id: user.id,
@@ -190,11 +229,17 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
                 ))}
               </div>
             </ScrollArea>
+            
+            {/* Typing indicator */}
+            {isOtherUserTyping && (
+              <TypingIndicator username={typingUsername} />
+            )}
+            
             <div className="p-4 border-t border-border flex gap-2">
               <Input
                 placeholder="Escreva a sua mensagem..."
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               />
               <Button onClick={sendMessage} size="icon">
