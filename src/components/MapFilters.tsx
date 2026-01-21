@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import {
   Select,
   SelectContent,
@@ -15,13 +16,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Filter, X } from 'lucide-react';
+import { Filter, X, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export interface MapFiltersState {
   instrument: string;
   skillLevel: string;
   gender: string;
+  maxDistance: number; // in km, 0 means no limit
 }
 
 interface MapFiltersProps {
@@ -64,6 +66,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
     filters.instrument,
     filters.skillLevel,
     filters.gender,
+    filters.maxDistance > 0,
   ].filter(Boolean).length;
 
   const handleClearFilters = () => {
@@ -71,6 +74,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
       instrument: '',
       skillLevel: '',
       gender: '',
+      maxDistance: 0,
     });
   };
 
@@ -117,6 +121,31 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
         </SheetHeader>
 
         <div className="space-y-6 mt-6">
+          {/* Distance Filter */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                Distância máxima
+              </Label>
+              <span className="text-sm font-medium">
+                {filters.maxDistance === 0 ? 'Sem limite' : `${filters.maxDistance} km`}
+              </span>
+            </div>
+            <Slider
+              value={[filters.maxDistance]}
+              onValueChange={(value) => onFiltersChange({ ...filters, maxDistance: value[0] })}
+              max={500}
+              step={10}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              {filters.maxDistance === 0 
+                ? 'A mostrar todos os músicos' 
+                : `A mostrar músicos até ${filters.maxDistance} km de si`}
+            </p>
+          </div>
+
           <div className="space-y-2">
             <Label>Instrumento</Label>
             <Select

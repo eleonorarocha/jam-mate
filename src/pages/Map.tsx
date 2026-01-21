@@ -19,6 +19,7 @@ const Map = () => {
     instrument: '',
     skillLevel: '',
     gender: '',
+    maxDistance: 0,
   });
 
   useEffect(() => {

@@ -31,6 +31,19 @@ interface UserPreferences {
   preferred_instruments: string[];
 }
 
+// Calculate distance between two points using Haversine formula
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
 const MapComponent = ({ token, filters }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -38,16 +51,17 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { user } = useAuth();
 
-  // Load user preferences
+  // Load user preferences and location
   useEffect(() => {
     const loadUserPreferences = async () => {
       if (!user) return;
       
       const { data } = await supabase
         .from('profiles')
-        .select('preferred_skill_levels, preferred_instruments')
+        .select('preferred_skill_levels, preferred_instruments, latitude, longitude')
         .eq('id', user.id)
         .single();
 
@@ -56,6 +70,11 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
           preferred_skill_levels: data.preferred_skill_levels || [],
           preferred_instruments: data.preferred_instruments || [],
         });
+        
+        // Set user location if available
+        if (data.latitude && data.longitude) {
+          setUserLocation({ lat: data.latitude, lng: data.longitude });
+        }
       }
     };
 
@@ -139,6 +158,18 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
       if (filters?.gender && musician.gender !== filters.gender) {
         return false;
       }
+      // Distance filter
+      if (filters?.maxDistance && filters.maxDistance > 0 && userLocation) {
+        const distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          musician.latitude,
+          musician.longitude
+        );
+        if (distance > filters.maxDistance) {
+          return false;
+        }
+      }
       return true;
     });
 
@@ -186,7 +217,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters, isCompatibleMatch]);
+  }, [musicians, filters, isCompatibleMatch, userLocation]);
 
   return (
     <>
