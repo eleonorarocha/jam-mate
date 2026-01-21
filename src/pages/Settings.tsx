@@ -4,6 +4,7 @@ import { Key, Bell, Shield, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import PartnerPreferences from '@/components/PartnerPreferences';
+import BlockedUsersList from '@/components/BlockedUsersList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -174,6 +175,8 @@ const Settings = () => {
                 </div>
               </CardContent>
             </Card>
+
+            <BlockedUsersList />
 
             <Card className="border-destructive/50">
               <CardHeader>

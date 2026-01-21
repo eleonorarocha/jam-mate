@@ -13,13 +13,16 @@ import {
   Calendar, 
   Music, 
   User,
-  CheckCircle
+  CheckCircle,
+  Ban
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import Header from '@/components/Header';
 import BookingDialog from '@/components/BookingDialog';
+import BlockUserButton from '@/components/BlockUserButton';
 
 interface ProfileData {
   id: string;
@@ -69,6 +72,7 @@ const PublicProfile = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { isBlocked } = useBlockedUsers();
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);
@@ -264,7 +268,7 @@ const PublicProfile = () => {
               {!isOwnProfile && (
                 <>
                   <Separator />
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <Button className="flex-1" onClick={handleMessage}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Enviar Mensagem
@@ -273,6 +277,13 @@ const PublicProfile = () => {
                       <Calendar className="h-4 w-4 mr-2" />
                       Agendar Jam
                     </Button>
+                  </div>
+                  <div className="pt-2">
+                    <BlockUserButton 
+                      userId={profile.id} 
+                      username={profile.username}
+                      variant="outline"
+                    />
                   </div>
                 </>
               )}

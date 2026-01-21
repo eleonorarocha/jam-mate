@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           created_at: string
@@ -320,6 +341,14 @@ export type Database = {
       }
       has_accepted_booking_with: {
         Args: { _profile_id: string; _viewer_id: string }
+        Returns: boolean
+      }
+      has_block_between: {
+        Args: { _user1: string; _user2: string }
+        Returns: boolean
+      }
+      is_blocked: {
+        Args: { _by_user_id: string; _user_id: string }
         Returns: boolean
       }
     }
