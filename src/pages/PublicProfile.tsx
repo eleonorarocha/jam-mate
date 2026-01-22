@@ -14,7 +14,8 @@ import {
   Music, 
   User,
   CheckCircle,
-  Ban
+  Ban,
+  Heart
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +24,7 @@ import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import Header from '@/components/Header';
 import BookingDialog from '@/components/BookingDialog';
 import BlockUserButton from '@/components/BlockUserButton';
+import FavoriteButton from '@/components/FavoriteButton';
 
 interface ProfileData {
   id: string;
@@ -233,6 +235,9 @@ const PublicProfile = () => {
                     </div>
                   )}
                 </div>
+                {!isOwnProfile && (
+                  <FavoriteButton musicianId={profile.id} size="default" />
+                )}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">

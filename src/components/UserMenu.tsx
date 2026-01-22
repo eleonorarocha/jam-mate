@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin, Image } from 'lucide-react';
+import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin, Image, Heart } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,6 +93,10 @@ const UserMenu = () => {
         <DropdownMenuItem onClick={() => navigate('/gallery')} className="cursor-pointer">
           <Image className="mr-2 h-4 w-4" />
           <span>Galeria</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/favorites')} className="cursor-pointer">
+          <Heart className="mr-2 h-4 w-4" />
+          <span>Favoritos</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
