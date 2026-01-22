@@ -14,6 +14,7 @@ import CalendarPage from "./pages/CalendarPage";
 import Ratings from "./pages/Ratings";
 import Settings from "./pages/Settings";
 import Gallery from "./pages/Gallery";
+import Favorites from "./pages/Favorites";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/ratings" element={<Ratings />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/favorites" element={<Favorites />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
