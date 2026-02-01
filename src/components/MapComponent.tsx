@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import MusicianPopup from './MusicianPopup';
 import { MapFiltersState } from './MapFilters';
 
@@ -53,6 +54,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { user } = useAuth();
+  const { blockedIds } = useBlockedUsers();
 
   // Load user preferences and location
   useEffect(() => {
@@ -149,6 +151,10 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
     // Apply filters
     const filteredMusicians = musicians.filter((musician) => {
+      // Filter out blocked users
+      if (blockedIds.has(musician.id)) {
+        return false;
+      }
       if (filters?.instrument && musician.instrument !== filters.instrument) {
         return false;
       }
@@ -217,7 +223,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters, isCompatibleMatch, userLocation]);
+  }, [musicians, filters, isCompatibleMatch, userLocation, blockedIds]);
 
   return (
     <>
