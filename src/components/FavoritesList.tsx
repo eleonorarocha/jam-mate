@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Heart, MapPin, Star, Music, ExternalLink, ArrowUpDown } from 'lucide-react';
+import { Heart, MapPin, Star, Music, ExternalLink, ArrowUpDown, Filter } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
 import FavoriteButton from './FavoriteButton';
 
@@ -23,9 +23,29 @@ const FavoritesList = () => {
   const navigate = useNavigate();
   const { favorites, loading } = useFavorites();
   const [sortBy, setSortBy] = useState<SortOption>('date-desc');
+  const [instrumentFilter, setInstrumentFilter] = useState<string>('all');
 
-  const sortedFavorites = useMemo(() => {
-    return [...favorites].sort((a, b) => {
+  // Get unique instruments from favorites
+  const availableInstruments = useMemo(() => {
+    const instruments = new Set<string>();
+    favorites.forEach((fav) => {
+      if (fav.profile?.instrument) {
+        instruments.add(fav.profile.instrument);
+      }
+    });
+    return Array.from(instruments).sort();
+  }, [favorites]);
+
+  const filteredAndSortedFavorites = useMemo(() => {
+    let result = [...favorites];
+    
+    // Apply instrument filter
+    if (instrumentFilter !== 'all') {
+      result = result.filter((fav) => fav.profile?.instrument === instrumentFilter);
+    }
+    
+    // Apply sorting
+    return result.sort((a, b) => {
       switch (sortBy) {
         case 'date-desc':
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -39,7 +59,7 @@ const FavoritesList = () => {
           return 0;
       }
     });
-  }, [favorites, sortBy]);
+  }, [favorites, sortBy, instrumentFilter]);
 
   if (loading) {
     return (
@@ -93,11 +113,27 @@ const FavoritesList = () => {
           </div>
         ) : (
           <ScrollArea className="h-[400px] pr-4">
-            <div className="flex items-center justify-end mb-3">
+            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <Select value={instrumentFilter} onValueChange={setInstrumentFilter}>
+                  <SelectTrigger className="w-[150px] h-8">
+                    <SelectValue placeholder="Instrumento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    {availableInstruments.map((instrument) => (
+                      <SelectItem key={instrument} value={instrument}>
+                        {instrument}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                 <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                  <SelectTrigger className="w-[180px] h-8">
+                  <SelectTrigger className="w-[150px] h-8">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -109,8 +145,16 @@ const FavoritesList = () => {
                 </Select>
               </div>
             </div>
+            {filteredAndSortedFavorites.length === 0 ? (
+              <div className="text-center py-8">
+                <Music className="h-8 w-8 mx-auto text-muted-foreground/30 mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  Nenhum favorito com este instrumento.
+                </p>
+              </div>
+            ) : (
             <div className="space-y-3">
-              {sortedFavorites.map((fav) => (
+              {filteredAndSortedFavorites.map((fav) => (
                 <div
                   key={fav.id}
                   className="flex items-center gap-3 p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors group"
@@ -168,6 +212,7 @@ const FavoritesList = () => {
                 </div>
               ))}
             </div>
+            )}
           </ScrollArea>
         )}
       </CardContent>
