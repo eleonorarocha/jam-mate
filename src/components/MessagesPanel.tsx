@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import TypingIndicator from '@/components/TypingIndicator';
 
 interface MessagesPanelProps {
@@ -18,6 +19,7 @@ interface MessagesPanelProps {
 const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { blockedIds } = useBlockedUsers();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -98,11 +100,17 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
     if (data) {
       const uniqueConversations = Array.from(
         new Map(
-          data.map((msg) => {
-            const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-            const other = msg.sender_id === user.id ? msg.receiver : msg.sender;
-            return [otherId, { id: otherId, profile: other, lastMessage: msg }];
-          })
+          data
+            .filter((msg) => {
+              // Filter out messages from/to blocked users
+              const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+              return !blockedIds.has(otherId);
+            })
+            .map((msg) => {
+              const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+              const other = msg.sender_id === user.id ? msg.receiver : msg.sender;
+              return [otherId, { id: otherId, profile: other, lastMessage: msg }];
+            })
         ).values()
       );
       setConversations(uniqueConversations);
