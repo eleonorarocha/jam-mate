@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, MapPin, Star, MessageSquare, Calendar, ExternalLink } from 'lucide-react';
+import { X, MapPin, Star, MessageSquare, Calendar, ExternalLink, Navigation } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -20,10 +20,11 @@ interface MusicianPopupProps {
     total_ratings: number | null;
     avatar_url: string | null;
   };
+  distance?: number | null;
   onClose: () => void;
 }
 
-const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
+const MusicianPopup = ({ musician, distance, onClose }: MusicianPopupProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -95,6 +96,12 @@ const MusicianPopup = ({ musician, onClose }: MusicianPopupProps) => {
                   <MapPin className="h-3 w-3" />
                   {musician.city}{musician.country ? `, ${musician.country}` : ''}
                 </div>
+                {distance !== null && distance !== undefined && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Navigation className="h-3 w-3" />
+                    {distance < 1 ? `${Math.round(distance * 1000)} m` : `${Math.round(distance)} km`}
+                  </div>
+                )}
               </div>
             </div>
           </CardHeader>
