@@ -50,6 +50,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
+  const [selectedMusicianDistance, setSelectedMusicianDistance] = useState<number | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -207,6 +208,17 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
       el.addEventListener('click', () => {
         setSelectedMusician(musician);
+        if (userLocation) {
+          const dist = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            musician.latitude,
+            musician.longitude
+          );
+          setSelectedMusicianDistance(dist);
+        } else {
+          setSelectedMusicianDistance(null);
+        }
       });
       
       el.addEventListener('mouseenter', () => {
@@ -239,6 +251,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
       {selectedMusician && (
         <MusicianPopup
           musician={selectedMusician}
+          distance={selectedMusicianDistance}
           onClose={() => setSelectedMusician(null)}
         />
       )}
