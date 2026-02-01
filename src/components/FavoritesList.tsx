@@ -1,10 +1,12 @@
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Heart, MapPin, Star, Music, ExternalLink } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Heart, MapPin, Star, Music, ExternalLink, ArrowUpDown } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
 import FavoriteButton from './FavoriteButton';
 
@@ -15,9 +17,29 @@ const skillLevelLabels: Record<string, string> = {
   professional: 'Profissional',
 };
 
+type SortOption = 'date-desc' | 'date-asc' | 'rating-desc' | 'rating-asc';
+
 const FavoritesList = () => {
   const navigate = useNavigate();
   const { favorites, loading } = useFavorites();
+  const [sortBy, setSortBy] = useState<SortOption>('date-desc');
+
+  const sortedFavorites = useMemo(() => {
+    return [...favorites].sort((a, b) => {
+      switch (sortBy) {
+        case 'date-desc':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'date-asc':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case 'rating-desc':
+          return (b.profile?.average_rating || 0) - (a.profile?.average_rating || 0);
+        case 'rating-asc':
+          return (a.profile?.average_rating || 0) - (b.profile?.average_rating || 0);
+        default:
+          return 0;
+      }
+    });
+  }, [favorites, sortBy]);
 
   if (loading) {
     return (
@@ -71,8 +93,24 @@ const FavoritesList = () => {
           </div>
         ) : (
           <ScrollArea className="h-[400px] pr-4">
+            <div className="flex items-center justify-end mb-3">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <SelectTrigger className="w-[180px] h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date-desc">Mais recentes</SelectItem>
+                    <SelectItem value="date-asc">Mais antigos</SelectItem>
+                    <SelectItem value="rating-desc">Maior rating</SelectItem>
+                    <SelectItem value="rating-asc">Menor rating</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="space-y-3">
-              {favorites.map((fav) => (
+              {sortedFavorites.map((fav) => (
                 <div
                   key={fav.id}
                   className="flex items-center gap-3 p-3 rounded-lg bg-accent/50 hover:bg-accent transition-colors group"
