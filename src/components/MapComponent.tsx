@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
+import { useFavorites } from '@/hooks/useFavorites';
 import MusicianPopup from './MusicianPopup';
 import { MapFiltersState } from './MapFilters';
 
@@ -56,6 +57,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { user } = useAuth();
   const { blockedIds } = useBlockedUsers();
+  const { isFavorite } = useFavorites();
 
   // Load user preferences and location
   useEffect(() => {
@@ -183,9 +185,11 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
     // Create markers for filtered musicians
     filteredMusicians.forEach((musician) => {
       const isMatch = isCompatibleMatch(musician);
+      const isFav = isFavorite(musician.id);
       
       const el = document.createElement('div');
       el.className = 'musician-marker';
+      el.style.position = 'relative';
       el.style.backgroundImage = musician.avatar_url
         ? `url(${musician.avatar_url})`
         : '';
@@ -204,6 +208,25 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
       
       if (isMatch) {
         el.style.animation = 'pulse 2s infinite';
+      }
+
+      // Add favorite heart indicator
+      if (isFav) {
+        const heartBadge = document.createElement('div');
+        heartBadge.className = 'favorite-badge';
+        heartBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+        heartBadge.style.position = 'absolute';
+        heartBadge.style.top = '-4px';
+        heartBadge.style.right = '-4px';
+        heartBadge.style.backgroundColor = 'white';
+        heartBadge.style.borderRadius = '50%';
+        heartBadge.style.width = '20px';
+        heartBadge.style.height = '20px';
+        heartBadge.style.display = 'flex';
+        heartBadge.style.alignItems = 'center';
+        heartBadge.style.justifyContent = 'center';
+        heartBadge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        el.appendChild(heartBadge);
       }
 
       el.addEventListener('click', () => {
@@ -235,7 +258,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters, isCompatibleMatch, userLocation, blockedIds]);
+  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds]);
 
   return (
     <>
