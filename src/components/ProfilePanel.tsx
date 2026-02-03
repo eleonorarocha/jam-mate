@@ -31,7 +31,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
     phone: '',
     phone_verified: false,
     email_verified: false,
-    gender: '' as 'male' | 'female' | 'other' | 'prefer_not_to_say' | '',
+    gender: '' as 'male' | 'female' | '',
   });
 
   useEffect(() => {
@@ -82,6 +82,15 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
       toast({
         title: 'Telefone obrigatório',
         description: 'O número de telefone é obrigatório para segurança.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!profile.gender) {
+      toast({
+        title: 'Género obrigatório',
+        description: 'Por favor, selecione o seu género.',
         variant: 'destructive',
       });
       return;
@@ -215,10 +224,10 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="gender">Género</Label>
+        <Label htmlFor="gender">Género *</Label>
         <Select
           value={profile.gender}
-          onValueChange={(value: 'male' | 'female' | 'other' | 'prefer_not_to_say') => 
+          onValueChange={(value: 'male' | 'female') => 
             setProfile({ ...profile, gender: value })
           }
         >
@@ -228,8 +237,6 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           <SelectContent>
             <SelectItem value="male">Masculino</SelectItem>
             <SelectItem value="female">Feminino</SelectItem>
-            <SelectItem value="other">Outro</SelectItem>
-            <SelectItem value="prefer_not_to_say">Prefiro não dizer</SelectItem>
           </SelectContent>
         </Select>
       </div>
