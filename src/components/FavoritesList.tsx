@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Heart, MapPin, Star, Music, ExternalLink, ArrowUpDown, Filter } from 'lucide-react';
+import { Heart, MapPin, Star, Music, ExternalLink, ArrowUpDown, Filter, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useFavorites } from '@/hooks/useFavorites';
 import FavoriteButton from './FavoriteButton';
 
@@ -24,6 +25,7 @@ const FavoritesList = () => {
   const { favorites, loading } = useFavorites();
   const [sortBy, setSortBy] = useState<SortOption>('date-desc');
   const [instrumentFilter, setInstrumentFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Get unique instruments from favorites
   const availableInstruments = useMemo(() => {
@@ -38,6 +40,14 @@ const FavoritesList = () => {
 
   const filteredAndSortedFavorites = useMemo(() => {
     let result = [...favorites];
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter((fav) => 
+        fav.profile?.username?.toLowerCase().includes(query)
+      );
+    }
     
     // Apply instrument filter
     if (instrumentFilter !== 'all') {
@@ -59,7 +69,7 @@ const FavoritesList = () => {
           return 0;
       }
     });
-  }, [favorites, sortBy, instrumentFilter]);
+  }, [favorites, sortBy, instrumentFilter, searchQuery]);
 
   if (loading) {
     return (
@@ -113,6 +123,17 @@ const FavoritesList = () => {
           </div>
         ) : (
           <ScrollArea className="h-[400px] pr-4">
+            <div className="mb-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Pesquisar por nome..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
+            </div>
             <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
