@@ -380,7 +380,7 @@ export type Database = {
         | "rejected"
         | "completed"
         | "cancelled"
-      gender_type: "male" | "female" | "other" | "prefer_not_to_say"
+      gender_type: "male" | "female"
       skill_level: "beginner" | "intermediate" | "advanced" | "professional"
     }
     CompositeTypes: {
@@ -516,7 +516,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
-      gender_type: ["male", "female", "other", "prefer_not_to_say"],
+      gender_type: ["male", "female"],
       skill_level: ["beginner", "intermediate", "advanced", "professional"],
     },
   },
