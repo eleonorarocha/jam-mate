@@ -20,6 +20,7 @@ const Map = () => {
     skillLevel: '',
     gender: '',
     maxDistance: 0,
+    favoritesOnly: false,
   });
 
   useEffect(() => {
