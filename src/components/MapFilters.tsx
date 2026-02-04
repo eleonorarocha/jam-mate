@@ -16,14 +16,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Filter, X, MapPin } from 'lucide-react';
+import { Filter, X, MapPin, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 export interface MapFiltersState {
   instrument: string;
   skillLevel: string;
   gender: string;
   maxDistance: number; // in km, 0 means no limit
+  favoritesOnly: boolean;
 }
 
 interface MapFiltersProps {
@@ -67,6 +69,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
     filters.skillLevel,
     filters.gender,
     filters.maxDistance > 0,
+    filters.favoritesOnly,
   ].filter(Boolean).length;
 
   const handleClearFilters = () => {
@@ -75,6 +78,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
       skillLevel: '',
       gender: '',
       maxDistance: 0,
+      favoritesOnly: false,
     });
   };
 
@@ -121,6 +125,20 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
         </SheetHeader>
 
         <div className="space-y-6 mt-6">
+          {/* Favorites Only Filter */}
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2 cursor-pointer">
+              <Heart className="h-4 w-4 text-red-500" />
+              Mostrar apenas favoritos
+            </Label>
+            <Switch
+              checked={filters.favoritesOnly}
+              onCheckedChange={(checked) => 
+                onFiltersChange({ ...filters, favoritesOnly: checked })
+              }
+            />
+          </div>
+
           {/* Distance Filter */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">

@@ -158,6 +158,10 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
       if (blockedIds.has(musician.id)) {
         return false;
       }
+      // Favorites only filter
+      if (filters?.favoritesOnly && !isFavorite(musician.id)) {
+        return false;
+      }
       if (filters?.instrument && musician.instrument !== filters.instrument) {
         return false;
       }
