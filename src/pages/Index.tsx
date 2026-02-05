@@ -17,6 +17,7 @@ const Index = () => {
   const [mapboxToken, setMapboxToken] = useState('');
   const [tokenSaved, setTokenSaved] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [visibleMusiciansCount, setVisibleMusiciansCount] = useState(0);
   const [filters, setFilters] = useState<HomeFiltersState>({
     searchQuery: '',
     city: '',
@@ -115,6 +116,7 @@ const Index = () => {
             onFiltersChange={setFilters}
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+            visibleCount={visibleMusiciansCount}
           />
           
           {/* Map */}
@@ -122,6 +124,7 @@ const Index = () => {
             <MapComponent 
               token={savedToken || mapboxToken} 
               filters={mapFilters}
+              onFilteredCountChange={setVisibleMusiciansCount}
             />
           </div>
         </div>
