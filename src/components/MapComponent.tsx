@@ -8,9 +8,14 @@ import { useFavorites } from '@/hooks/useFavorites';
 import MusicianPopup from './MusicianPopup';
 import { MapFiltersState } from './MapFilters';
 
+interface ExtendedFilters extends MapFiltersState {
+  searchQuery?: string;
+  city?: string;
+}
+
 interface MapComponentProps {
   token: string;
-  filters?: MapFiltersState;
+  filters?: ExtendedFilters;
 }
 
 interface Musician {
@@ -157,6 +162,22 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
       // Filter out blocked users
       if (blockedIds.has(musician.id)) {
         return false;
+      }
+      // Search by name filter
+      if (filters?.searchQuery && filters.searchQuery.trim()) {
+        const query = filters.searchQuery.toLowerCase().trim();
+        if (!musician.username.toLowerCase().includes(query)) {
+          return false;
+        }
+      }
+      // City/region filter
+      if (filters?.city && filters.city.trim()) {
+        const cityQuery = filters.city.toLowerCase().trim();
+        const musicianCity = musician.city?.toLowerCase() || '';
+        const musicianCountry = musician.country?.toLowerCase() || '';
+        if (!musicianCity.includes(cityQuery) && !musicianCountry.includes(cityQuery)) {
+          return false;
+        }
       }
       // Favorites only filter
       if (filters?.favoritesOnly && !isFavorite(musician.id)) {
