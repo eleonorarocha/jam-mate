@@ -16,6 +16,7 @@ interface ExtendedFilters extends MapFiltersState {
 interface MapComponentProps {
   token: string;
   filters?: ExtendedFilters;
+  onFilteredCountChange?: (count: number) => void;
 }
 
 interface Musician {
@@ -51,7 +52,7 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-const MapComponent = ({ token, filters }: MapComponentProps) => {
+const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -207,6 +208,9 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
       return true;
     });
 
+    // Report filtered count to parent
+    onFilteredCountChange?.(filteredMusicians.length);
+
     // Create markers for filtered musicians
     filteredMusicians.forEach((musician) => {
       const isMatch = isCompatibleMatch(musician);
@@ -283,7 +287,7 @@ const MapComponent = ({ token, filters }: MapComponentProps) => {
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds]);
+  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, onFilteredCountChange]);
 
   return (
     <>

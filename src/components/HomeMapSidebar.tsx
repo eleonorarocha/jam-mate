@@ -24,6 +24,7 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  Users,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +43,7 @@ interface HomeMapSidebarProps {
   onFiltersChange: (filters: HomeFiltersState) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  visibleCount?: number;
 }
 
 const instruments = [
@@ -79,6 +81,7 @@ const HomeMapSidebar = ({
   onFiltersChange,
   isCollapsed,
   onToggleCollapse,
+  visibleCount = 0,
 }: HomeMapSidebarProps) => {
   const activeFiltersCount = [
     filters.searchQuery,
@@ -166,6 +169,16 @@ const HomeMapSidebar = ({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="px-4 py-3 bg-muted/50 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium">
+            {visibleCount} {visibleCount === 1 ? 'músico encontrado' : 'músicos encontrados'}
+          </span>
         </div>
       </div>
 
