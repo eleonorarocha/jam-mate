@@ -1,14 +1,135 @@
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Music, MapPin, MessageSquare, Star, Users, Calendar } from 'lucide-react';
 import Header from '@/components/Header';
-import SearchBar from '@/components/SearchBar';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import MapComponent from '@/components/MapComponent';
+import HomeMapSidebar, { HomeFiltersState } from '@/components/HomeMapSidebar';
+import { MapFiltersState } from '@/components/MapFilters';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const { toast } = useToast();
+  const [mapboxToken, setMapboxToken] = useState('');
+  const [tokenSaved, setTokenSaved] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [filters, setFilters] = useState<HomeFiltersState>({
+    searchQuery: '',
+    city: '',
+    instrument: '',
+    skillLevel: '',
+    gender: '',
+    maxDistance: 0,
+    favoritesOnly: false,
+  });
 
+  // Convert HomeFiltersState to MapFiltersState for MapComponent
+  const mapFilters: MapFiltersState & { searchQuery?: string; city?: string } = {
+    instrument: filters.instrument,
+    skillLevel: filters.skillLevel,
+    gender: filters.gender,
+    maxDistance: filters.maxDistance,
+    favoritesOnly: filters.favoritesOnly,
+    searchQuery: filters.searchQuery,
+    city: filters.city,
+  };
+
+  const handleSaveToken = () => {
+    if (mapboxToken.trim()) {
+      localStorage.setItem('mapbox_token', mapboxToken);
+      setTokenSaved(true);
+      toast({
+        title: 'Token guardado!',
+        description: 'Pode agora ver o mapa.',
+      });
+    }
+  };
+
+  const savedToken = localStorage.getItem('mapbox_token');
+  const hasMapToken = tokenSaved || savedToken;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">A carregar...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged in user without token - show token input
+  if (user && !hasMapToken) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-24 flex items-center justify-center p-4">
+          <div className="max-w-md w-full space-y-4 bg-card p-6 rounded-lg border">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Configure o Mapbox</h2>
+              <p className="text-muted-foreground mb-4">
+                Para visualizar o mapa, precisa de um token público do Mapbox.
+                Pode obtê-lo em{' '}
+                <a
+                  href="https://mapbox.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  mapbox.com
+                </a>
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="Cole aqui o seu token público do Mapbox"
+                value={mapboxToken}
+                onChange={(e) => setMapboxToken(e.target.value)}
+              />
+              <Button onClick={handleSaveToken} className="w-full">
+                Guardar Token
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged in user with token - show map with sidebar
+  if (user && hasMapToken) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <div className="flex-1 flex pt-16">
+          {/* Sidebar with filters */}
+          <HomeMapSidebar
+            filters={filters}
+            onFiltersChange={setFilters}
+            isCollapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+          
+          {/* Map */}
+          <div className="flex-1 relative">
+            <MapComponent 
+              token={savedToken || mapboxToken} 
+              filters={mapFilters}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in - show landing page
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <Header />
@@ -30,21 +151,14 @@ const Index = () => {
             Encontre músicos perto de si e organize jam sessions incríveis
           </p>
 
-          {/* Search Bar */}
-          <div className="pt-8">
-            <SearchBar />
+          <div className="flex gap-4 justify-center pt-8">
+            <Button size="lg" onClick={() => navigate('/auth')}>
+              Começar Agora
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate('/auth')}>
+              Já tenho conta
+            </Button>
           </div>
-
-          {!user && (
-            <div className="flex gap-4 justify-center pt-8">
-              <Button size="lg" onClick={() => navigate('/auth')}>
-                Começar Agora
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => navigate('/auth')}>
-                Já tenho conta
-              </Button>
-            </div>
-          )}
         </div>
       </section>
 
@@ -116,19 +230,17 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      {!user && (
-        <section className="py-16 px-4">
-          <div className="container mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold mb-4">Pronto para tocar?</h2>
-            <p className="text-muted-foreground mb-8">
-              Junte-se a centenas de músicos que já encontraram parceiros para jam sessions
-            </p>
-            <Button size="lg" onClick={() => navigate('/auth')}>
-              Criar Conta Gratuita
-            </Button>
-          </div>
-        </section>
-      )}
+      <section className="py-16 px-4">
+        <div className="container mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold mb-4">Pronto para tocar?</h2>
+          <p className="text-muted-foreground mb-8">
+            Junte-se a centenas de músicos que já encontraram parceiros para jam sessions
+          </p>
+          <Button size="lg" onClick={() => navigate('/auth')}>
+            Criar Conta Gratuita
+          </Button>
+        </div>
+      </section>
     </div>
   );
 };
