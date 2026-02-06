@@ -34,6 +34,7 @@ const Index = () => {
       gender: '',
       maxDistance: 0,
       favoritesOnly: false,
+      availabilityDate: '',
     };
   });
 
@@ -47,7 +48,7 @@ const Index = () => {
   }, [sidebarCollapsed]);
 
   // Convert HomeFiltersState to MapFiltersState for MapComponent
-  const mapFilters: MapFiltersState & { searchQuery?: string; city?: string } = {
+  const mapFilters: MapFiltersState & { searchQuery?: string; city?: string; availabilityDate?: string } = {
     instrument: filters.instrument,
     skillLevel: filters.skillLevel,
     gender: filters.gender,
@@ -55,6 +56,7 @@ const Index = () => {
     favoritesOnly: filters.favoritesOnly,
     searchQuery: filters.searchQuery,
     city: filters.city,
+    availabilityDate: filters.availabilityDate,
   };
 
   const handleSaveToken = () => {
