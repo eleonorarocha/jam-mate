@@ -172,14 +172,19 @@ const HomeMapSidebar = ({
         </div>
       </div>
 
-      {/* Results Count */}
-      <div className="px-4 py-3 bg-muted/50 border-b border-border">
+      {/* Results Count + Clear Filters */}
+      <div className="px-4 py-3 bg-muted/50 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">
             {visibleCount} {visibleCount === 1 ? 'músico encontrado' : 'músicos encontrados'}
           </span>
         </div>
+        {activeFiltersCount > 0 && (
+          <Button variant="ghost" size="sm" onClick={handleClearFilters} className="h-7 text-xs text-muted-foreground hover:text-foreground">
+            Limpar filtros
+          </Button>
+        )}
       </div>
 
       {/* Filters Content */}
