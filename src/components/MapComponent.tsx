@@ -11,6 +11,7 @@ import { MapFiltersState } from './MapFilters';
 interface ExtendedFilters extends MapFiltersState {
   searchQuery?: string;
   city?: string;
+  availabilityDate?: string;
 }
 
 interface MapComponentProps {
@@ -59,6 +60,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
   const [selectedMusicianDistance, setSelectedMusicianDistance] = useState<number | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
+  const [busyMusicianIds, setBusyMusicianIds] = useState<Set<string>>(new Set());
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { user } = useAuth();
@@ -127,6 +129,40 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
       setMusicians(data as Musician[]);
     }
   }, []);
+
+  // Load busy musicians for a specific date
+  useEffect(() => {
+    const loadBusyMusicians = async () => {
+      if (!filters?.availabilityDate) {
+        setBusyMusicianIds(new Set());
+        return;
+      }
+
+      const selectedDate = new Date(filters.availabilityDate);
+      const startOfDay = new Date(selectedDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(selectedDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const { data } = await supabase
+        .from('bookings')
+        .select('musician_id, requester_id')
+        .in('status', ['accepted', 'pending'])
+        .gte('scheduled_date', startOfDay.toISOString())
+        .lte('scheduled_date', endOfDay.toISOString());
+
+      if (data) {
+        const busyIds = new Set<string>();
+        data.forEach((booking) => {
+          busyIds.add(booking.musician_id);
+          busyIds.add(booking.requester_id);
+        });
+        setBusyMusicianIds(busyIds);
+      }
+    };
+
+    loadBusyMusicians();
+  }, [filters?.availabilityDate]);
 
   // Initialize map
   useEffect(() => {
@@ -204,6 +240,10 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
         if (distance > filters.maxDistance) {
           return false;
         }
+      }
+      // Availability date filter - hide busy musicians
+      if (filters?.availabilityDate && busyMusicianIds.has(musician.id)) {
+        return false;
       }
       return true;
     });
@@ -287,7 +327,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, onFilteredCountChange]);
+  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange]);
 
   return (
     <>
