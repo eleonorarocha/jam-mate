@@ -16,17 +16,35 @@ const Index = () => {
   const { toast } = useToast();
   const [mapboxToken, setMapboxToken] = useState('');
   const [tokenSaved, setTokenSaved] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [visibleMusiciansCount, setVisibleMusiciansCount] = useState(0);
-  const [filters, setFilters] = useState<HomeFiltersState>({
-    searchQuery: '',
-    city: '',
-    instrument: '',
-    skillLevel: '',
-    gender: '',
-    maxDistance: 0,
-    favoritesOnly: false,
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('jammate_sidebar_collapsed');
+    return saved ? JSON.parse(saved) : false;
   });
+  const [visibleMusiciansCount, setVisibleMusiciansCount] = useState(0);
+  const [filters, setFilters] = useState<HomeFiltersState>(() => {
+    const saved = localStorage.getItem('jammate_filters');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* ignore */ }
+    }
+    return {
+      searchQuery: '',
+      city: '',
+      instrument: '',
+      skillLevel: '',
+      gender: '',
+      maxDistance: 0,
+      favoritesOnly: false,
+    };
+  });
+
+  // Persist filters to localStorage
+  useEffect(() => {
+    localStorage.setItem('jammate_filters', JSON.stringify(filters));
+  }, [filters]);
+
+  useEffect(() => {
+    localStorage.setItem('jammate_sidebar_collapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   // Convert HomeFiltersState to MapFiltersState for MapComponent
   const mapFilters: MapFiltersState & { searchQuery?: string; city?: string } = {
