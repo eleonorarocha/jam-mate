@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Music, MapPin, MessageSquare, Star, Users, Calendar } from 'lucide-react';
+import { Music, MapPin, MessageSquare, Star, Users, Calendar, Search } from 'lucide-react';
 import Header from '@/components/Header';
+import mapPreview from '@/assets/map-preview.jpg';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import MapComponent from '@/components/MapComponent';
@@ -185,8 +186,38 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Map Preview Section */}
       <section className="py-16 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <h2 className="text-3xl font-bold text-center mb-4">Explore músicos perto de si</h2>
+          <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
+            Descubra músicos na sua zona, filtre por instrumento e nível, e encontre o parceiro ideal para a sua próxima jam.
+          </p>
+          <div className="relative rounded-2xl overflow-hidden border border-border shadow-xl">
+            <img 
+              src={mapPreview} 
+              alt="Prévia do mapa com músicos" 
+              className="w-full h-[400px] object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent flex flex-col items-center justify-end pb-10 px-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Search className="w-5 h-5 text-primary" />
+                <span className="text-lg font-semibold">Encontre músicos na sua área</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-5 text-center max-w-md">
+                Crie uma conta gratuita para explorar o mapa interativo, filtrar por instrumento, nível e muito mais.
+              </p>
+              <Button size="lg" onClick={() => navigate('/auth')}>
+                Criar Conta e Explorar o Mapa
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl font-bold text-center mb-12">Como funciona</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
