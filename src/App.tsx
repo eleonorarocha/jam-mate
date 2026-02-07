@@ -1,5 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -20,26 +21,28 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/profile/:id" element={<PublicProfile />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/ratings" element={<Ratings />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/favorites" element={<Favorites />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/map" element={<Map />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:id" element={<PublicProfile />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/ratings" element={<Ratings />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

@@ -3,6 +3,7 @@ import { Music } from 'lucide-react';
 import UserMenu from './UserMenu';
 import NotificationsDropdown from './NotificationsDropdown';
 import PushNotificationToggle from './PushNotificationToggle';
+import ThemeToggle from './ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
 
 const Header = () => {
@@ -20,13 +21,16 @@ const Header = () => {
           </span>
         </Link>
 
-        {user && (
-          <div className="flex items-center gap-2">
-            <PushNotificationToggle />
-            <NotificationsDropdown />
-            <UserMenu />
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          {user && (
+            <>
+              <PushNotificationToggle />
+              <NotificationsDropdown />
+              <UserMenu />
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
