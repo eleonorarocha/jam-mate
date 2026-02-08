@@ -40,6 +40,9 @@ interface UserPreferences {
   preferred_instruments: string[];
 }
 
+// Approximate coordinates (~1km precision) to protect exact location
+const approximateCoord = (coord: number): number => Math.round(coord * 100) / 100;
+
 // Calculate distance between two points using Haversine formula
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // Earth's radius in km
@@ -304,8 +307,8 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
           const dist = calculateDistance(
             userLocation.lat,
             userLocation.lng,
-            musician.latitude,
-            musician.longitude
+            approximateCoord(musician.latitude),
+            approximateCoord(musician.longitude)
           );
           setSelectedMusicianDistance(dist);
         } else {
@@ -322,7 +325,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
       });
 
       const marker = new mapboxgl.Marker(el)
-        .setLngLat([musician.longitude, musician.latitude])
+        .setLngLat([approximateCoord(musician.longitude), approximateCoord(musician.latitude)])
         .addTo(map.current!);
 
       markersRef.current.push(marker);
