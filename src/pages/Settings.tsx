@@ -137,6 +137,79 @@ const Settings = () => {
           </motion.div>
 
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+            {/* Account Security */}
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Lock className="h-4 w-4 text-primary" />
+                    </div>
+                    Segurança da Conta
+                  </CardTitle>
+                  <CardDescription>Altere o seu email ou password</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Email Change */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      Alterar Email
+                    </div>
+                    <p className="text-xs text-muted-foreground">Email atual: {user?.email}</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-email">Novo Email</Label>
+                      <Input
+                        id="new-email"
+                        type="email"
+                        placeholder="novo@email.com"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                      />
+                    </div>
+                    <Button onClick={handleUpdateEmail} disabled={isUpdatingEmail} size="sm">
+                      {isUpdatingEmail ? 'A enviar...' : 'Alterar Email'}
+                    </Button>
+                  </div>
+
+                  <div className="border-t pt-6">
+                    {/* Password Change */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Lock className="h-4 w-4 text-muted-foreground" />
+                        Alterar Password
+                      </div>
+                      <div className="grid gap-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="new-password">Nova Password</Label>
+                          <Input
+                            id="new-password"
+                            type="password"
+                            placeholder="••••••••"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="confirm-password">Confirmar Password</Label>
+                          <Input
+                            id="confirm-password"
+                            type="password"
+                            placeholder="••••••••"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <Button onClick={handleUpdatePassword} disabled={isUpdatingPassword} size="sm">
+                        {isUpdatingPassword ? 'A atualizar...' : 'Alterar Password'}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
