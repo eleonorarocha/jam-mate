@@ -66,7 +66,7 @@ const Header = () => {
           <ThemeToggle />
           {user && (
             <>
-              <PushNotificationToggle />
+              
               <NotificationsDropdown />
               <UserMenu />
             </>
