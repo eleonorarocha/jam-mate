@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, Music, MapPin, User, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AvatarCropper from '@/components/AvatarCropper';
 
 const STEPS = [
   { id: 'photo', title: 'Foto de Perfil', subtitle: 'Adicione uma foto para que outros músicos o reconheçam', icon: Camera },
