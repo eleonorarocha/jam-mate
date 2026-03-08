@@ -48,6 +48,21 @@ const Index = () => {
     localStorage.setItem('jammate_sidebar_collapsed', JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
+  // Check onboarding status
+  useEffect(() => {
+    if (!user) {
+      setCheckingOnboarding(false);
+      return;
+    }
+    supabase.from('profiles').select('onboarding_completed').eq('id', user.id).single()
+      .then(({ data }) => {
+        if (data && !data.onboarding_completed) {
+          navigate('/onboarding');
+        }
+        setCheckingOnboarding(false);
+      });
+  }, [user, navigate]);
+
   const mapFilters: MapFiltersState & { searchQuery?: string; city?: string; availabilityDate?: string } = {
     instrument: filters.instrument,
     skillLevel: filters.skillLevel,
