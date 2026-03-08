@@ -5,6 +5,7 @@ import NotificationsDropdown from './NotificationsDropdown';
 import PushNotificationToggle from './PushNotificationToggle';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -16,6 +17,7 @@ const navLinks = [
 const Header = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const unreadCount = useUnreadMessages();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -34,12 +36,13 @@ const Header = () => {
             <nav className="flex items-center gap-1">
               {navLinks.map(({ to, label, icon: Icon }) => {
                 const isActive = location.pathname === to;
+                const showBadge = to === '/messages' && unreadCount > 0;
                 return (
                   <Link
                     key={to}
                     to={to}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                      'relative flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                       isActive
                         ? 'bg-primary/10 text-primary'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent'
@@ -47,6 +50,11 @@ const Header = () => {
                   >
                     <Icon className="w-4 h-4" />
                     <span className="hidden md:inline">{label}</span>
+                    {showBadge && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
