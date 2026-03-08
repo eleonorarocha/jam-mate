@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 const UserMenu = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const unreadCount = useUnreadMessages();
   const [profile, setProfile] = useState<{ username: string; avatar_url: string | null } | null>(null);
 
   useEffect(() => {
