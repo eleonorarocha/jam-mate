@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Music, MapPin, MessageSquare, Calendar } from 'lucide-react';
 import UserMenu from './UserMenu';
 import NotificationsDropdown from './NotificationsDropdown';
-import PushNotificationToggle from './PushNotificationToggle';
+
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -66,7 +66,7 @@ const Header = () => {
           <ThemeToggle />
           {user && (
             <>
-              <PushNotificationToggle />
+              
               <NotificationsDropdown />
               <UserMenu />
             </>

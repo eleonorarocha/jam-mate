@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Clock, User, Check, XCircle, Calendar, RefreshCw } from 'lucide-react';
+import { Bell, BellRing, BellOff, Clock, User, Check, XCircle, Calendar, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,6 +17,12 @@ import { format, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import RejectBookingDialog from './RejectBookingDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface BookingNotification {
   id: string;
@@ -51,6 +57,7 @@ const NotificationsDropdown = () => {
   const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
   const [bookingToReschedule, setBookingToReschedule] = useState<BookingNotification | null>(null);
   const [open, setOpen] = useState(false);
+  const { isSupported, isSubscribed, permission, requestPermission } = usePushNotifications();
 
   useEffect(() => {
     if (!user) return;
@@ -227,17 +234,51 @@ const NotificationsDropdown = () => {
           <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Notificações</h3>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  setOpen(false);
-                  navigate('/calendar');
-                }}
-              >
-                <Calendar className="h-4 w-4 mr-1" />
-                Ver Agenda
-              </Button>
+              <div className="flex items-center gap-1">
+                {isSupported && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          if (permission === 'default') requestPermission();
+                        }}
+                        disabled={permission === 'denied'}
+                      >
+                        {permission === 'denied' ? (
+                          <BellOff className="h-4 w-4 text-muted-foreground" />
+                        ) : isSubscribed ? (
+                          <BellRing className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Bell className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {permission === 'denied'
+                          ? 'Notificações bloqueadas'
+                          : isSubscribed
+                          ? 'Push ativas'
+                          : 'Ativar push'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setOpen(false);
+                    navigate('/calendar');
+                  }}
+                >
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Ver Agenda
+                </Button>
+              </div>
             </div>
           </div>
           
