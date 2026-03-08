@@ -17,6 +17,7 @@ import Ratings from "./pages/Ratings";
 import Settings from "./pages/Settings";
 import Gallery from "./pages/Gallery";
 import Favorites from "./pages/Favorites";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/map" element={<Map />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:id" element={<PublicProfile />} />

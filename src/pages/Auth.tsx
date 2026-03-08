@@ -33,6 +33,7 @@ const floatingIcons = [
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -110,6 +111,27 @@ const Auth = () => {
         message = 'Este email já está registado. Tente fazer login.';
       }
       toast({ title: 'Erro', description: message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setErrors({ email: 'Email é obrigatório' });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({ title: 'Email enviado!', description: 'Verifique a sua caixa de entrada para redefinir a password.' });
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -206,104 +228,176 @@ const Auth = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="text-center mb-8">
-              <motion.h2
-                className="text-3xl font-bold mb-2"
-                key={isLogin ? 'login-title' : 'signup-title'}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {isLogin ? 'Bem-vindo de volta' : 'Criar conta'}
-              </motion.h2>
-              <p className="text-muted-foreground">
-                {isLogin
-                  ? 'Entre para encontrar músicos e jam sessions.'
-                  : 'Junte-se à comunidade de músicos.'}
-              </p>
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.form
-                key={isLogin ? 'login' : 'signup'}
-                variants={formVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                onSubmit={handleAuth}
-                className="space-y-4"
-              >
-                {!isLogin && (
-                  <>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="firstName">Nome</Label>
-                        <Input id="firstName" placeholder="João" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={errors.firstName ? 'border-destructive' : ''} />
-                        {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="lastName">Sobrenome</Label>
-                        <Input id="lastName" placeholder="Silva" value={lastName} onChange={(e) => setLastName(e.target.value)} className={errors.lastName ? 'border-destructive' : ''} />
-                        {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="phone">Telefone</Label>
-                      <Input id="phone" type="tel" placeholder="+351 912 345 678" value={phone} onChange={(e) => setPhone(e.target.value)} className={errors.phone ? 'border-destructive' : ''} />
-                      {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
-                    </div>
-                  </>
-                )}
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
-                  {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={errors.password ? 'border-destructive' : ''} />
-                  {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
-                </div>
-
-                <motion.div whileTap={{ scale: 0.98 }}>
-                  <Button
-                    type="submit"
-                    className="w-full h-11 text-base font-semibold bg-gradient-to-r from-primary to-[hsl(var(--primary-glow))] hover:opacity-90 transition-opacity"
-                    style={{ boxShadow: 'var(--shadow-primary)' }}
-                    disabled={loading}
+            {showForgotPassword ? (
+              <>
+                <div className="text-center mb-8">
+                  <motion.h2
+                    className="text-3xl font-bold mb-2"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    {loading ? (
-                      <motion.div
-                        className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                      />
-                    ) : isLogin ? 'Entrar' : 'Criar Conta'}
-                  </Button>
-                </motion.div>
-              </motion.form>
-            </AnimatePresence>
+                    Recuperar password
+                  </motion.h2>
+                  <p className="text-muted-foreground">
+                    Introduza o seu email para receber um link de recuperação.
+                  </p>
+                </div>
 
-            <div className="mt-6 text-center">
-              <div className="relative mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
+                <motion.form
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4 }}
+                  onSubmit={handleForgotPassword}
+                  className="space-y-4"
+                >
+                  <div className="space-y-1.5">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input id="reset-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
+                    {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                  </div>
+
+                  <motion.div whileTap={{ scale: 0.98 }}>
+                    <Button
+                      type="submit"
+                      className="w-full h-11 text-base font-semibold bg-gradient-to-r from-primary to-[hsl(var(--primary-glow))] hover:opacity-90 transition-opacity"
+                      style={{ boxShadow: 'var(--shadow-primary)' }}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <motion.div
+                          className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                        />
+                      ) : 'Enviar link de recuperação'}
+                    </Button>
+                  </motion.div>
+                </motion.form>
+
+                <div className="mt-6 text-center">
+                  <button
+                    type="button"
+                    onClick={() => { setShowForgotPassword(false); setErrors({}); }}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    ← Voltar ao login
+                  </button>
                 </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-background px-3 text-muted-foreground">ou</span>
+              </>
+            ) : (
+              <>
+                <div className="text-center mb-8">
+                  <motion.h2
+                    className="text-3xl font-bold mb-2"
+                    key={isLogin ? 'login-title' : 'signup-title'}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {isLogin ? 'Bem-vindo de volta' : 'Criar conta'}
+                  </motion.h2>
+                  <p className="text-muted-foreground">
+                    {isLogin
+                      ? 'Entre para encontrar músicos e jam sessions.'
+                      : 'Junte-se à comunidade de músicos.'}
+                  </p>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                {isLogin ? 'Não tem conta? ' : 'Já tem conta? '}
-                <span className="font-medium text-primary">{isLogin ? 'Criar conta' : 'Entrar'}</span>
-              </button>
-            </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.form
+                    key={isLogin ? 'login' : 'signup'}
+                    variants={formVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    onSubmit={handleAuth}
+                    className="space-y-4"
+                  >
+                    {!isLogin && (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label htmlFor="firstName">Nome</Label>
+                            <Input id="firstName" placeholder="João" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={errors.firstName ? 'border-destructive' : ''} />
+                            {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="lastName">Sobrenome</Label>
+                            <Input id="lastName" placeholder="Silva" value={lastName} onChange={(e) => setLastName(e.target.value)} className={errors.lastName ? 'border-destructive' : ''} />
+                            {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="phone">Telefone</Label>
+                          <Input id="phone" type="tel" placeholder="+351 912 345 678" value={phone} onChange={(e) => setPhone(e.target.value)} className={errors.phone ? 'border-destructive' : ''} />
+                          {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+                        </div>
+                      </>
+                    )}
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
+                      {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password</Label>
+                        {isLogin && (
+                          <button
+                            type="button"
+                            onClick={() => { setShowForgotPassword(true); setErrors({}); }}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Esqueceu a password?
+                          </button>
+                        )}
+                      </div>
+                      <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={errors.password ? 'border-destructive' : ''} />
+                      {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+                    </div>
+
+                    <motion.div whileTap={{ scale: 0.98 }}>
+                      <Button
+                        type="submit"
+                        className="w-full h-11 text-base font-semibold bg-gradient-to-r from-primary to-[hsl(var(--primary-glow))] hover:opacity-90 transition-opacity"
+                        style={{ boxShadow: 'var(--shadow-primary)' }}
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <motion.div
+                            className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                          />
+                        ) : isLogin ? 'Entrar' : 'Criar Conta'}
+                      </Button>
+                    </motion.div>
+                  </motion.form>
+                </AnimatePresence>
+
+                <div className="mt-6 text-center">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="bg-background px-3 text-muted-foreground">ou</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {isLogin ? 'Não tem conta? ' : 'Já tem conta? '}
+                    <span className="font-medium text-primary">{isLogin ? 'Criar conta' : 'Entrar'}</span>
+                  </button>
+                </div>
+              </>
+            )}
           </motion.div>
         </div>
       </div>
