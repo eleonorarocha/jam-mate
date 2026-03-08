@@ -46,8 +46,15 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/map');
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        const { data } = await supabase.from('profiles').select('onboarding_completed').eq('id', session.user.id).single();
+        if (data && !data.onboarding_completed) {
+          navigate('/onboarding');
+        } else {
+          navigate('/');
+        }
+      }
     });
   }, [navigate]);
 
