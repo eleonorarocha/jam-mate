@@ -17,6 +17,7 @@ import Ratings from "./pages/Ratings";
 import Settings from "./pages/Settings";
 import Gallery from "./pages/Gallery";
 import Favorites from "./pages/Favorites";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
