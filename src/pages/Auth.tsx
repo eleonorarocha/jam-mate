@@ -116,6 +116,27 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setErrors({ email: 'Email é obrigatório' });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({ title: 'Email enviado!', description: 'Verifique a sua caixa de entrada para redefinir a password.' });
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formVariants = {
     hidden: { opacity: 0, x: isLogin ? -30 : 30 },
     visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
