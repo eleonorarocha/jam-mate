@@ -54,6 +54,8 @@ const NotificationsDropdown = () => {
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [bookingToReject, setBookingToReject] = useState<BookingNotification | null>(null);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [bookingToReschedule, setBookingToReschedule] = useState<BookingNotification | null>(null);
   const [open, setOpen] = useState(false);
   const { isSupported, isSubscribed, permission, requestPermission } = usePushNotifications();
 
