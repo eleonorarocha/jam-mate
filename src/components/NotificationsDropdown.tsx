@@ -234,17 +234,51 @@ const NotificationsDropdown = () => {
           <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Notificações</h3>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  setOpen(false);
-                  navigate('/calendar');
-                }}
-              >
-                <Calendar className="h-4 w-4 mr-1" />
-                Ver Agenda
-              </Button>
+              <div className="flex items-center gap-1">
+                {isSupported && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          if (permission === 'default') requestPermission();
+                        }}
+                        disabled={permission === 'denied'}
+                      >
+                        {permission === 'denied' ? (
+                          <BellOff className="h-4 w-4 text-muted-foreground" />
+                        ) : isSubscribed ? (
+                          <BellRing className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Bell className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {permission === 'denied'
+                          ? 'Notificações bloqueadas'
+                          : isSubscribed
+                          ? 'Push ativas'
+                          : 'Ativar push'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setOpen(false);
+                    navigate('/calendar');
+                  }}
+                >
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Ver Agenda
+                </Button>
+              </div>
             </div>
           </div>
           
