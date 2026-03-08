@@ -88,6 +88,11 @@ const UserMenu = () => {
         <DropdownMenuItem onClick={() => navigate('/messages')} className="cursor-pointer">
           <MessageSquare className="mr-2 h-4 w-4" />
           <span>Mensagens</span>
+          {unreadCount > 0 && (
+            <span className="ml-auto min-w-[20px] h-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/calendar')} className="cursor-pointer">
           <Calendar className="mr-2 h-4 w-4" />
