@@ -4,9 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Music } from 'lucide-react';
+import { Music, Guitar, Headphones, Mic2, Piano } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 
 const signUpSchema = z.object({
@@ -22,6 +22,15 @@ const loginSchema = z.object({
   password: z.string().min(1, 'Password é obrigatória'),
 });
 
+const floatingIcons = [
+  { Icon: Guitar, x: '10%', y: '20%', delay: 0, size: 32 },
+  { Icon: Headphones, x: '80%', y: '15%', delay: 0.5, size: 28 },
+  { Icon: Mic2, x: '15%', y: '75%', delay: 1, size: 24 },
+  { Icon: Piano, x: '85%', y: '70%', delay: 1.5, size: 30 },
+  { Icon: Music, x: '50%', y: '85%', delay: 0.8, size: 26 },
+  { Icon: Guitar, x: '70%', y: '40%', delay: 1.2, size: 22 },
+];
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -36,15 +45,12 @@ const Auth = () => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate('/map');
-      }
+      if (session) navigate('/map');
     });
   }, [navigate]);
 
   const validateForm = () => {
     setErrors({});
-    
     try {
       if (isLogin) {
         loginSchema.parse({ email, password });
@@ -56,9 +62,7 @@ const Auth = () => {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as string] = err.message;
-          }
+          if (err.path[0]) newErrors[err.path[0] as string] = err.message;
         });
         setErrors(newErrors);
       }
@@ -68,34 +72,21 @@ const Auth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-
-        toast({
-          title: 'Bem-vindo!',
-          description: 'Login realizado com sucesso.',
-        });
+        toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' });
         navigate('/map');
       } else {
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-          },
+          options: { emailRedirectTo: `${window.location.origin}/` },
         });
-
         if (signUpError) throw signUpError;
 
         if (authData.user) {
@@ -104,17 +95,12 @@ const Auth = () => {
             username: `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
             first_name: firstName,
             last_name: lastName,
-            phone: phone,
+            phone,
             instrument: '',
             skill_level: 'beginner',
           });
-
           if (profileError) throw profileError;
-
-          toast({
-            title: 'Conta criada!',
-            description: 'Complete o seu perfil para começar.',
-          });
+          toast({ title: 'Conta criada!', description: 'Complete o seu perfil para começar.' });
           navigate('/map');
         }
       }
@@ -123,147 +109,254 @@ const Auth = () => {
       if (message.includes('User already registered')) {
         message = 'Este email já está registado. Tente fazer login.';
       }
-      toast({
-        title: 'Erro',
-        description: message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Erro', description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Simple header with logo */}
-      <header className="p-4">
-        <Link to="/" className="flex items-center gap-2 w-fit hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-            <Music className="w-5 h-5 text-primary" />
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            JamMate
-          </span>
-        </Link>
-      </header>
+  const formVariants = {
+    hidden: { opacity: 0, x: isLogin ? -30 : 30 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
+    exit: { opacity: 0, x: isLogin ? 30 : -30, transition: { duration: 0.25 } },
+  };
 
-      <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 flex flex-col items-center">
-            <CardTitle className="text-2xl font-bold text-center">
-              {isLogin ? 'Entrar' : 'Criar Conta'}
-            </CardTitle>
-            <CardDescription className="text-center">
-              {isLogin
-                ? 'Bem-vindo de volta! Entre para encontrar músicos.'
-                : 'Junte-se à comunidade de músicos.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAuth} className="space-y-4">
-              {!isLogin && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">Nome *</Label>
+  return (
+    <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-background">
+      {/* Left panel — decorative */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-primary/5 items-center justify-center overflow-hidden">
+        {/* Floating icons */}
+        {floatingIcons.map(({ Icon, x, y, delay, size }, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-primary/15"
+            style={{ left: x, top: y }}
+            animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 5 + delay, repeat: Infinity, ease: 'easeInOut', delay }}
+          >
+            <Icon size={size} />
+          </motion.div>
+        ))}
+
+        {/* Center content */}
+        <motion.div
+          className="relative z-10 text-center px-12 max-w-lg"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+        >
+          <motion.div
+            className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <Music className="w-10 h-10 text-primary" />
+          </motion.div>
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            JamMate
+          </h1>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Encontre músicos perto de si, organize jam sessions e faça parte de uma comunidade vibrante.
+          </p>
+
+          <div className="mt-10 grid grid-cols-3 gap-6">
+            {[
+              { value: '500+', label: 'Músicos' },
+              { value: '1.2k', label: 'Jam Sessions' },
+              { value: '4.8★', label: 'Avaliação' },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 + i * 0.15 }}
+              >
+                <div className="text-2xl font-bold text-primary">{stat.value}</div>
+                <div className="text-xs text-muted-foreground">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Gradient orb */}
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        <header className="p-6">
+          <Link to="/" className="flex items-center gap-2 w-fit hover:opacity-80 transition-opacity lg:hidden">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <Music className="w-5 h-5 text-primary" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              JamMate
+            </span>
+          </Link>
+          <Link to="/" className="hidden lg:block text-sm text-muted-foreground hover:text-foreground transition-colors">
+            ← Voltar à página inicial
+          </Link>
+        </header>
+
+        <div className="flex-1 flex items-center justify-center p-6">
+          <motion.div
+            className="w-full max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Header */}
+            <div className="text-center mb-8">
+              <motion.h2
+                className="text-3xl font-bold mb-2"
+                key={isLogin ? 'login-title' : 'signup-title'}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {isLogin ? 'Bem-vindo de volta' : 'Criar conta'}
+              </motion.h2>
+              <p className="text-muted-foreground">
+                {isLogin
+                  ? 'Entre para encontrar músicos e jam sessions.'
+                  : 'Junte-se à comunidade de músicos.'}
+              </p>
+            </div>
+
+            {/* Form */}
+            <AnimatePresence mode="wait">
+              <motion.form
+                key={isLogin ? 'login' : 'signup'}
+                variants={formVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                onSubmit={handleAuth}
+                className="space-y-4"
+              >
+                {!isLogin && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="firstName">Nome</Label>
+                        <Input
+                          id="firstName"
+                          placeholder="João"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          className={errors.firstName ? 'border-destructive' : ''}
+                        />
+                        {errors.firstName && (
+                          <p className="text-xs text-destructive">{errors.firstName}</p>
+                        )}
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="lastName">Sobrenome</Label>
+                        <Input
+                          id="lastName"
+                          placeholder="Silva"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          className={errors.lastName ? 'border-destructive' : ''}
+                        />
+                        {errors.lastName && (
+                          <p className="text-xs text-destructive">{errors.lastName}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="phone">Telefone</Label>
                       <Input
-                        id="firstName"
-                        placeholder="João"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        required={!isLogin}
-                        className={errors.firstName ? 'border-destructive' : ''}
+                        id="phone"
+                        type="tel"
+                        placeholder="+351 912 345 678"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className={errors.phone ? 'border-destructive' : ''}
                       />
-                      {errors.firstName && (
-                        <p className="text-xs text-destructive">{errors.firstName}</p>
+                      {errors.phone && (
+                        <p className="text-xs text-destructive">{errors.phone}</p>
                       )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Sobrenome *</Label>
-                      <Input
-                        id="lastName"
-                        placeholder="Silva"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        required={!isLogin}
-                        className={errors.lastName ? 'border-destructive' : ''}
+                  </>
+                )}
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={errors.email ? 'border-destructive' : ''}
+                  />
+                  {errors.email && (
+                    <p className="text-xs text-destructive">{errors.email}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={errors.password ? 'border-destructive' : ''}
+                  />
+                  {errors.password && (
+                    <p className="text-xs text-destructive">{errors.password}</p>
+                  )}
+                </div>
+
+                <motion.div whileTap={{ scale: 0.98 }}>
+                  <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
+                    {loading ? (
+                      <motion.div
+                        className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                       />
-                      {errors.lastName && (
-                        <p className="text-xs text-destructive">{errors.lastName}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone *</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+351 912 345 678"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required={!isLogin}
-                      className={errors.phone ? 'border-destructive' : ''}
-                    />
-                    {errors.phone && (
-                      <p className="text-xs text-destructive">{errors.phone}</p>
+                    ) : isLogin ? (
+                      'Entrar'
+                    ) : (
+                      'Criar Conta'
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      Obrigatório para segurança da comunidade
-                    </p>
-                  </div>
-                </>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className={errors.email ? 'border-destructive' : ''}
-                />
-                {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email}</p>
-                )}
+                  </Button>
+                </motion.div>
+              </motion.form>
+            </AnimatePresence>
+
+            {/* Toggle */}
+            <div className="mt-6 text-center">
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-background px-3 text-muted-foreground">ou</span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className={errors.password ? 'border-destructive' : ''}
-                />
-                {errors.password && (
-                  <p className="text-xs text-destructive">{errors.password}</p>
-                )}
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'A processar...' : isLogin ? 'Entrar' : 'Criar Conta'}
-              </Button>
-            </form>
-            <div className="mt-4 text-center text-sm">
               <button
                 type="button"
                 onClick={() => {
                   setIsLogin(!isLogin);
                   setErrors({});
                 }}
-                className="text-primary hover:underline"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
-                {isLogin
-                  ? 'Não tem conta? Criar conta'
-                  : 'Já tem conta? Entrar'}
+                {isLogin ? 'Não tem conta? ' : 'Já tem conta? '}
+                <span className="font-medium text-primary">
+                  {isLogin ? 'Criar conta' : 'Entrar'}
+                </span>
               </button>
             </div>
-          </CardContent>
-        </Card>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
