@@ -17,6 +17,12 @@ import { format, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import RejectBookingDialog from './RejectBookingDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface BookingNotification {
   id: string;
