@@ -46,6 +46,57 @@ const Settings = () => {
     toast({ title: 'Token removido', description: 'O token do Mapbox foi removido.' });
   };
 
+  const handleUpdateEmail = async () => {
+    if (!newEmail.trim()) {
+      toast({ title: 'Erro', description: 'Por favor, insira um email válido.', variant: 'destructive' });
+      return;
+    }
+
+    setIsUpdatingEmail(true);
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    setIsUpdatingEmail(false);
+
+    if (error) {
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ 
+        title: 'Email de confirmação enviado', 
+        description: 'Verifique a sua caixa de entrada para confirmar a alteração.' 
+      });
+      setNewEmail('');
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      toast({ title: 'Erro', description: 'Por favor, preencha todos os campos.', variant: 'destructive' });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({ title: 'Erro', description: 'As passwords não coincidem.', variant: 'destructive' });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({ title: 'Erro', description: 'A password deve ter pelo menos 6 caracteres.', variant: 'destructive' });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setIsUpdatingPassword(false);
+
+    if (error) {
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Password atualizada', description: 'A sua password foi alterada com sucesso.' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
