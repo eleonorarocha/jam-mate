@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Check, CheckCheck } from 'lucide-react';
-import { X, Send } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Check, CheckCheck, X, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -183,14 +183,22 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
                 setSelectedConversation(conv);
                 loadMessages(conv.id);
               }}
-              className={`w-full p-4 text-left border-b border-border hover:bg-accent/50 transition-colors ${
+              className={`w-full p-3 text-left border-b border-border hover:bg-accent/50 transition-colors flex items-center gap-3 ${
                 selectedConversation?.id === conv.id ? 'bg-accent' : ''
               }`}
             >
-              <p className="font-medium">{conv.profile?.username}</p>
-              <p className="text-sm text-muted-foreground truncate">
-                {conv.lastMessage?.content}
-              </p>
+              <Avatar className="h-9 w-9 shrink-0">
+                <AvatarImage src={conv.profile?.avatar_url || undefined} alt={conv.profile?.username} />
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                  {conv.profile?.username?.charAt(0).toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm truncate">{conv.profile?.username}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {conv.lastMessage?.content}
+                </p>
+              </div>
             </button>
           ))}
         </ScrollArea>
@@ -198,9 +206,19 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
 
       <div className="flex-1 flex flex-col">
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <h3 className="font-semibold">
-            {selectedConversation?.profile?.username || 'Mensagens'}
-          </h3>
+          <div className="flex items-center gap-3">
+            {selectedConversation?.profile && (
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={selectedConversation.profile.avatar_url || undefined} alt={selectedConversation.profile.username} />
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                  {selectedConversation.profile.username?.charAt(0).toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <h3 className="font-semibold">
+              {selectedConversation?.profile?.username || 'Mensagens'}
+            </h3>
+          </div>
           {!embedded && (
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-5 w-5" />
