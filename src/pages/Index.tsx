@@ -15,6 +15,8 @@ import CtaSection from '@/components/landing/CtaSection';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [tokenSaved, setTokenSaved] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('jammate_sidebar_collapsed');
