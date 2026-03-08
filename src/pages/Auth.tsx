@@ -117,7 +117,7 @@ const Auth = () => {
 
   const formVariants = {
     hidden: { opacity: 0, x: isLogin ? -30 : 30 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
     exit: { opacity: 0, x: isLogin ? 30 : -30, transition: { duration: 0.25 } },
   };
 
