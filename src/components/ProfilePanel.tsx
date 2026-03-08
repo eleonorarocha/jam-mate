@@ -20,6 +20,8 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState({
     username: '',
     first_name: '',
