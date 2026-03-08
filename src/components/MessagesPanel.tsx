@@ -183,14 +183,22 @@ const MessagesPanel = ({ onClose, embedded = false }: MessagesPanelProps) => {
                 setSelectedConversation(conv);
                 loadMessages(conv.id);
               }}
-              className={`w-full p-4 text-left border-b border-border hover:bg-accent/50 transition-colors ${
+              className={`w-full p-3 text-left border-b border-border hover:bg-accent/50 transition-colors flex items-center gap-3 ${
                 selectedConversation?.id === conv.id ? 'bg-accent' : ''
               }`}
             >
-              <p className="font-medium">{conv.profile?.username}</p>
-              <p className="text-sm text-muted-foreground truncate">
-                {conv.lastMessage?.content}
-              </p>
+              <Avatar className="h-9 w-9 shrink-0">
+                <AvatarImage src={conv.profile?.avatar_url || undefined} alt={conv.profile?.username} />
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                  {conv.profile?.username?.charAt(0).toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm truncate">{conv.profile?.username}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {conv.lastMessage?.content}
+                </p>
+              </div>
             </button>
           ))}
         </ScrollArea>
