@@ -200,8 +200,14 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            onChange={handleAvatarUpload}
+            onChange={handleFileSelect}
             className="hidden"
+          />
+          <AvatarCropper
+            imageSrc={cropperImage || ''}
+            open={!!cropperImage}
+            onClose={() => setCropperImage(null)}
+            onCropComplete={handleCroppedAvatar}
           />
           <button
             onClick={() => fileInputRef.current?.click()}
