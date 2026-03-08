@@ -124,12 +124,11 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-background">
       {/* Left panel — decorative */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-primary/5 items-center justify-center overflow-hidden">
-        {/* Floating icons */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary/8 via-secondary/40 to-accent/8 items-center justify-center overflow-hidden">
         {floatingIcons.map(({ Icon, x, y, delay, size }, i) => (
           <motion.div
             key={i}
-            className="absolute text-primary/15"
+            className="absolute text-primary/12"
             style={{ left: x, top: y }}
             animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0] }}
             transition={{ duration: 5 + delay, repeat: Infinity, ease: 'easeInOut', delay }}
@@ -138,7 +137,6 @@ const Auth = () => {
           </motion.div>
         ))}
 
-        {/* Center content */}
         <motion.div
           className="relative z-10 text-center px-12 max-w-lg"
           initial={{ opacity: 0, y: 30 }}
@@ -146,14 +144,16 @@ const Auth = () => {
           transition={{ duration: 0.7, delay: 0.3 }}
         >
           <motion.div
-            className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8"
+            className="w-20 h-20 bg-gradient-to-br from-primary/15 to-accent/15 rounded-full flex items-center justify-center mx-auto mb-8 ring-4 ring-primary/10"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
           >
             <Music className="w-10 h-10 text-primary" />
           </motion.div>
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            JamMate
+          <h1 className="text-4xl font-bold mb-4">
+            <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+              JamMate
+            </span>
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
             Encontre músicos perto de si, organize jam sessions e faça parte de uma comunidade vibrante.
@@ -179,9 +179,8 @@ const Auth = () => {
           </div>
         </motion.div>
 
-        {/* Gradient orb */}
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-primary/8 rounded-full blur-3xl" />
+        <div className="absolute -top-32 -right-32 w-80 h-80 bg-accent/8 rounded-full blur-3xl" />
       </div>
 
       {/* Right panel — form */}
@@ -191,7 +190,7 @@ const Auth = () => {
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
               <Music className="w-5 h-5 text-primary" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               JamMate
             </span>
           </Link>
@@ -207,7 +206,6 @@ const Auth = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Header */}
             <div className="text-center mb-8">
               <motion.h2
                 className="text-3xl font-bold mb-2"
@@ -225,7 +223,6 @@ const Auth = () => {
               </p>
             </div>
 
-            {/* Form */}
             <AnimatePresence mode="wait">
               <motion.form
                 key={isLogin ? 'login' : 'signup'}
@@ -241,97 +238,54 @@ const Auth = () => {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <Label htmlFor="firstName">Nome</Label>
-                        <Input
-                          id="firstName"
-                          placeholder="João"
-                          value={firstName}
-                          onChange={(e) => setFirstName(e.target.value)}
-                          className={errors.firstName ? 'border-destructive' : ''}
-                        />
-                        {errors.firstName && (
-                          <p className="text-xs text-destructive">{errors.firstName}</p>
-                        )}
+                        <Input id="firstName" placeholder="João" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={errors.firstName ? 'border-destructive' : ''} />
+                        {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="lastName">Sobrenome</Label>
-                        <Input
-                          id="lastName"
-                          placeholder="Silva"
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                          className={errors.lastName ? 'border-destructive' : ''}
-                        />
-                        {errors.lastName && (
-                          <p className="text-xs text-destructive">{errors.lastName}</p>
-                        )}
+                        <Input id="lastName" placeholder="Silva" value={lastName} onChange={(e) => setLastName(e.target.value)} className={errors.lastName ? 'border-destructive' : ''} />
+                        {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
                       </div>
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="phone">Telefone</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+351 912 345 678"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className={errors.phone ? 'border-destructive' : ''}
-                      />
-                      {errors.phone && (
-                        <p className="text-xs text-destructive">{errors.phone}</p>
-                      )}
+                      <Input id="phone" type="tel" placeholder="+351 912 345 678" value={phone} onChange={(e) => setPhone(e.target.value)} className={errors.phone ? 'border-destructive' : ''} />
+                      {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
                     </div>
                   </>
                 )}
 
                 <div className="space-y-1.5">
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={errors.email ? 'border-destructive' : ''}
-                  />
-                  {errors.email && (
-                    <p className="text-xs text-destructive">{errors.email}</p>
-                  )}
+                  <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
+                  {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={errors.password ? 'border-destructive' : ''}
-                  />
-                  {errors.password && (
-                    <p className="text-xs text-destructive">{errors.password}</p>
-                  )}
+                  <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={errors.password ? 'border-destructive' : ''} />
+                  {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
 
                 <motion.div whileTap={{ scale: 0.98 }}>
-                  <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
+                  <Button
+                    type="submit"
+                    className="w-full h-11 text-base font-semibold bg-gradient-to-r from-primary to-[hsl(var(--primary-glow))] hover:opacity-90 transition-opacity"
+                    style={{ boxShadow: 'var(--shadow-primary)' }}
+                    disabled={loading}
+                  >
                     {loading ? (
                       <motion.div
                         className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                       />
-                    ) : isLogin ? (
-                      'Entrar'
-                    ) : (
-                      'Criar Conta'
-                    )}
+                    ) : isLogin ? 'Entrar' : 'Criar Conta'}
                   </Button>
                 </motion.div>
               </motion.form>
             </AnimatePresence>
 
-            {/* Toggle */}
             <div className="mt-6 text-center">
               <div className="relative mb-6">
                 <div className="absolute inset-0 flex items-center">
@@ -343,16 +297,11 @@ const Auth = () => {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setErrors({});
-                }}
+                onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 {isLogin ? 'Não tem conta? ' : 'Já tem conta? '}
-                <span className="font-medium text-primary">
-                  {isLogin ? 'Criar conta' : 'Entrar'}
-                </span>
+                <span className="font-medium text-primary">{isLogin ? 'Criar conta' : 'Entrar'}</span>
               </button>
             </div>
           </motion.div>
