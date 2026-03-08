@@ -136,7 +136,13 @@ const Onboarding = () => {
                   initials
                 )}
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+              <AvatarCropper
+                imageSrc={cropperImage || ''}
+                open={!!cropperImage}
+                onClose={() => setCropperImage(null)}
+                onCropComplete={handleCroppedAvatar}
+              />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingAvatar}
