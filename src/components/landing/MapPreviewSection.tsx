@@ -16,13 +16,18 @@ const MapPreviewSection = () => {
       transition={{ duration: 0.7 }}
     >
       <div className="container mx-auto max-w-5xl">
-        <h2 className="text-3xl font-bold text-center mb-4">Explore músicos perto de si</h2>
-        <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-          Descubra músicos na sua zona, filtre por instrumento e nível, e encontre o parceiro ideal para a sua próxima jam.
-        </p>
+        <div className="text-center mb-8">
+          <span className="inline-block px-3 py-1 rounded-full bg-accent/15 text-accent-foreground text-xs font-medium mb-3">
+            Mapa Interativo
+          </span>
+          <h2 className="text-3xl font-bold mb-2">Explore músicos perto de si</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Descubra músicos na sua zona, filtre por instrumento e nível, e encontre o parceiro ideal.
+          </p>
+        </div>
         <motion.div
           className="relative rounded-2xl overflow-hidden border border-border shadow-xl"
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.01 }}
           transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         >
           <img
@@ -33,13 +38,18 @@ const MapPreviewSection = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent flex flex-col items-center justify-end pb-10 px-4">
             <div className="flex items-center gap-2 mb-3">
-              <Search className="w-5 h-5 text-primary" />
+              <Search className="w-5 h-5 text-accent" />
               <span className="text-lg font-semibold">Encontre músicos na sua área</span>
             </div>
             <p className="text-sm text-muted-foreground mb-5 text-center max-w-md">
-              Crie uma conta gratuita para explorar o mapa interativo, filtrar por instrumento, nível e muito mais.
+              Crie uma conta gratuita para explorar o mapa interativo e muito mais.
             </p>
-            <Button size="lg" onClick={() => navigate('/auth')}>
+            <Button
+              size="lg"
+              onClick={() => navigate('/auth')}
+              className="bg-gradient-to-r from-primary to-[hsl(var(--primary-glow))] hover:opacity-90 transition-opacity"
+              style={{ boxShadow: 'var(--shadow-primary)' }}
+            >
               Criar Conta e Explorar o Mapa
             </Button>
           </div>

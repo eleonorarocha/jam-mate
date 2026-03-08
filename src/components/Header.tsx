@@ -24,10 +24,10 @@ const Header = () => {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary/15 to-accent/15 rounded-full flex items-center justify-center ring-2 ring-primary/10">
               <Music className="w-5 h-5 text-primary" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent hidden sm:inline">
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hidden sm:inline">
               JamMate
             </span>
           </Link>
@@ -45,7 +45,7 @@ const Header = () => {
                       'relative flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors',
                       isActive
                         ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                     )}
                   >
                     <Icon className="w-4 h-4" />
