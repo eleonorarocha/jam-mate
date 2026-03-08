@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import MapComponent from '@/components/MapComponent';
 import HomeMapSidebar, { HomeFiltersState } from '@/components/HomeMapSidebar';
@@ -13,6 +15,8 @@ import CtaSection from '@/components/landing/CtaSection';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [tokenSaved, setTokenSaved] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('jammate_sidebar_collapsed');
@@ -44,6 +48,21 @@ const Index = () => {
     localStorage.setItem('jammate_sidebar_collapsed', JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
+  // Check onboarding status
+  useEffect(() => {
+    if (!user) {
+      setCheckingOnboarding(false);
+      return;
+    }
+    supabase.from('profiles').select('onboarding_completed').eq('id', user.id).single()
+      .then(({ data }) => {
+        if (data && !data.onboarding_completed) {
+          navigate('/onboarding');
+        }
+        setCheckingOnboarding(false);
+      });
+  }, [user, navigate]);
+
   const mapFilters: MapFiltersState & { searchQuery?: string; city?: string; availabilityDate?: string } = {
     instrument: filters.instrument,
     skillLevel: filters.skillLevel,
@@ -55,7 +74,7 @@ const Index = () => {
     availabilityDate: filters.availabilityDate,
   };
 
-  if (loading) {
+  if (loading || checkingOnboarding) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
