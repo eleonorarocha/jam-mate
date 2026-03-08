@@ -182,14 +182,27 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
       {/* Avatar & Name Header */}
       <motion.div variants={itemVariants} className="flex flex-col items-center text-center pb-2">
         <div className="relative group mb-4">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg ring-4 ring-background">
-            {profile.avatar_url ? (
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground text-2xl font-bold shadow-lg ring-4 ring-background overflow-hidden">
+            {uploadingAvatar ? (
+              <Loader2 className="w-8 h-8 animate-spin text-primary-foreground" />
+            ) : profile.avatar_url ? (
               <img src={profile.avatar_url} alt="Avatar" className="w-full h-full rounded-full object-cover" />
             ) : (
               initials
             )}
           </div>
-          <button className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-card border-2 border-border flex items-center justify-center shadow-md hover:bg-muted transition-colors">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadingAvatar}
+            className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-card border-2 border-border flex items-center justify-center shadow-md hover:bg-muted transition-colors disabled:opacity-50"
+          >
             <Camera className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
