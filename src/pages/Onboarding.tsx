@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Camera, Music, MapPin, User, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AvatarCropper from '@/components/AvatarCropper';
 
 const STEPS = [
   { id: 'photo', title: 'Foto de Perfil', subtitle: 'Adicione uma foto para que outros músicos o reconheçam', icon: Camera },
@@ -25,6 +26,7 @@ const Onboarding = () => {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropperImage, setCropperImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -37,9 +39,9 @@ const Onboarding = () => {
     gender: '' as 'male' | 'female' | '',
   });
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     if (!file.type.startsWith('image/')) {
       toast({ title: 'Ficheiro inválido', description: 'Selecione uma imagem.', variant: 'destructive' });
@@ -50,11 +52,19 @@ const Onboarding = () => {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => setCropperImage(reader.result as string);
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleCroppedAvatar = async (croppedBlob: Blob) => {
+    if (!user) return;
+    setCropperImage(null);
     setUploadingAvatar(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}/avatar.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
+      const filePath = `${user.id}/avatar.jpg`;
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, croppedBlob, { upsert: true, contentType: 'image/jpeg' });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
@@ -67,7 +77,6 @@ const Onboarding = () => {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     } finally {
       setUploadingAvatar(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -127,7 +136,13 @@ const Onboarding = () => {
                   initials
                 )}
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+              <AvatarCropper
+                imageSrc={cropperImage || ''}
+                open={!!cropperImage}
+                onClose={() => setCropperImage(null)}
+                onCropComplete={handleCroppedAvatar}
+              />
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingAvatar}
