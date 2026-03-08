@@ -284,7 +284,18 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    {isLogin && (
+                      <button
+                        type="button"
+                        onClick={() => { setShowForgotPassword(true); setErrors({}); }}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Esqueceu a password?
+                      </button>
+                    )}
+                  </div>
                   <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={errors.password ? 'border-destructive' : ''} />
                   {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
