@@ -110,7 +110,7 @@ const Auth = () => {
           });
           if (profileError) throw profileError;
           toast({ title: 'Conta criada!', description: 'Complete o seu perfil para começar.' });
-          navigate('/map');
+          navigate('/onboarding');
         }
       }
     } catch (error: any) {
