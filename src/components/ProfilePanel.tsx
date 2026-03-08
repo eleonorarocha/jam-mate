@@ -22,6 +22,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [cropperImage, setCropperImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState({
     username: '',
