@@ -353,6 +353,7 @@ const About = () => {
               ))}
             </Accordion>
           </motion.div>
+        </section>
 
         {/* CTA */}
         <section className="container mx-auto px-4 max-w-2xl text-center">
