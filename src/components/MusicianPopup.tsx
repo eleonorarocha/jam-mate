@@ -22,6 +22,7 @@ interface MusicianPopupProps {
   };
   distance?: number | null;
   onClose: () => void;
+  isAuthenticated?: boolean;
 }
 
 const MusicianPopup = ({ musician, distance, onClose }: MusicianPopupProps) => {
