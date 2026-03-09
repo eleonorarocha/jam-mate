@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, BellRing, BellOff, Clock, User, Check, XCircle, Calendar, RefreshCw } from 'lucide-react';
+import { Bell, BellRing, BellOff, Clock, User, Check, XCircle, Calendar, RefreshCw, History, CheckCheck, MessageSquare, Music, AlarmClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -44,13 +44,25 @@ interface BookingNotification {
   };
 }
 
+interface NotificationHistoryItem {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
 const NotificationsDropdown = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [pendingBookings, setPendingBookings] = useState<BookingNotification[]>([]);
   const [rejectedBookings, setRejectedBookings] = useState<BookingNotification[]>([]);
+  const [history, setHistory] = useState<NotificationHistoryItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [bookingToReject, setBookingToReject] = useState<BookingNotification | null>(null);
@@ -131,6 +143,61 @@ const NotificationsDropdown = () => {
     };
   }, [user]);
 
+  // Fetch notification history
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchHistory = async () => {
+      setLoadingHistory(true);
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (!error && data) {
+        setHistory(data as any as NotificationHistoryItem[]);
+        setUnreadCount((data as any[]).filter((n: any) => !n.read).length);
+      }
+      setLoadingHistory(false);
+    };
+
+    fetchHistory();
+
+    const channel = supabase
+      .channel('notifications-history')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, () => fetchHistory())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  const markAllRead = async () => {
+    if (!user) return;
+    await supabase
+      .from('notifications')
+      .update({ read: true } as any)
+      .eq('user_id', user.id)
+      .eq('read', false);
+    setHistory(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+  };
+
+  const getNotifIcon = (type: string) => {
+    switch (type) {
+      case 'message': return <MessageSquare className="h-4 w-4 text-primary" />;
+      case 'booking': return <Music className="h-4 w-4 text-primary" />;
+      case 'reminder': return <AlarmClock className="h-4 w-4 text-amber-500" />;
+      default: return <Bell className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
   const handleUpdateBookingStatus = async (
     booking: BookingNotification, 
     newStatus: 'accepted' | 'rejected', 
@@ -204,7 +271,7 @@ const NotificationsDropdown = () => {
 
   const pendingCount = pendingBookings.length;
   const rejectedCount = rejectedBookings.length;
-  const totalCount = pendingCount + rejectedCount;
+  const totalCount = pendingCount + rejectedCount + unreadCount;
 
   return (
     <>
@@ -283,8 +350,8 @@ const NotificationsDropdown = () => {
           </div>
           
           <Tabs defaultValue="pending" className="w-full">
-            <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-border h-10">
-              <TabsTrigger value="pending" className="relative">
+            <TabsList className="w-full grid grid-cols-3 rounded-none border-b border-border h-10">
+              <TabsTrigger value="pending" className="relative text-xs">
                 Pedidos
                 {pendingCount > 0 && (
                   <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
@@ -292,11 +359,19 @@ const NotificationsDropdown = () => {
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative">
+              <TabsTrigger value="rejected" className="relative text-xs">
                 Recusados
                 {rejectedCount > 0 && (
                   <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
                     {rejectedCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="history" className="relative text-xs">
+                Histórico
+                {unreadCount > 0 && (
+                  <Badge variant="outline" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {unreadCount > 9 ? '9+' : unreadCount}
                   </Badge>
                 )}
               </TabsTrigger>
@@ -424,6 +499,60 @@ const NotificationsDropdown = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-0">
+              <ScrollArea className="max-h-[350px]">
+                {loadingHistory ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    A carregar...
+                  </div>
+                ) : history.length === 0 ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Sem notificações</p>
+                  </div>
+                ) : (
+                  <div>
+                    {unreadCount > 0 && (
+                      <div className="p-2 border-b border-border">
+                        <Button variant="ghost" size="sm" className="w-full text-xs gap-1" onClick={markAllRead}>
+                          <CheckCheck className="h-3.5 w-3.5" />
+                          Marcar tudo como lido
+                        </Button>
+                      </div>
+                    )}
+                    <div className="divide-y divide-border">
+                      {history.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`p-3 transition-colors ${!notif.read ? 'bg-accent/30' : 'hover:bg-accent/20'}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                              {getNotifIcon(notif.type)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm leading-tight ${!notif.read ? 'font-semibold' : 'font-medium'}`}>
+                                {notif.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                                {notif.message}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground/70 mt-1">
+                                {format(parseISO(notif.created_at), "d MMM 'às' HH:mm", { locale: pt })}
+                              </p>
+                            </div>
+                            {!notif.read && (
+                              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </ScrollArea>
