@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 export const useRealtimeNotifications = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const playSound = useNotificationSound();
   const initializedRef = useRef(false);
 
   useEffect(() => {
