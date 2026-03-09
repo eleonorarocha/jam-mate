@@ -19,6 +19,7 @@ const Index = () => {
     return saved ? JSON.parse(saved) : false;
   });
   const [visibleMusiciansCount, setVisibleMusiciansCount] = useState(0);
+  const [flyToCoords, setFlyToCoords] = useState<[number, number] | null>(null);
   const [filters, setFilters] = useState<HomeFiltersState>(() => {
     const saved = localStorage.getItem('jammate_filters');
     if (saved) {
