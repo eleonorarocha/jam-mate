@@ -62,8 +62,8 @@ const MusicianCard = ({
             </AvatarFallback>
           </Avatar>
           {isFavorite && (
-            <div className="absolute -top-1 -right-1 bg-white dark:bg-background rounded-full p-0.5 shadow">
-              <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+            <div className="absolute -top-1 -right-1 bg-background rounded-full p-0.5 shadow">
+              <Heart className="h-4 w-4 fill-destructive text-destructive" />
             </div>
           )}
         </div>
