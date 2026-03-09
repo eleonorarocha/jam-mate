@@ -189,6 +189,22 @@ const NotificationsDropdown = () => {
     setUnreadCount(0);
   };
 
+  const clearAllHistory = async () => {
+    if (!user) return;
+    await supabase.from('notifications').delete().eq('user_id', user.id);
+    setHistory([]);
+    setUnreadCount(0);
+  };
+
+  const deleteNotification = async (id: string) => {
+    await supabase.from('notifications').delete().eq('id', id);
+    setHistory(prev => {
+      const updated = prev.filter(n => n.id !== id);
+      setUnreadCount(updated.filter(n => !n.read).length);
+      return updated;
+    });
+  };
+
   const getNotifIcon = (type: string) => {
     switch (type) {
       case 'message': return <MessageSquare className="h-4 w-4 text-primary" />;
