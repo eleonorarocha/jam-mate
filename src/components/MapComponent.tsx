@@ -272,6 +272,18 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
 
     // Report filtered count to parent
     onFilteredCountChange?.(filteredMusicians.length);
+    
+    // Collect compatible IDs
+    const compatibleIds = new Set<string>();
+    filteredMusicians.forEach((m) => {
+      if (isCompatibleMatch(m)) compatibleIds.add(m.id);
+    });
+    
+    // Report musicians to parent
+    onMusiciansChange?.(filteredMusicians, compatibleIds);
+    
+    // Clear marker elements map
+    markerElementsRef.current.clear();
 
     // Create markers for filtered musicians
     filteredMusicians.forEach((musician) => {
