@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
+import { getNotifPref } from '@/hooks/useNotificationPreferences';
 
 export const useRealtimeNotifications = () => {
   const { user } = useAuth();
@@ -12,11 +13,9 @@ export const useRealtimeNotifications = () => {
 
   useEffect(() => {
     if (!user) return;
-    // Prevent double-subscription in strict mode
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    // Listen for new messages
     const messagesChannel = supabase
       .channel('realtime-messages-notif')
       .on(
@@ -28,11 +27,11 @@ export const useRealtimeNotifications = () => {
           filter: `receiver_id=eq.${user.id}`,
         },
         async (payload) => {
+          if (!getNotifPref('messages')) return;
+
           const msg = payload.new as any;
-          // Don't notify for own messages
           if (msg.sender_id === user.id) return;
 
-          // Fetch sender name
           const { data: sender } = await supabase
             .from('profiles')
             .select('username, full_name')
@@ -50,7 +49,6 @@ export const useRealtimeNotifications = () => {
       )
       .subscribe();
 
-    // Listen for new/updated bookings
     const bookingsChannel = supabase
       .channel('realtime-bookings-notif')
       .on(
@@ -62,6 +60,8 @@ export const useRealtimeNotifications = () => {
           filter: `musician_id=eq.${user.id}`,
         },
         async (payload) => {
+          if (!getNotifPref('bookings')) return;
+
           const booking = payload.new as any;
           const { data: requester } = await supabase
             .from('profiles')
@@ -87,6 +87,8 @@ export const useRealtimeNotifications = () => {
           filter: `requester_id=eq.${user.id}`,
         },
         async (payload) => {
+          if (!getNotifPref('bookings')) return;
+
           const booking = payload.new as any;
           const oldStatus = (payload.old as any)?.status;
           if (booking.status === oldStatus) return;
