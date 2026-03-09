@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, BarChart3 } from 'lucide-react';
+import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, BarChart3, Download } from 'lucide-react';
+import { downloadCSV } from '@/lib/csv-export';
 import AdminUsers from '@/components/AdminUsers';
 import AdminStats from '@/components/AdminStats';
 import Header from '@/components/Header';
@@ -211,6 +212,27 @@ const Admin = () => {
           <p className="text-sm text-muted-foreground ml-auto">
             {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
           </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() =>
+              downloadCSV(
+                filtered.map((f) => ({
+                  utilizador: (f.profiles as any)?.username || 'Anónimo',
+                  categoria: categoryLabels[f.category] || f.category,
+                  mensagem: f.message,
+                  rating: f.rating ?? '',
+                  estado: statusConfig[f.status]?.label || f.status,
+                  notas_admin: f.admin_notes || '',
+                  data: f.created_at,
+                })),
+                'feedback'
+              )
+            }
+          >
+            <Download className="w-3.5 h-3.5" /> Exportar CSV
+          </Button>
         </div>
 
         {/* Table */}
