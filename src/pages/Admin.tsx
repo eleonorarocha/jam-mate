@@ -143,8 +143,11 @@ const Admin = () => {
           </div>
         </motion.div>
 
-        <Tabs defaultValue="feedback" className="space-y-6">
+        <Tabs defaultValue="stats" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="stats" className="gap-1.5">
+              <BarChart3 className="w-4 h-4" /> Estatísticas
+            </TabsTrigger>
             <TabsTrigger value="feedback" className="gap-1.5">
               <MessageSquare className="w-4 h-4" /> Feedback
             </TabsTrigger>
@@ -152,6 +155,10 @@ const Admin = () => {
               <Users className="w-4 h-4" /> Utilizadores
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="stats">
+            <AdminStats />
+          </TabsContent>
 
           <TabsContent value="feedback" className="space-y-6">
 
