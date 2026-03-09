@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, BarChart3 } from 'lucide-react';
+import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, BarChart3, Download } from 'lucide-react';
+import { downloadCSV } from '@/lib/csv-export';
 import AdminUsers from '@/components/AdminUsers';
 import AdminStats from '@/components/AdminStats';
 import Header from '@/components/Header';
