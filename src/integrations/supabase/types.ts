@@ -123,27 +123,33 @@ export type Database = {
       }
       feedback: {
         Row: {
+          admin_notes: string | null
           category: string
           created_at: string
           id: string
           message: string
           rating: number | null
+          status: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           category?: string
           created_at?: string
           id?: string
           message: string
           rating?: number | null
+          status?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           category?: string
           created_at?: string
           id?: string
           message?: string
           rating?: number | null
+          status?: string
           user_id?: string
         }
         Relationships: []
@@ -429,6 +435,24 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_profiles: {
@@ -517,12 +541,20 @@ export type Database = {
         Args: { _user1: string; _user2: string }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_blocked: {
         Args: { _by_user_id: string; _user_id: string }
         Returns: boolean
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       booking_status:
         | "pending"
         | "accepted"
@@ -658,6 +690,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       booking_status: [
         "pending",
         "accepted",
