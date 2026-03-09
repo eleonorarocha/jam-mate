@@ -74,10 +74,11 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentProps) => {
+const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange, highlightedMusicianId, onMusicianSelect }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const markerElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
   const [selectedMusicianDistance, setSelectedMusicianDistance] = useState<number | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
