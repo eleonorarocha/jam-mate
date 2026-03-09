@@ -352,73 +352,77 @@ const HomeMapSidebar = ({
             </Select>
           </div>
 
-          <Separator />
+          {isAuthenticated && (
+            <>
+              <Separator />
 
-          {/* Availability Date Filter */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-medium">
-              <CalendarIcon className="h-4 w-4" />
-              Disponibilidade
-            </Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !filters.availabilityDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {filters.availabilityDate
-                    ? format(new Date(filters.availabilityDate), "PPP", { locale: pt })
-                    : "Selecionar data"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={filters.availabilityDate ? new Date(filters.availabilityDate) : undefined}
-                  onSelect={(date) =>
-                    onFiltersChange({
-                      ...filters,
-                      availabilityDate: date ? date.toISOString() : '',
-                    })
+              {/* Availability Date Filter */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-sm font-medium">
+                  <CalendarIcon className="h-4 w-4" />
+                  Disponibilidade
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !filters.availabilityDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {filters.availabilityDate
+                        ? format(new Date(filters.availabilityDate), "PPP", { locale: pt })
+                        : "Selecionar data"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={filters.availabilityDate ? new Date(filters.availabilityDate) : undefined}
+                      onSelect={(date) =>
+                        onFiltersChange({
+                          ...filters,
+                          availabilityDate: date ? date.toISOString() : '',
+                        })
+                      }
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {filters.availabilityDate && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onFiltersChange({ ...filters, availabilityDate: '' })}
+                    className="h-7 text-xs text-muted-foreground hover:text-foreground w-full"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Limpar data
+                  </Button>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Favorites Only */}
+              <div className="flex items-center justify-between">
+                <Label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
+                  <Heart className="h-4 w-4 text-destructive" />
+                  Apenas favoritos
+                </Label>
+                <Switch
+                  checked={filters.favoritesOnly}
+                  onCheckedChange={(checked) =>
+                    onFiltersChange({ ...filters, favoritesOnly: checked })
                   }
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
                 />
-              </PopoverContent>
-            </Popover>
-            {filters.availabilityDate && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onFiltersChange({ ...filters, availabilityDate: '' })}
-                className="h-7 text-xs text-muted-foreground hover:text-foreground w-full"
-              >
-                <X className="h-3 w-3 mr-1" />
-                Limpar data
-              </Button>
-            )}
-          </div>
-
-          <Separator />
-
-          {/* Favorites Only */}
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
-              <Heart className="h-4 w-4 text-destructive" />
-              Apenas favoritos
-            </Label>
-            <Switch
-              checked={filters.favoritesOnly}
-              onCheckedChange={(checked) =>
-                onFiltersChange({ ...filters, favoritesOnly: checked })
-              }
-            />
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </ScrollArea>
     </div>
