@@ -133,11 +133,34 @@ const Admin = () => {
     }
   };
 
-  const filtered = feedback.filter((f) => {
-    if (filterCategory !== 'all' && f.category !== filterCategory) return false;
-    if (filterStatus !== 'all' && f.status !== filterStatus) return false;
-    return true;
-  });
+  const filtered = useMemo(() => {
+    let result = feedback.filter((f) => {
+      if (filterCategory !== 'all' && f.category !== filterCategory) return false;
+      if (filterStatus !== 'all' && f.status !== filterStatus) return false;
+      return true;
+    });
+
+    result.sort((a, b) => {
+      let cmp = 0;
+      switch (fbSortKey) {
+        case 'username':
+          cmp = ((a.profiles as any)?.username || '').localeCompare((b.profiles as any)?.username || '');
+          break;
+        case 'category':
+          cmp = a.category.localeCompare(b.category);
+          break;
+        case 'status':
+          cmp = a.status.localeCompare(b.status);
+          break;
+        case 'created_at':
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+      }
+      return fbSortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return result;
+  }, [feedback, filterCategory, filterStatus, fbSortKey, fbSortDir]);
 
   const FEEDBACK_PER_PAGE = 10;
   const feedbackTotalPages = Math.max(1, Math.ceil(filtered.length / FEEDBACK_PER_PAGE));
