@@ -264,6 +264,30 @@ const Settings = () => {
                       <Switch defaultChecked />
                     </div>
                   ))}
+
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="flex items-center gap-1.5">
+                          <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          Sons de notificação
+                        </Label>
+                        <p className="text-sm text-muted-foreground">Reproduzir um som quando recebe notificações</p>
+                      </div>
+                      <Switch
+                        defaultChecked={isNotificationSoundEnabled()}
+                        onCheckedChange={(checked) => {
+                          setNotificationSoundEnabled(checked);
+                          toast({
+                            title: checked ? '🔔 Sons ativados' : '🔕 Sons desativados',
+                            description: checked
+                              ? 'Vai ouvir sons nas notificações.'
+                              : 'As notificações serão silenciosas.',
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
