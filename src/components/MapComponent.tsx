@@ -14,10 +14,28 @@ interface ExtendedFilters extends MapFiltersState {
   availabilityDate?: string;
 }
 
+interface Musician {
+  id: string;
+  username: string;
+  instrument: string;
+  city: string | null;
+  country: string | null;
+  latitude: number;
+  longitude: number;
+  average_rating: number | null;
+  total_ratings: number | null;
+  avatar_url: string | null;
+  skill_level?: string;
+  gender?: string;
+}
+
 interface MapComponentProps {
   token: string;
   filters?: ExtendedFilters;
   onFilteredCountChange?: (count: number) => void;
+  onMusiciansChange?: (musicians: Musician[], compatibleIds: Set<string>) => void;
+  highlightedMusicianId?: string | null;
+  onMusicianSelect?: (musician: Musician) => void;
 }
 
 interface Musician {

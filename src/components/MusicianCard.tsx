@@ -92,7 +92,7 @@ const MusicianCard = ({
               </Badge>
             )}
             {isCompatible && (
-              <Badge className="text-xs bg-lime-500 hover:bg-lime-600 text-white">
+              <Badge className="text-xs bg-accent text-accent-foreground">
                 Match
               </Badge>
             )}
