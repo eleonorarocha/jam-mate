@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter } from 'lucide-react';
+import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users } from 'lucide-react';
+import AdminUsers from '@/components/AdminUsers';
 import Header from '@/components/Header';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -136,12 +138,24 @@ const Admin = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Painel de Administração</h1>
-            <p className="text-muted-foreground text-sm">Gerir feedback dos utilizadores</p>
+            <p className="text-muted-foreground text-sm">Gerir feedback e utilizadores</p>
           </div>
         </motion.div>
 
+        <Tabs defaultValue="feedback" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="feedback" className="gap-1.5">
+              <MessageSquare className="w-4 h-4" /> Feedback
+            </TabsTrigger>
+            <TabsTrigger value="users" className="gap-1.5">
+              <Users className="w-4 h-4" /> Utilizadores
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="feedback" className="space-y-6">
+
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-4">
           {[
             { label: 'Total', value: stats.total, icon: MessageSquare },
             { label: 'Pendentes', value: stats.pending, icon: Clock },
@@ -317,6 +331,13 @@ const Admin = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+          </TabsContent>
+
+          <TabsContent value="users">
+            <AdminUsers />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
