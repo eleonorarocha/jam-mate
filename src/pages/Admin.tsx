@@ -138,12 +138,24 @@ const Admin = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">Painel de Administração</h1>
-            <p className="text-muted-foreground text-sm">Gerir feedback dos utilizadores</p>
+            <p className="text-muted-foreground text-sm">Gerir feedback e utilizadores</p>
           </div>
         </motion.div>
 
+        <Tabs defaultValue="feedback" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="feedback" className="gap-1.5">
+              <MessageSquare className="w-4 h-4" /> Feedback
+            </TabsTrigger>
+            <TabsTrigger value="users" className="gap-1.5">
+              <Users className="w-4 h-4" /> Utilizadores
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="feedback" className="space-y-6">
+
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-4">
           {[
             { label: 'Total', value: stats.total, icon: MessageSquare },
             { label: 'Pendentes', value: stats.pending, icon: Clock },
