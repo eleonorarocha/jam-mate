@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin, Image, Heart } from 'lucide-react';
+import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin, Image, Heart, UserPlus, LogIn } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,8 +49,42 @@ const UserMenu = () => {
     if (profile?.username) {
       return profile.username.substring(0, 2).toUpperCase();
     }
-    return user?.email?.substring(0, 2).toUpperCase() || 'U';
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return 'U';
   };
+
+  // Non-authenticated user menu
+  if (!user) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="relative h-10 w-10 rounded-full ring-2 ring-border hover:ring-primary transition-all focus:outline-none focus:ring-primary">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-muted text-muted-foreground">
+                <User className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <p className="text-sm text-muted-foreground">Bem-vindo ao JamMate</p>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => navigate('/auth')} className="cursor-pointer">
+            <UserPlus className="mr-2 h-4 w-4" />
+            <span>Criar conta</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/auth')} className="cursor-pointer">
+            <LogIn className="mr-2 h-4 w-4" />
+            <span>Entrar</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
   return (
     <DropdownMenu>
