@@ -248,6 +248,7 @@ const Admin = () => {
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">Nenhum feedback encontrado.</div>
         ) : (
+          <>
           <div className="bg-card border border-border rounded-xl overflow-hidden">
             <Table>
               <TableHeader>
