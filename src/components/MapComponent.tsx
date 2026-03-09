@@ -14,10 +14,28 @@ interface ExtendedFilters extends MapFiltersState {
   availabilityDate?: string;
 }
 
+interface Musician {
+  id: string;
+  username: string;
+  instrument: string;
+  city: string | null;
+  country: string | null;
+  latitude: number;
+  longitude: number;
+  average_rating: number | null;
+  total_ratings: number | null;
+  avatar_url: string | null;
+  skill_level?: string;
+  gender?: string;
+}
+
 interface MapComponentProps {
   token: string;
   filters?: ExtendedFilters;
   onFilteredCountChange?: (count: number) => void;
+  onMusiciansChange?: (musicians: Musician[], compatibleIds: Set<string>) => void;
+  highlightedMusicianId?: string | null;
+  onMusicianSelect?: (musician: Musician) => void;
 }
 
 interface Musician {
@@ -56,10 +74,11 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentProps) => {
+const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange, highlightedMusicianId, onMusicianSelect }: MapComponentProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const markerElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
   const [selectedMusicianDistance, setSelectedMusicianDistance] = useState<number | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
@@ -253,6 +272,18 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
 
     // Report filtered count to parent
     onFilteredCountChange?.(filteredMusicians.length);
+    
+    // Collect compatible IDs
+    const compatibleIds = new Set<string>();
+    filteredMusicians.forEach((m) => {
+      if (isCompatibleMatch(m)) compatibleIds.add(m.id);
+    });
+    
+    // Report musicians to parent
+    onMusiciansChange?.(filteredMusicians, compatibleIds);
+    
+    // Clear marker elements map
+    markerElementsRef.current.clear();
 
     // Create markers for filtered musicians
     filteredMusicians.forEach((musician) => {
@@ -302,17 +333,21 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
       }
 
       el.addEventListener('click', () => {
-        setSelectedMusician(musician);
-        if (userLocation) {
-          const dist = calculateDistance(
-            userLocation.lat,
-            userLocation.lng,
-            approximateCoord(musician.latitude),
-            approximateCoord(musician.longitude)
-          );
-          setSelectedMusicianDistance(dist);
+        if (onMusicianSelect) {
+          onMusicianSelect(musician);
         } else {
-          setSelectedMusicianDistance(null);
+          setSelectedMusician(musician);
+          if (userLocation) {
+            const dist = calculateDistance(
+              userLocation.lat,
+              userLocation.lng,
+              approximateCoord(musician.latitude),
+              approximateCoord(musician.longitude)
+            );
+            setSelectedMusicianDistance(dist);
+          } else {
+            setSelectedMusicianDistance(null);
+          }
         }
       });
       
@@ -324,13 +359,29 @@ const MapComponent = ({ token, filters, onFilteredCountChange }: MapComponentPro
         el.style.transform = 'scale(1)';
       });
 
+      // Store marker element for highlighting
+      markerElementsRef.current.set(musician.id, el);
+
       const marker = new mapboxgl.Marker(el)
         .setLngLat([approximateCoord(musician.longitude), approximateCoord(musician.latitude)])
         .addTo(map.current!);
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange]);
+  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange, onMusiciansChange, onMusicianSelect]);
+
+  // Handle highlighted musician from list hover
+  useEffect(() => {
+    markerElementsRef.current.forEach((el, id) => {
+      if (id === highlightedMusicianId) {
+        el.style.transform = 'scale(1.3)';
+        el.style.zIndex = '1000';
+      } else {
+        el.style.transform = 'scale(1)';
+        el.style.zIndex = '';
+      }
+    });
+  }, [highlightedMusicianId]);
 
   return (
     <>
