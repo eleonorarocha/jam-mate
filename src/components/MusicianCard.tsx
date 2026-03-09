@@ -76,9 +76,9 @@ const MusicianCard = ({
             </div>
             {musician.average_rating != null && musician.average_rating > 0 && (
               <div className="flex items-center gap-1 shrink-0">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <Star className="h-4 w-4 fill-primary text-primary" />
                 <span className="text-sm font-medium">{musician.average_rating.toFixed(1)}</span>
-                {musician.total_ratings && (
+                {musician.total_ratings != null && musician.total_ratings > 0 && (
                   <span className="text-xs text-muted-foreground">({musician.total_ratings})</span>
                 )}
               </div>
