@@ -1,15 +1,5 @@
 import { useCallback, useRef } from 'react';
-
-const SOUND_ENABLED_KEY = 'jammate_notification_sound';
-
-export const isNotificationSoundEnabled = (): boolean => {
-  const val = localStorage.getItem(SOUND_ENABLED_KEY);
-  return val === null ? true : val === 'true';
-};
-
-export const setNotificationSoundEnabled = (enabled: boolean) => {
-  localStorage.setItem(SOUND_ENABLED_KEY, String(enabled));
-};
+import { getNotifPref } from '@/hooks/useNotificationPreferences';
 
 export const useNotificationSound = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
