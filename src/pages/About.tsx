@@ -1,7 +1,15 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Music, MapPin, Users, Star, Heart, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Music, MapPin, Users, Star, Heart, MessageSquare, ArrowLeft, Send, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const values = [
   {
@@ -32,7 +40,61 @@ const stats = [
   { label: 'Critérios de avaliação', value: '4' },
 ];
 
+const StarRating = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => (
+  <div className="flex gap-1">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <button
+        key={star}
+        type="button"
+        onClick={() => onChange(star)}
+        className="transition-colors"
+      >
+        <Star
+          className={`w-6 h-6 ${star <= value ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`}
+        />
+      </button>
+    ))}
+  </div>
+);
+
 const About = () => {
+  const { user } = useAuth();
+  const [category, setCategory] = useState('suggestion');
+  const [rating, setRating] = useState(0);
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Precisas de estar autenticado para enviar feedback.');
+      return;
+    }
+    const trimmed = message.trim();
+    if (!trimmed || trimmed.length > 2000) {
+      toast.error('A mensagem deve ter entre 1 e 2000 caracteres.');
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from('feedback').insert({
+      user_id: user.id,
+      category,
+      rating: rating || null,
+      message: trimmed,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast.error('Erro ao enviar feedback. Tenta novamente.');
+    } else {
+      setSubmitted(true);
+      setMessage('');
+      setRating(0);
+      setCategory('suggestion');
+      toast.success('Obrigado pelo teu feedback!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -166,6 +228,91 @@ const About = () => {
               </motion.div>
             ))}
           </div>
+        </section>
+
+        {/* Feedback Form */}
+        <section className="container mx-auto px-4 max-w-2xl mb-16">
+          <motion.div
+            className="bg-card border border-border rounded-2xl p-8"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-2xl font-bold mb-2">Envia-nos o teu Feedback</h2>
+            <p className="text-muted-foreground mb-6">
+              A tua opinião ajuda-nos a melhorar o JamMate. Partilha sugestões, reporta problemas ou avalia a app.
+            </p>
+
+            {!user ? (
+              <div className="text-center py-6">
+                <p className="text-muted-foreground mb-4">Precisas de estar autenticado para enviar feedback.</p>
+                <Button asChild>
+                  <Link to="/auth">Entrar / Criar conta</Link>
+                </Button>
+              </div>
+            ) : submitted ? (
+              <motion.div
+                className="text-center py-8"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+              >
+                <CheckCircle className="w-12 h-12 text-primary mx-auto mb-3" />
+                <p className="font-semibold text-lg mb-1">Obrigado!</p>
+                <p className="text-muted-foreground mb-4">O teu feedback foi enviado com sucesso.</p>
+                <Button variant="outline" onClick={() => setSubmitted(false)}>
+                  Enviar outro
+                </Button>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <Label htmlFor="category">Categoria</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="suggestion">💡 Sugestão</SelectItem>
+                      <SelectItem value="bug">🐛 Reportar problema</SelectItem>
+                      <SelectItem value="review">⭐ Avaliar a app</SelectItem>
+                      <SelectItem value="other">💬 Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {category === 'review' && (
+                  <div>
+                    <Label>Avaliação da app</Label>
+                    <div className="mt-1.5">
+                      <StarRating value={rating} onChange={setRating} />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label htmlFor="feedback-message">Mensagem</Label>
+                  <Textarea
+                    id="feedback-message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Escreve aqui o teu feedback..."
+                    className="mt-1.5 min-h-[120px]"
+                    maxLength={2000}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground mt-1 text-right">
+                    {message.length}/2000
+                  </p>
+                </div>
+
+                <Button type="submit" disabled={submitting || !message.trim()} className="w-full">
+                  <Send className="w-4 h-4 mr-2" />
+                  {submitting ? 'A enviar...' : 'Enviar Feedback'}
+                </Button>
+              </form>
+            )}
+          </motion.div>
         </section>
 
         {/* CTA */}
