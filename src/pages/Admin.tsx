@@ -54,6 +54,7 @@ const Admin = () => {
   const [selectedItem, setSelectedItem] = useState<FeedbackItem | null>(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [newStatus, setNewStatus] = useState('');
+  const [feedbackPage, setFeedbackPage] = useState(1);
 
   useEffect(() => {
     if (!loading && !isAdmin) {
