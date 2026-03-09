@@ -54,10 +54,10 @@ const MusicianCard = ({
       onMouseLeave={onMouseLeave}
     >
       <div className="flex gap-4">
-        <div className="relative">
+      <div className="relative">
           <Avatar className="h-16 w-16">
             <AvatarImage src={musician.avatar_url || undefined} alt={musician.username} />
-            <AvatarFallback className="bg-primary/10 text-primary text-lg">
+            <AvatarFallback className="bg-muted text-muted-foreground text-lg">
               {musician.username.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
