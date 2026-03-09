@@ -125,36 +125,48 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
             </div>
 
             <div className="flex flex-col gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleViewProfile}
-                className="w-full"
-              >
-                <ExternalLink className="h-4 w-4 mr-1" />
-                Ver Perfil Completo
-              </Button>
-              <div className="flex gap-2">
+              {isAuthenticated ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleViewProfile}
+                    className="w-full"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                    Ver Perfil Completo
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      onClick={handleMessage}
+                      disabled={user?.id === musician.id}
+                    >
+                      <MessageSquare className="h-4 w-4 mr-1" />
+                      Mensagem
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      variant="secondary"
+                      onClick={() => setShowBooking(true)}
+                      disabled={user?.id === musician.id}
+                    >
+                      <Calendar className="h-4 w-4 mr-1" />
+                      Agendar
+                    </Button>
+                  </div>
+                </>
+              ) : (
                 <Button
                   size="sm"
-                  className="flex-1"
-                  onClick={handleMessage}
-                  disabled={user?.id === musician.id}
+                  className="w-full"
+                  onClick={() => navigate('/auth')}
                 >
-                  <MessageSquare className="h-4 w-4 mr-1" />
-                  Mensagem
+                  Registar para contactar
                 </Button>
-                <Button
-                  size="sm"
-                  className="flex-1"
-                  variant="secondary"
-                  onClick={() => setShowBooking(true)}
-                  disabled={user?.id === musician.id}
-                >
-                  <Calendar className="h-4 w-4 mr-1" />
-                  Agendar
-                </Button>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>

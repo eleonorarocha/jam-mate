@@ -141,16 +141,35 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
 
   // Load musicians from database
   const loadMusicians = useCallback(async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender')
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null);
-
-    if (data) {
-      setMusicians(data as Musician[]);
+    if (isAuthenticated) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
+      if (data) {
+        setMusicians(data as Musician[]);
+      }
+    } else {
+      // Non-authenticated: use public_profiles with approximate coordinates
+      const { data } = await supabase
+        .from('public_profiles')
+        .select('id, username, instrument, city, country, approx_latitude, approx_longitude, average_rating, total_ratings, avatar_url, skill_level, gender')
+        .not('approx_latitude', 'is', null)
+        .not('approx_longitude', 'is', null);
+      if (data) {
+        setMusicians(data.map(m => ({
+          ...m,
+          id: m.id!,
+          username: m.username!,
+          instrument: m.instrument!,
+          latitude: m.approx_latitude!,
+          longitude: m.approx_longitude!,
+          avatar_url: null, // Hide avatars for non-authenticated users
+        })) as Musician[]);
+      }
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Load busy musicians for a specific date
   useEffect(() => {
