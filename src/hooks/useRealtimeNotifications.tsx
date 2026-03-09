@@ -75,6 +75,7 @@ export const useRealtimeNotifications = () => {
             title: '🎵 Novo pedido de jam!',
             description: `${name} quer tocar consigo.`,
           });
+          playSound('booking');
         }
       )
       .on(
