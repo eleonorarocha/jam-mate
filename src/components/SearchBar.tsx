@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 interface SearchBarProps {
-  onSearch?: (location: string, date: Date | undefined) => void;
+  onSearch?: (location: string, date: Date | undefined, coordinates?: [number, number]) => void;
 }
 
 interface GeocoderSuggestion {
