@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Music } from 'lucide-react';
+import { Music, Info } from 'lucide-react';
 import UserMenu from './UserMenu';
 import NotificationsDropdown from './NotificationsDropdown';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Header = () => {
   const { user } = useAuth();
@@ -21,6 +23,16 @@ const Header = () => {
         </Link>
 
         <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" asChild className="h-9 w-9">
+                <Link to="/about">
+                  <Info className="h-4 w-4" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Sobre nós</TooltipContent>
+          </Tooltip>
           <ThemeToggle />
           {user && <NotificationsDropdown />}
           <UserMenu />

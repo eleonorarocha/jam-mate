@@ -50,6 +50,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/favorites" element={<Favorites />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
