@@ -20,6 +20,7 @@ import Favorites from "./pages/Favorites";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import About from "./pages/About";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
