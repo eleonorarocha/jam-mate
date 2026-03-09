@@ -105,12 +105,15 @@ const Index = () => {
         />
         <div className="flex-1 relative">
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-full max-w-2xl px-4">
-            <SearchBar onSearch={(location, date) => {
+            <SearchBar onSearch={(location, date, coordinates) => {
               setFilters(prev => ({
                 ...prev,
                 city: location,
                 availabilityDate: date ? date.toISOString() : '',
               }));
+              if (coordinates) {
+                setFlyToCoords(coordinates);
+              }
             }} />
           </div>
           <MapComponent
