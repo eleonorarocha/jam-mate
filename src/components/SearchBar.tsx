@@ -20,7 +20,7 @@ interface GeocoderSuggestion {
   center: [number, number];
 }
 
-const SearchBar = ({ onSearch }: SearchBarProps) => {
+const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
   const [location, setLocation] = useState('');
   const [date, setDate] = useState<Date | undefined>();
   const [suggestions, setSuggestions] = useState<GeocoderSuggestion[]>([]);
