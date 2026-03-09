@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Bell, Shield, Trash2, Settings as SettingsIcon, Mail, Lock, Volume2 } from 'lucide-react';
+import { Key, Bell, Shield, Trash2, Settings as SettingsIcon, Mail, Lock, Volume2, MessageSquare, Music } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import PartnerPreferences from '@/components/PartnerPreferences';
