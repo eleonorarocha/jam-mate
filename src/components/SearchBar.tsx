@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, CalendarDays, Loader2 } from 'lucide-react';
+import { Search, MapPin, CalendarDays, Loader2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -10,6 +10,7 @@ import { pt } from 'date-fns/locale';
 
 interface SearchBarProps {
   onSearch?: (location: string, date: Date | undefined, coordinates?: [number, number]) => void;
+  onClear?: () => void;
 }
 
 interface GeocoderSuggestion {
@@ -19,7 +20,7 @@ interface GeocoderSuggestion {
   center: [number, number];
 }
 
-const SearchBar = ({ onSearch }: SearchBarProps) => {
+const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
   const [location, setLocation] = useState('');
   const [date, setDate] = useState<Date | undefined>();
   const [suggestions, setSuggestions] = useState<GeocoderSuggestion[]>([]);
@@ -99,6 +100,16 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
     }
   };
 
+  const hasActiveSearch = location.trim() !== '' || date !== undefined;
+
+  const handleClear = () => {
+    setLocation('');
+    setDate(undefined);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    onClear?.();
+  };
+
   return (
     <div className="w-full max-w-3xl mx-auto" ref={containerRef}>
       <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-full shadow-lg">
@@ -156,6 +167,17 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
             />
           </PopoverContent>
         </Popover>
+        
+        {hasActiveSearch && (
+          <Button
+            onClick={handleClear}
+            size="icon"
+            variant="ghost"
+            className="rounded-full h-10 w-10 shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
         
         <Button 
           onClick={handleSearch} 
