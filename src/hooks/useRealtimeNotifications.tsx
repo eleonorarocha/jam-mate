@@ -104,11 +104,13 @@ export const useRealtimeNotifications = () => {
               title: '✅ Jam aceite!',
               description: `${name} aceitou o seu pedido.`,
             });
+            playSound('booking');
           } else if (booking.status === 'rejected') {
             toast({
               title: '❌ Pedido recusado',
               description: `${name} recusou o seu pedido.`,
             });
+            playSound('booking');
           }
         }
       )
