@@ -71,6 +71,18 @@ const Admin = () => {
   const [adminNotes, setAdminNotes] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [feedbackPage, setFeedbackPage] = useState(1);
+  const [fbSortKey, setFbSortKey] = useState<FeedbackSortKey>('created_at');
+  const [fbSortDir, setFbSortDir] = useState<SortDir>('desc');
+
+  const handleFbSort = (key: string) => {
+    if (key === fbSortKey) {
+      setFbSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setFbSortKey(key as FeedbackSortKey);
+      setFbSortDir('asc');
+    }
+    setFeedbackPage(1);
+  };
 
   useEffect(() => {
     if (!loading && !isAdmin) {
