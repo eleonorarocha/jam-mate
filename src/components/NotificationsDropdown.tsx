@@ -271,7 +271,7 @@ const NotificationsDropdown = () => {
 
   const pendingCount = pendingBookings.length;
   const rejectedCount = rejectedBookings.length;
-  const totalCount = pendingCount + rejectedCount;
+  const totalCount = pendingCount + rejectedCount + unreadCount;
 
   return (
     <>
