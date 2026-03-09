@@ -131,11 +131,13 @@ const Map = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
       <Header />
-      <MapFiltersBar filters={filters} onFiltersChange={setFilters} />
+      <div className="relative z-10 shrink-0">
+        <MapFiltersBar filters={filters} onFiltersChange={setFilters} />
+      </div>
       
-      <div className="flex-1 pt-0">
+      <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Musicians list panel */}
           <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
