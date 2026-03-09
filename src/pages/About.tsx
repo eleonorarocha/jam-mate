@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Music, MapPin, Users, Star, Heart, MessageSquare, ArrowLeft, Send, CheckCircle } from 'lucide-react';
+import { Music, MapPin, Users, Star, Heart, MessageSquare, ArrowLeft, Send, CheckCircle, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -312,6 +313,45 @@ const About = () => {
                 </Button>
               </form>
             )}
+          </motion.div>
+        </section>
+
+        {/* FAQ */}
+        <section className="container mx-auto px-4 max-w-3xl mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <HelpCircle className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold">Perguntas Frequentes</h2>
+            </div>
+
+            <Accordion type="single" collapsible className="space-y-3">
+              {[
+                { q: 'O JamMate é gratuito?', a: 'Sim! O JamMate é totalmente gratuito. Podes criar conta, explorar o mapa, enviar propostas de jam e avaliar outros músicos sem qualquer custo.' },
+                { q: 'Como encontro músicos perto de mim?', a: 'Usa o mapa interativo na página principal. Podes filtrar por instrumento, nível de experiência, género e distância para encontrar músicos compatíveis na tua zona.' },
+                { q: 'Como funciona o sistema de avaliações?', a: 'Após uma jam session concluída, ambos os participantes podem avaliar-se mutuamente em 4 critérios: Localização, Respeito, Pontualidade e Diversão, numa escala de 1 a 5 estrelas, com um comentário obrigatório.' },
+                { q: 'A minha localização exata é visível?', a: 'Não. Para proteger a tua privacidade, a tua localização no mapa é aproximada (~1km de precisão). A localização exata nunca é partilhada com outros utilizadores.' },
+                { q: 'Posso agendar uma jam session pela plataforma?', a: 'Sim! Ao visitar o perfil de outro músico, podes enviar uma proposta de jam com data, hora e duração. O músico recebe uma notificação e pode aceitar ou recusar.' },
+                { q: 'Como posso bloquear outro utilizador?', a: 'No perfil de qualquer utilizador, encontras a opção de bloquear. Utilizadores bloqueados não conseguem ver o teu perfil, enviar-te mensagens ou propostas de jam.' },
+                { q: 'Que instrumentos são suportados?', a: 'O JamMate suporta mais de 20 instrumentos, incluindo guitarra, baixo, bateria, piano, voz, violino, saxofone, trompete e muitos mais. Podes selecionar o teu durante o registo.' },
+                { q: 'Como posso editar o meu perfil?', a: 'Acede ao teu perfil através do menu de utilizador no canto superior direito. Lá podes alterar a tua foto, bio, instrumento, nível de experiência e preferências de parceiro.' },
+              ].map((faq, i) => (
+                <AccordionItem key={i} value={`faq-${i}`} className="bg-card border border-border rounded-xl px-5">
+                  <AccordionTrigger className="text-left font-medium hover:no-underline">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </motion.div>
         </section>
 
