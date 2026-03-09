@@ -142,6 +142,30 @@ const AdminUsers = () => {
             <SelectItem value="user">Utilizadores</SelectItem>
           </SelectContent>
         </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          onClick={() =>
+            downloadCSV(
+              filtered.map((u) => ({
+                username: u.username,
+                nome: u.first_name || '',
+                instrumento: u.instrument,
+                nivel: skillLabels[u.skill_level] || u.skill_level,
+                cidade: u.city || '',
+                pais: u.country || '',
+                rating: u.average_rating ? Number(u.average_rating).toFixed(1) : '',
+                avaliacoes: u.total_ratings || 0,
+                admin: roles.some((r) => r.user_id === u.id && r.role === 'admin') ? 'Sim' : 'Não',
+                registo: u.created_at,
+              })),
+              'utilizadores'
+            )
+          }
+        >
+          <Download className="w-3.5 h-3.5" /> Exportar CSV
+        </Button>
         <p className="text-sm text-muted-foreground ml-auto">
           {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
         </p>

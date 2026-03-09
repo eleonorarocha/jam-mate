@@ -168,6 +168,63 @@ const AdminStats = () => {
 
   return (
     <div className="space-y-8">
+      {/* Export buttons */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          onClick={() =>
+            downloadCSV(
+              profiles.map((p) => ({
+                username: p.id,
+                instrumento: p.instrument,
+                nivel: skillLabels[p.skill_level] || p.skill_level,
+                cidade: p.city || '',
+                criado_em: p.created_at,
+              })),
+              'utilizadores'
+            )
+          }
+        >
+          <Download className="w-3.5 h-3.5" /> Utilizadores
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          onClick={() =>
+            downloadCSV(
+              feedback.map((f) => ({
+                categoria: categoryLabels[f.category] || f.category,
+                rating: f.rating ?? '',
+                estado: f.status,
+                criado_em: f.created_at,
+              })),
+              'feedback'
+            )
+          }
+        >
+          <Download className="w-3.5 h-3.5" /> Feedback
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
+          onClick={() =>
+            downloadCSV(
+              bookings.map((b) => ({
+                estado: b.status,
+                criado_em: b.created_at,
+              })),
+              'bookings'
+            )
+          }
+        >
+          <Download className="w-3.5 h-3.5" /> Bookings
+        </Button>
+      </div>
+
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
