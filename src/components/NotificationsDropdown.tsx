@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, BellRing, BellOff, Clock, User, Check, XCircle, Calendar, RefreshCw, History, CheckCheck, MessageSquare, Music, AlarmClock } from 'lucide-react';
+import { Bell, BellRing, BellOff, Clock, User, Check, XCircle, Calendar, RefreshCw, History, CheckCheck, MessageSquare, Music, AlarmClock, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -187,6 +187,22 @@ const NotificationsDropdown = () => {
       .eq('read', false);
     setHistory(prev => prev.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
+  };
+
+  const clearAllHistory = async () => {
+    if (!user) return;
+    await supabase.from('notifications').delete().eq('user_id', user.id);
+    setHistory([]);
+    setUnreadCount(0);
+  };
+
+  const deleteNotification = async (id: string) => {
+    await supabase.from('notifications').delete().eq('id', id);
+    setHistory(prev => {
+      const updated = prev.filter(n => n.id !== id);
+      setUnreadCount(updated.filter(n => !n.read).length);
+      return updated;
+    });
   };
 
   const getNotifIcon = (type: string) => {
@@ -517,14 +533,18 @@ const NotificationsDropdown = () => {
                   </div>
                 ) : (
                   <div>
-                    {unreadCount > 0 && (
-                      <div className="p-2 border-b border-border">
-                        <Button variant="ghost" size="sm" className="w-full text-xs gap-1" onClick={markAllRead}>
+                    <div className="p-2 border-b border-border flex gap-1">
+                      {unreadCount > 0 && (
+                        <Button variant="ghost" size="sm" className="flex-1 text-xs gap-1" onClick={markAllRead}>
                           <CheckCheck className="h-3.5 w-3.5" />
-                          Marcar tudo como lido
+                          Marcar como lido
                         </Button>
-                      </div>
-                    )}
+                      )}
+                      <Button variant="ghost" size="sm" className="flex-1 text-xs gap-1 text-destructive hover:text-destructive" onClick={clearAllHistory}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Limpar tudo
+                      </Button>
+                    </div>
                     <div className="divide-y divide-border">
                       {history.map((notif) => (
                         <div
@@ -546,9 +566,14 @@ const NotificationsDropdown = () => {
                                 {format(parseISO(notif.created_at), "d MMM 'às' HH:mm", { locale: pt })}
                               </p>
                             </div>
-                            {!notif.read && (
-                              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" />
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 flex-shrink-0 text-muted-foreground hover:text-destructive"
+                              onClick={() => deleteNotification(notif.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
                         </div>
                       ))}
