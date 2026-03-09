@@ -7,6 +7,26 @@ import { getNotifPref } from '@/hooks/useNotificationPreferences';
 import { format, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
+const persistNotification = async (
+  userId: string,
+  type: string,
+  title: string,
+  message: string,
+  bookingId?: string
+) => {
+  try {
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      type,
+      title,
+      message,
+      booking_id: bookingId || null,
+    } as any);
+  } catch (err) {
+    console.error('Failed to persist notification:', err);
+  }
+};
+
 export const useRealtimeNotifications = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -30,8 +50,6 @@ export const useRealtimeNotifications = () => {
           filter: `receiver_id=eq.${user.id}`,
         },
         async (payload) => {
-          if (!getNotifPref('messages')) return;
-
           const msg = payload.new as any;
           if (msg.sender_id === user.id) return;
 
@@ -42,12 +60,15 @@ export const useRealtimeNotifications = () => {
             .single();
 
           const name = sender?.full_name || sender?.username || 'Alguém';
+          const title = `💬 Nova mensagem de ${name}`;
+          const desc = msg.content?.length > 60 ? msg.content.slice(0, 60) + '…' : msg.content;
 
-          toast({
-            title: `💬 Nova mensagem de ${name}`,
-            description: msg.content?.length > 60 ? msg.content.slice(0, 60) + '…' : msg.content,
-          });
-          playSound('message');
+          await persistNotification(user.id, 'message', title, desc);
+
+          if (getNotifPref('messages')) {
+            toast({ title, description: desc });
+            playSound('message');
+          }
         }
       )
       .subscribe();
@@ -64,8 +85,6 @@ export const useRealtimeNotifications = () => {
           filter: `musician_id=eq.${user.id}`,
         },
         async (payload) => {
-          if (!getNotifPref('bookings')) return;
-
           const booking = payload.new as any;
           const { data: requester } = await supabase
             .from('profiles')
@@ -74,12 +93,15 @@ export const useRealtimeNotifications = () => {
             .single();
 
           const name = requester?.full_name || requester?.username || 'Um músico';
+          const title = '🎵 Novo pedido de jam!';
+          const desc = `${name} quer tocar consigo.`;
 
-          toast({
-            title: '🎵 Novo pedido de jam!',
-            description: `${name} quer tocar consigo.`,
-          });
-          playSound('booking');
+          await persistNotification(user.id, 'booking', title, desc, booking.id);
+
+          if (getNotifPref('bookings')) {
+            toast({ title, description: desc });
+            playSound('booking');
+          }
         }
       )
       .on(
@@ -95,7 +117,7 @@ export const useRealtimeNotifications = () => {
           const oldBooking = payload.old as any;
 
           // Handle reminder notification
-          if (booking.reminder_sent && !oldBooking?.reminder_sent && getNotifPref('reminders')) {
+          if (booking.reminder_sent && !oldBooking?.reminder_sent) {
             const { data: musician } = await supabase
               .from('profiles')
               .select('username, full_name')
@@ -104,17 +126,19 @@ export const useRealtimeNotifications = () => {
 
             const name = musician?.full_name || musician?.username || 'músico';
             const dateStr = format(parseISO(booking.scheduled_date), "HH:mm", { locale: pt });
+            const title = '⏰ Jam session em breve!';
+            const desc = `A sua sessão com ${name} começa às ${dateStr}.`;
 
-            toast({
-              title: '⏰ Jam session em breve!',
-              description: `A sua sessão com ${name} começa às ${dateStr}.`,
-            });
-            playSound('booking');
+            await persistNotification(user.id, 'reminder', title, desc, booking.id);
+
+            if (getNotifPref('reminders')) {
+              toast({ title, description: desc });
+              playSound('booking');
+            }
             return;
           }
 
           // Handle status changes
-          if (!getNotifPref('bookings')) return;
           const oldStatus = oldBooking?.status;
           if (booking.status === oldStatus) return;
 
@@ -127,17 +151,23 @@ export const useRealtimeNotifications = () => {
           const name = musician?.full_name || musician?.username || 'O músico';
 
           if (booking.status === 'accepted') {
-            toast({
-              title: '✅ Jam aceite!',
-              description: `${name} aceitou o seu pedido.`,
-            });
-            playSound('booking');
+            const title = '✅ Jam aceite!';
+            const desc = `${name} aceitou o seu pedido.`;
+            await persistNotification(user.id, 'booking', title, desc, booking.id);
+
+            if (getNotifPref('bookings')) {
+              toast({ title, description: desc });
+              playSound('booking');
+            }
           } else if (booking.status === 'rejected') {
-            toast({
-              title: '❌ Pedido recusado',
-              description: `${name} recusou o seu pedido.`,
-            });
-            playSound('booking');
+            const title = '❌ Pedido recusado';
+            const desc = `${name} recusou o seu pedido.`;
+            await persistNotification(user.id, 'booking', title, desc, booking.id);
+
+            if (getNotifPref('bookings')) {
+              toast({ title, description: desc });
+              playSound('booking');
+            }
           }
         }
       )
@@ -159,7 +189,6 @@ export const useRealtimeNotifications = () => {
           const oldBooking = payload.old as any;
 
           if (!booking.reminder_sent || oldBooking?.reminder_sent) return;
-          if (!getNotifPref('reminders')) return;
 
           const { data: requester } = await supabase
             .from('profiles')
@@ -169,12 +198,15 @@ export const useRealtimeNotifications = () => {
 
           const name = requester?.full_name || requester?.username || 'músico';
           const dateStr = format(parseISO(booking.scheduled_date), "HH:mm", { locale: pt });
+          const title = '⏰ Jam session em breve!';
+          const desc = `A sua sessão com ${name} começa às ${dateStr}.`;
 
-          toast({
-            title: '⏰ Jam session em breve!',
-            description: `A sua sessão com ${name} começa às ${dateStr}.`,
-          });
-          playSound('booking');
+          await persistNotification(user.id, 'reminder', title, desc, booking.id);
+
+          if (getNotifPref('reminders')) {
+            toast({ title, description: desc });
+            playSound('booking');
+          }
         }
       )
       .subscribe();
