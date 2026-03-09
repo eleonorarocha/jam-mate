@@ -97,6 +97,12 @@ const AdminUsers = () => {
     return matchesSearch;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedUsers = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [search, filterRole]);
+
   if (loading) {
     return <div className="text-center py-12 text-muted-foreground">A carregar utilizadores...</div>;
   }
