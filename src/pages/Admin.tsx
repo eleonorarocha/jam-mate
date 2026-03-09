@@ -44,6 +44,22 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
   resolved: { label: 'Resolvido', variant: 'default' },
 };
 
+type FeedbackSortKey = 'username' | 'category' | 'status' | 'created_at';
+type SortDir = 'asc' | 'desc';
+
+const FeedbackSortableHead = ({ label, sortKey, currentKey, dir, onSort }: { label: string; sortKey: string; currentKey: string; dir: SortDir; onSort: (key: string) => void }) => (
+  <TableHead className="cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => onSort(sortKey)}>
+    <span className="inline-flex items-center gap-1">
+      {label}
+      {currentKey === sortKey ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 opacity-30" />
+      )}
+    </span>
+  </TableHead>
+);
+
 const Admin = () => {
   const { isAdmin, loading } = useAdmin();
   const navigate = useNavigate();
