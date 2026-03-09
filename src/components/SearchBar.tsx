@@ -168,6 +168,17 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
           </PopoverContent>
         </Popover>
         
+        {hasActiveSearch && (
+          <Button
+            onClick={handleClear}
+            size="icon"
+            variant="ghost"
+            className="rounded-full h-10 w-10 shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+        
         <Button 
           onClick={handleSearch} 
           size="icon" 
