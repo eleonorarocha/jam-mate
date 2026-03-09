@@ -541,10 +541,28 @@ const NotificationsDropdown = () => {
                           Marcar como lido
                         </Button>
                       )}
-                      <Button variant="ghost" size="sm" className="flex-1 text-xs gap-1 text-destructive hover:text-destructive" onClick={clearAllHistory}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Limpar tudo
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="flex-1 text-xs gap-1 text-destructive hover:text-destructive">
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Limpar tudo
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Limpar histórico?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Todas as notificações serão eliminadas permanentemente. Esta ação não pode ser revertida.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={clearAllHistory} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Eliminar tudo
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                     <div className="divide-y divide-border">
                       {history.map((notif) => (
