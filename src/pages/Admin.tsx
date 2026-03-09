@@ -331,6 +331,13 @@ const Admin = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+          </TabsContent>
+
+          <TabsContent value="users">
+            <AdminUsers />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
