@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useNotificationSound } from '@/hooks/useNotificationSound';
 import { getNotifPref } from '@/hooks/useNotificationPreferences';
+import { format, parseISO } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 export const useRealtimeNotifications = () => {
   const { user } = useAuth();
@@ -16,6 +18,7 @@ export const useRealtimeNotifications = () => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
+    // Listen for new messages
     const messagesChannel = supabase
       .channel('realtime-messages-notif')
       .on(
@@ -49,6 +52,7 @@ export const useRealtimeNotifications = () => {
       )
       .subscribe();
 
+    // Listen for new/updated bookings
     const bookingsChannel = supabase
       .channel('realtime-bookings-notif')
       .on(
@@ -87,10 +91,31 @@ export const useRealtimeNotifications = () => {
           filter: `requester_id=eq.${user.id}`,
         },
         async (payload) => {
-          if (!getNotifPref('bookings')) return;
-
           const booking = payload.new as any;
-          const oldStatus = (payload.old as any)?.status;
+          const oldBooking = payload.old as any;
+
+          // Handle reminder notification
+          if (booking.reminder_sent && !oldBooking?.reminder_sent && getNotifPref('reminders')) {
+            const { data: musician } = await supabase
+              .from('profiles')
+              .select('username, full_name')
+              .eq('id', booking.musician_id)
+              .single();
+
+            const name = musician?.full_name || musician?.username || 'músico';
+            const dateStr = format(parseISO(booking.scheduled_date), "HH:mm", { locale: pt });
+
+            toast({
+              title: '⏰ Jam session em breve!',
+              description: `A sua sessão com ${name} começa às ${dateStr}.`,
+            });
+            playSound('booking');
+            return;
+          }
+
+          // Handle status changes
+          if (!getNotifPref('bookings')) return;
+          const oldStatus = oldBooking?.status;
           if (booking.status === oldStatus) return;
 
           const { data: musician } = await supabase
@@ -118,10 +143,47 @@ export const useRealtimeNotifications = () => {
       )
       .subscribe();
 
+    // Listen for reminders on bookings where user is the musician
+    const remindersMusicianChannel = supabase
+      .channel('realtime-reminders-musician')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'bookings',
+          filter: `musician_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          const booking = payload.new as any;
+          const oldBooking = payload.old as any;
+
+          if (!booking.reminder_sent || oldBooking?.reminder_sent) return;
+          if (!getNotifPref('reminders')) return;
+
+          const { data: requester } = await supabase
+            .from('profiles')
+            .select('username, full_name')
+            .eq('id', booking.requester_id)
+            .single();
+
+          const name = requester?.full_name || requester?.username || 'músico';
+          const dateStr = format(parseISO(booking.scheduled_date), "HH:mm", { locale: pt });
+
+          toast({
+            title: '⏰ Jam session em breve!',
+            description: `A sua sessão com ${name} começa às ${dateStr}.`,
+          });
+          playSound('booking');
+        }
+      )
+      .subscribe();
+
     return () => {
       initializedRef.current = false;
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(bookingsChannel);
+      supabase.removeChannel(remindersMusicianChannel);
     };
   }, [user, toast]);
 };
