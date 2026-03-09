@@ -503,6 +503,60 @@ const NotificationsDropdown = () => {
                 )}
               </ScrollArea>
             </TabsContent>
+
+            <TabsContent value="history" className="mt-0">
+              <ScrollArea className="max-h-[350px]">
+                {loadingHistory ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    A carregar...
+                  </div>
+                ) : history.length === 0 ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Sem notificações</p>
+                  </div>
+                ) : (
+                  <div>
+                    {unreadCount > 0 && (
+                      <div className="p-2 border-b border-border">
+                        <Button variant="ghost" size="sm" className="w-full text-xs gap-1" onClick={markAllRead}>
+                          <CheckCheck className="h-3.5 w-3.5" />
+                          Marcar tudo como lido
+                        </Button>
+                      </div>
+                    )}
+                    <div className="divide-y divide-border">
+                      {history.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`p-3 transition-colors ${!notif.read ? 'bg-accent/30' : 'hover:bg-accent/20'}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                              {getNotifIcon(notif.type)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm leading-tight ${!notif.read ? 'font-semibold' : 'font-medium'}`}>
+                                {notif.title}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                                {notif.message}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground/70 mt-1">
+                                {format(parseISO(notif.created_at), "d MMM 'às' HH:mm", { locale: pt })}
+                              </p>
+                            </div>
+                            {!notif.read && (
+                              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
           </Tabs>
         </PopoverContent>
       </Popover>
