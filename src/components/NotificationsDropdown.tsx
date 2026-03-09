@@ -566,9 +566,14 @@ const NotificationsDropdown = () => {
                                 {format(parseISO(notif.created_at), "d MMM 'às' HH:mm", { locale: pt })}
                               </p>
                             </div>
-                            {!notif.read && (
-                              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2" />
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 flex-shrink-0 text-muted-foreground hover:text-destructive"
+                              onClick={() => deleteNotification(notif.id)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
                         </div>
                       ))}
