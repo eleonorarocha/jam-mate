@@ -261,7 +261,7 @@ const Admin = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((item) => (
+                {paginatedFeedback.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">
                       {(item.profiles as any)?.username || 'Anónimo'}
@@ -278,24 +278,10 @@ const Admin = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => {
-                            setSelectedItem(item);
-                            setNewStatus(item.status);
-                            setAdminNotes(item.admin_notes || '');
-                          }}
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSelectedItem(item); setNewStatus(item.status); setAdminNotes(item.admin_notes || ''); }}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(item.id)}
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(item.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -305,6 +291,32 @@ const Admin = () => {
               </TableBody>
             </Table>
           </div>
+          {feedbackTotalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-muted-foreground">
+                Página {feedbackPage} de {feedbackTotalPages}
+              </p>
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="h-8 w-8" disabled={feedbackPage <= 1} onClick={() => setFeedbackPage((p) => p - 1)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                {Array.from({ length: feedbackTotalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === feedbackTotalPages || Math.abs(p - feedbackPage) <= 1)
+                  .map((p, idx, arr) => (
+                    <span key={p}>
+                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-1 text-muted-foreground">…</span>}
+                      <Button variant={p === feedbackPage ? 'default' : 'outline'} size="icon" className="h-8 w-8 text-xs" onClick={() => setFeedbackPage(p)}>
+                        {p}
+                      </Button>
+                    </span>
+                  ))}
+                <Button variant="outline" size="icon" className="h-8 w-8" disabled={feedbackPage >= feedbackTotalPages} onClick={() => setFeedbackPage((p) => p + 1)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
         )}
 
         {/* Detail Dialog */}
