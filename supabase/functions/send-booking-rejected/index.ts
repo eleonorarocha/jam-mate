@@ -69,7 +69,7 @@ serve(async (req: Request): Promise<Response> => {
     });
 
     const emailResponse = await resend.emails.send({
-      from: "JamMate <onboarding@resend.dev>",
+      from: "JamMate <geral@jammate.com>",
       to: [requesterAuth.user.email],
       subject: `O teu pedido de Jam Session não foi aceite`,
       html: `
