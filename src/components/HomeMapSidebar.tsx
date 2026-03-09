@@ -50,6 +50,7 @@ interface HomeMapSidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   visibleCount?: number;
+  isAuthenticated?: boolean;
 }
 
 const instruments = [
