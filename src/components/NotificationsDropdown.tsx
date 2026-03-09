@@ -533,14 +533,18 @@ const NotificationsDropdown = () => {
                   </div>
                 ) : (
                   <div>
-                    {unreadCount > 0 && (
-                      <div className="p-2 border-b border-border">
-                        <Button variant="ghost" size="sm" className="w-full text-xs gap-1" onClick={markAllRead}>
+                    <div className="p-2 border-b border-border flex gap-1">
+                      {unreadCount > 0 && (
+                        <Button variant="ghost" size="sm" className="flex-1 text-xs gap-1" onClick={markAllRead}>
                           <CheckCheck className="h-3.5 w-3.5" />
-                          Marcar tudo como lido
+                          Marcar como lido
                         </Button>
-                      </div>
-                    )}
+                      )}
+                      <Button variant="ghost" size="sm" className="flex-1 text-xs gap-1 text-destructive hover:text-destructive" onClick={clearAllHistory}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Limpar tudo
+                      </Button>
+                    </div>
                     <div className="divide-y divide-border">
                       {history.map((notif) => (
                         <div
