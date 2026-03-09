@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
+import SearchBar from '@/components/SearchBar';
 import MapComponent from '@/components/MapComponent';
 import HomeMapSidebar, { HomeFiltersState } from '@/components/HomeMapSidebar';
 import { MapFiltersState } from '@/components/MapFilters';
@@ -102,6 +103,15 @@ const Index = () => {
           isAuthenticated={!!user}
         />
         <div className="flex-1 relative">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-full max-w-2xl px-4">
+            <SearchBar onSearch={(location, date) => {
+              setFilters(prev => ({
+                ...prev,
+                city: location,
+                availabilityDate: date ? date.toISOString() : '',
+              }));
+            }} />
+          </div>
           <MapComponent
             token={savedToken || ''}
             filters={mapFilters}
