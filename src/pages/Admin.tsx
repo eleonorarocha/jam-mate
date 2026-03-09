@@ -304,11 +304,11 @@ const Admin = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Utilizador</TableHead>
-                  <TableHead>Categoria</TableHead>
+                  <FeedbackSortableHead label="Utilizador" sortKey="username" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
+                  <FeedbackSortableHead label="Categoria" sortKey="category" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
                   <TableHead>Mensagem</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Data</TableHead>
+                  <FeedbackSortableHead label="Estado" sortKey="status" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
+                  <FeedbackSortableHead label="Data" sortKey="created_at" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
