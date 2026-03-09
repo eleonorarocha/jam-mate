@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
@@ -7,8 +7,6 @@ import MapComponent from '@/components/MapComponent';
 import HomeMapSidebar, { HomeFiltersState } from '@/components/HomeMapSidebar';
 import { MapFiltersState } from '@/components/MapFilters';
 import MapboxTokenForm from '@/components/landing/MapboxTokenForm';
-import { Button } from '@/components/ui/button';
-import { Music } from 'lucide-react';
 
 const Index = () => {
   const { user, loading } = useAuth();
