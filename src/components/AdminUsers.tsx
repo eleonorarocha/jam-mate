@@ -200,7 +200,7 @@ const AdminUsers = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((user) => {
+              {paginatedUsers.map((user) => {
                 const userRoles = getUserRoles(user.id);
                 const isAdmin = userRoles.some((r) => r.role === 'admin');
                 return (
