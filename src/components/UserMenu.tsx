@@ -147,6 +147,12 @@ const UserMenu = () => {
           <span>Favoritos</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Administração</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
           <span>Configurações</span>
