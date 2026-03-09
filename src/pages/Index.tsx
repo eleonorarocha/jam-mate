@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
+import SearchBar from '@/components/SearchBar';
 import MapComponent from '@/components/MapComponent';
 import HomeMapSidebar, { HomeFiltersState } from '@/components/HomeMapSidebar';
 import { MapFiltersState } from '@/components/MapFilters';
