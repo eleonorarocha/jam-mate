@@ -42,6 +42,7 @@ export type Database = {
           id: string
           message: string | null
           musician_id: string
+          reminder_sent: boolean
           requester_id: string
           scheduled_date: string
           status: Database["public"]["Enums"]["booking_status"]
@@ -53,6 +54,7 @@ export type Database = {
           id?: string
           message?: string | null
           musician_id: string
+          reminder_sent?: boolean
           requester_id: string
           scheduled_date: string
           status?: Database["public"]["Enums"]["booking_status"]
@@ -64,6 +66,7 @@ export type Database = {
           id?: string
           message?: string | null
           musician_id?: string
+          reminder_sent?: boolean
           requester_id?: string
           scheduled_date?: string
           status?: Database["public"]["Enums"]["booking_status"]
