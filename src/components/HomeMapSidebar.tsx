@@ -89,6 +89,7 @@ const HomeMapSidebar = ({
   isCollapsed,
   onToggleCollapse,
   visibleCount = 0,
+  isAuthenticated = true,
 }: HomeMapSidebarProps) => {
   const activeFiltersCount = [
     filters.searchQuery,
