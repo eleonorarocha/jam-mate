@@ -333,17 +333,21 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       }
 
       el.addEventListener('click', () => {
-        setSelectedMusician(musician);
-        if (userLocation) {
-          const dist = calculateDistance(
-            userLocation.lat,
-            userLocation.lng,
-            approximateCoord(musician.latitude),
-            approximateCoord(musician.longitude)
-          );
-          setSelectedMusicianDistance(dist);
+        if (onMusicianSelect) {
+          onMusicianSelect(musician);
         } else {
-          setSelectedMusicianDistance(null);
+          setSelectedMusician(musician);
+          if (userLocation) {
+            const dist = calculateDistance(
+              userLocation.lat,
+              userLocation.lng,
+              approximateCoord(musician.latitude),
+              approximateCoord(musician.longitude)
+            );
+            setSelectedMusicianDistance(dist);
+          } else {
+            setSelectedMusicianDistance(null);
+          }
         }
       });
       
