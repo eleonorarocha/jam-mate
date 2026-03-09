@@ -100,6 +100,16 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
     }
   };
 
+  const hasActiveSearch = location.trim() !== '' || date !== undefined;
+
+  const handleClear = () => {
+    setLocation('');
+    setDate(undefined);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    onClear?.();
+  };
+
   return (
     <div className="w-full max-w-3xl mx-auto" ref={containerRef}>
       <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-full shadow-lg">
