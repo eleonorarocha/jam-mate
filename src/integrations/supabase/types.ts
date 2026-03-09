@@ -78,10 +78,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bookings_musician_id_fkey"
+            columns: ["musician_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "bookings_requester_id_fkey"
             columns: ["requester_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -198,16 +212,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
         Row: {
+          approx_latitude: number | null
+          approx_longitude: number | null
           avatar_url: string | null
           average_rating: number | null
           bio: string | null
@@ -235,6 +265,8 @@ export type Database = {
           username: string
         }
         Insert: {
+          approx_latitude?: number | null
+          approx_longitude?: number | null
           avatar_url?: string | null
           average_rating?: number | null
           bio?: string | null
@@ -262,6 +294,8 @@ export type Database = {
           username: string
         }
         Update: {
+          approx_latitude?: number | null
+          approx_longitude?: number | null
           avatar_url?: string | null
           average_rating?: number | null
           bio?: string | null
@@ -346,17 +380,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ratings_rated_user_id_fkey"
+            columns: ["rated_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ratings_rater_id_fkey"
             columns: ["rater_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ratings_rater_id_fkey"
+            columns: ["rater_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          approx_latitude: number | null
+          approx_longitude: number | null
+          avatar_url: string | null
+          average_rating: number | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          email_verified: boolean | null
+          first_name: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          id: string | null
+          instrument: string | null
+          onboarding_completed: boolean | null
+          phone_verified: boolean | null
+          preferred_instruments: string[] | null
+          preferred_skill_levels: string[] | null
+          skill_level: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings: number | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          approx_latitude?: number | null
+          approx_longitude?: number | null
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          email_verified?: boolean | null
+          first_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string | null
+          instrument?: string | null
+          onboarding_completed?: boolean | null
+          phone_verified?: boolean | null
+          preferred_instruments?: string[] | null
+          preferred_skill_levels?: string[] | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          approx_latitude?: number | null
+          approx_longitude?: number | null
+          avatar_url?: string | null
+          average_rating?: number | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          email_verified?: boolean | null
+          first_name?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          id?: string | null
+          instrument?: string | null
+          onboarding_completed?: boolean | null
+          phone_verified?: boolean | null
+          preferred_instruments?: string[] | null
+          preferred_skill_levels?: string[] | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          total_ratings?: number | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_view_sensitive_profile: {
