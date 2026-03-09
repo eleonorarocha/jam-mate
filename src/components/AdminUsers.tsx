@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Users, Search, Shield, ShieldOff, Eye, Star, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,8 @@ const skillLabels: Record<string, string> = {
   professional: 'Profissional',
 };
 
+const ITEMS_PER_PAGE = 10;
+
 const AdminUsers = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [roles, setRoles] = useState<UserRole[]>([]);
@@ -48,6 +51,7 @@ const AdminUsers = () => {
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     loadData();
@@ -93,6 +97,12 @@ const AdminUsers = () => {
     if (filterRole === 'user') return matchesSearch && !roles.some((r) => r.user_id === u.id && r.role === 'admin');
     return matchesSearch;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedUsers = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  // Reset page when filters change
+  useEffect(() => { setCurrentPage(1); }, [search, filterRole]);
 
   if (loading) {
     return <div className="text-center py-12 text-muted-foreground">A carregar utilizadores...</div>;
@@ -175,95 +185,107 @@ const AdminUsers = () => {
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">Nenhum utilizador encontrado.</div>
       ) : (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Utilizador</TableHead>
-                <TableHead>Instrumento</TableHead>
-                <TableHead>Nível</TableHead>
-                <TableHead>Cidade</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Roles</TableHead>
-                <TableHead>Registo</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((user) => {
-                const userRoles = getUserRoles(user.id);
-                const isAdmin = userRoles.some((r) => r.role === 'admin');
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={user.avatar_url || undefined} />
-                          <AvatarFallback className="text-xs">
-                            {user.username.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-sm">{user.username}</p>
-                          {user.first_name && (
-                            <p className="text-xs text-muted-foreground">{user.first_name}</p>
-                          )}
+        <>
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Utilizador</TableHead>
+                  <TableHead>Instrumento</TableHead>
+                  <TableHead>Nível</TableHead>
+                  <TableHead>Cidade</TableHead>
+                  <TableHead>Rating</TableHead>
+                  <TableHead>Roles</TableHead>
+                  <TableHead>Registo</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedUsers.map((user) => {
+                  const userRoles = getUserRoles(user.id);
+                  const isAdmin = userRoles.some((r) => r.role === 'admin');
+                  return (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={user.avatar_url || undefined} />
+                            <AvatarFallback className="text-xs">
+                              {user.username.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">{user.username}</p>
+                            {user.first_name && (
+                              <p className="text-xs text-muted-foreground">{user.first_name}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">{user.instrument}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {skillLabels[user.skill_level] || user.skill_level}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {user.city || '—'}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {user.average_rating ? `${Number(user.average_rating).toFixed(1)}★` : '—'}
-                    </TableCell>
-                    <TableCell>
-                      {isAdmin ? (
-                        <Badge variant="default" className="text-xs">Admin</Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Utilizador</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                      {format(new Date(user.created_at), 'dd MMM yyyy', { locale: pt })}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setSelectedUser(user)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => toggleAdminRole(user.id)}
-                          title={isAdmin ? 'Remover admin' : 'Tornar admin'}
-                        >
-                          {isAdmin ? (
-                            <ShieldOff className="w-4 h-4 text-destructive" />
-                          ) : (
-                            <Shield className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                      </TableCell>
+                      <TableCell className="text-sm">{user.instrument}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {skillLabels[user.skill_level] || user.skill_level}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {user.city || '—'}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {user.average_rating ? `${Number(user.average_rating).toFixed(1)}★` : '—'}
+                      </TableCell>
+                      <TableCell>
+                        {isAdmin ? (
+                          <Badge variant="default" className="text-xs">Admin</Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Utilizador</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                        {format(new Date(user.created_at), 'dd MMM yyyy', { locale: pt })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedUser(user)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleAdminRole(user.id)} title={isAdmin ? 'Remover admin' : 'Tornar admin'}>
+                            {isAdmin ? <ShieldOff className="w-4 h-4 text-destructive" /> : <Shield className="w-4 h-4" />}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </p>
+              <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage <= 1} onClick={() => setCurrentPage((p) => p - 1)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                  .map((p, idx, arr) => (
+                    <span key={p}>
+                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-1 text-muted-foreground">…</span>}
+                      <Button variant={p === currentPage ? 'default' : 'outline'} size="icon" className="h-8 w-8 text-xs" onClick={() => setCurrentPage(p)}>
+                        {p}
+                      </Button>
+                    </span>
+                  ))}
+                <Button variant="outline" size="icon" className="h-8 w-8" disabled={currentPage >= totalPages} onClick={() => setCurrentPage((p) => p + 1)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* User Detail Dialog */}
