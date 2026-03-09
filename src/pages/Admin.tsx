@@ -111,6 +111,12 @@ const Admin = () => {
     return true;
   });
 
+  const FEEDBACK_PER_PAGE = 10;
+  const feedbackTotalPages = Math.max(1, Math.ceil(filtered.length / FEEDBACK_PER_PAGE));
+  const paginatedFeedback = filtered.slice((feedbackPage - 1) * FEEDBACK_PER_PAGE, feedbackPage * FEEDBACK_PER_PAGE);
+
+  useEffect(() => { setFeedbackPage(1); }, [filterCategory, filterStatus]);
+
   const stats = {
     total: feedback.length,
     pending: feedback.filter((f) => f.status === 'pending').length,
