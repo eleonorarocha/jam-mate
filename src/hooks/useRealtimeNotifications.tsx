@@ -45,6 +45,7 @@ export const useRealtimeNotifications = () => {
             title: `💬 Nova mensagem de ${name}`,
             description: msg.content?.length > 60 ? msg.content.slice(0, 60) + '…' : msg.content,
           });
+          playSound('message');
         }
       )
       .subscribe();
