@@ -93,6 +93,16 @@ const About = () => {
       setRating(0);
       setCategory('suggestion');
       toast.success('Obrigado pelo teu feedback!');
+
+      // Send email notification to admins (fire and forget)
+      supabase.functions.invoke('send-feedback-notification', {
+        body: {
+          userId: user.id,
+          category,
+          rating: rating || null,
+          message: trimmed,
+        },
+      }).catch((err) => console.error('Feedback notification error:', err));
     }
   };
 
