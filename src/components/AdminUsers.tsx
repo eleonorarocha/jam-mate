@@ -41,6 +41,8 @@ const skillLabels: Record<string, string> = {
   professional: 'Profissional',
 };
 
+const ITEMS_PER_PAGE = 10;
+
 const AdminUsers = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [roles, setRoles] = useState<UserRole[]>([]);
@@ -48,6 +50,7 @@ const AdminUsers = () => {
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('all');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     loadData();
