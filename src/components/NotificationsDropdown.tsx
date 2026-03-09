@@ -350,8 +350,8 @@ const NotificationsDropdown = () => {
           </div>
           
           <Tabs defaultValue="pending" className="w-full">
-            <TabsList className="w-full grid grid-cols-2 rounded-none border-b border-border h-10">
-              <TabsTrigger value="pending" className="relative">
+            <TabsList className="w-full grid grid-cols-3 rounded-none border-b border-border h-10">
+              <TabsTrigger value="pending" className="relative text-xs">
                 Pedidos
                 {pendingCount > 0 && (
                   <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
@@ -359,11 +359,19 @@ const NotificationsDropdown = () => {
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="rejected" className="relative">
+              <TabsTrigger value="rejected" className="relative text-xs">
                 Recusados
                 {rejectedCount > 0 && (
                   <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
                     {rejectedCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="history" className="relative text-xs">
+                Histórico
+                {unreadCount > 0 && (
+                  <Badge variant="outline" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {unreadCount > 9 ? '9+' : unreadCount}
                   </Badge>
                 )}
               </TabsTrigger>
