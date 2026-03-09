@@ -36,6 +36,8 @@ interface MapComponentProps {
   onMusiciansChange?: (musicians: Musician[], compatibleIds: Set<string>) => void;
   highlightedMusicianId?: string | null;
   onMusicianSelect?: (musician: Musician) => void;
+  flyTo?: [number, number] | null;
+  onFlyToComplete?: () => void;
 }
 
 interface Musician {
