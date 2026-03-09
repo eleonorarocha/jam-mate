@@ -36,6 +36,8 @@ interface MapComponentProps {
   onMusiciansChange?: (musicians: Musician[], compatibleIds: Set<string>) => void;
   highlightedMusicianId?: string | null;
   onMusicianSelect?: (musician: Musician) => void;
+  flyTo?: [number, number] | null;
+  onFlyToComplete?: () => void;
 }
 
 interface Musician {
@@ -74,7 +76,7 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 };
 
-const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange, highlightedMusicianId, onMusicianSelect, isAuthenticated = true }: MapComponentProps & { isAuthenticated?: boolean }) => {
+const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange, highlightedMusicianId, onMusicianSelect, isAuthenticated = true, flyTo, onFlyToComplete }: MapComponentProps & { isAuthenticated?: boolean }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -388,6 +390,17 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       markersRef.current.push(marker);
     });
   }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange, onMusiciansChange, onMusicianSelect]);
+
+  // Fly to coordinates when selected from search
+  useEffect(() => {
+    if (!map.current || !flyTo) return;
+    map.current.flyTo({
+      center: flyTo,
+      zoom: 11,
+      duration: 1500,
+    });
+    onFlyToComplete?.();
+  }, [flyTo, onFlyToComplete]);
 
   // Handle highlighted musician from list hover
   useEffect(() => {

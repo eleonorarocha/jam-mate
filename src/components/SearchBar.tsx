@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 interface SearchBarProps {
-  onSearch?: (location: string, date: Date | undefined) => void;
+  onSearch?: (location: string, date: Date | undefined, coordinates?: [number, number]) => void;
 }
 
 interface GeocoderSuggestion {
@@ -93,6 +93,10 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
     setLocation(suggestion.text);
     setSuggestions([]);
     setShowSuggestions(false);
+    // Trigger search with coordinates to center the map
+    if (onSearch) {
+      onSearch(suggestion.text, date, suggestion.center);
+    }
   };
 
   return (

@@ -19,6 +19,7 @@ const Index = () => {
     return saved ? JSON.parse(saved) : false;
   });
   const [visibleMusiciansCount, setVisibleMusiciansCount] = useState(0);
+  const [flyToCoords, setFlyToCoords] = useState<[number, number] | null>(null);
   const [filters, setFilters] = useState<HomeFiltersState>(() => {
     const saved = localStorage.getItem('jammate_filters');
     if (saved) {
@@ -104,12 +105,15 @@ const Index = () => {
         />
         <div className="flex-1 relative">
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-full max-w-2xl px-4">
-            <SearchBar onSearch={(location, date) => {
+            <SearchBar onSearch={(location, date, coordinates) => {
               setFilters(prev => ({
                 ...prev,
                 city: location,
                 availabilityDate: date ? date.toISOString() : '',
               }));
+              if (coordinates) {
+                setFlyToCoords(coordinates);
+              }
             }} />
           </div>
           <MapComponent
@@ -117,6 +121,8 @@ const Index = () => {
             filters={mapFilters}
             onFilteredCountChange={setVisibleMusiciansCount}
             isAuthenticated={!!user}
+            flyTo={flyToCoords}
+            onFlyToComplete={() => setFlyToCoords(null)}
           />
         </div>
       </div>
