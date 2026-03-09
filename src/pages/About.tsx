@@ -88,6 +88,11 @@ const About = () => {
     if (error) {
       toast.error('Erro ao enviar feedback. Tenta novamente.');
     } else {
+      // Capture values before resetting state
+      const submittedCategory = category;
+      const submittedRating = rating;
+      const submittedMessage = trimmed;
+
       setSubmitted(true);
       setMessage('');
       setRating(0);
@@ -98,9 +103,9 @@ const About = () => {
       supabase.functions.invoke('send-feedback-notification', {
         body: {
           userId: user.id,
-          category,
-          rating: rating || null,
-          message: trimmed,
+          category: submittedCategory,
+          rating: submittedRating || null,
+          message: submittedMessage,
         },
       }).catch((err) => console.error('Feedback notification error:', err));
     }
