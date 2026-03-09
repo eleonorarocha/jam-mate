@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { TrendingUp, Users, MessageSquare, Star, Calendar } from 'lucide-react';
+import { TrendingUp, Users, MessageSquare, Star, Calendar, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { format, subMonths, startOfMonth, endOfMonth, parseISO, isAfter } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { downloadCSV } from '@/lib/csv-export';
 
 interface Profile {
   id: string;

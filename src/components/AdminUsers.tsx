@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, Search, Shield, ShieldOff, Eye, Star } from 'lucide-react';
+import { Users, Search, Shield, ShieldOff, Eye, Star, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { downloadCSV } from '@/lib/csv-export';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
