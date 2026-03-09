@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, BarChart3, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, BarChart3, Download, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { downloadCSV } from '@/lib/csv-export';
 import AdminUsers from '@/components/AdminUsers';
 import AdminStats from '@/components/AdminStats';
@@ -44,6 +44,22 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
   resolved: { label: 'Resolvido', variant: 'default' },
 };
 
+type FeedbackSortKey = 'username' | 'category' | 'status' | 'created_at';
+type SortDir = 'asc' | 'desc';
+
+const FeedbackSortableHead = ({ label, sortKey, currentKey, dir, onSort }: { label: string; sortKey: string; currentKey: string; dir: SortDir; onSort: (key: string) => void }) => (
+  <TableHead className="cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => onSort(sortKey)}>
+    <span className="inline-flex items-center gap-1">
+      {label}
+      {currentKey === sortKey ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 opacity-30" />
+      )}
+    </span>
+  </TableHead>
+);
+
 const Admin = () => {
   const { isAdmin, loading } = useAdmin();
   const navigate = useNavigate();
@@ -55,6 +71,18 @@ const Admin = () => {
   const [adminNotes, setAdminNotes] = useState('');
   const [newStatus, setNewStatus] = useState('');
   const [feedbackPage, setFeedbackPage] = useState(1);
+  const [fbSortKey, setFbSortKey] = useState<FeedbackSortKey>('created_at');
+  const [fbSortDir, setFbSortDir] = useState<SortDir>('desc');
+
+  const handleFbSort = (key: string) => {
+    if (key === fbSortKey) {
+      setFbSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setFbSortKey(key as FeedbackSortKey);
+      setFbSortDir('asc');
+    }
+    setFeedbackPage(1);
+  };
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -105,11 +133,34 @@ const Admin = () => {
     }
   };
 
-  const filtered = feedback.filter((f) => {
-    if (filterCategory !== 'all' && f.category !== filterCategory) return false;
-    if (filterStatus !== 'all' && f.status !== filterStatus) return false;
-    return true;
-  });
+  const filtered = useMemo(() => {
+    let result = feedback.filter((f) => {
+      if (filterCategory !== 'all' && f.category !== filterCategory) return false;
+      if (filterStatus !== 'all' && f.status !== filterStatus) return false;
+      return true;
+    });
+
+    result.sort((a, b) => {
+      let cmp = 0;
+      switch (fbSortKey) {
+        case 'username':
+          cmp = ((a.profiles as any)?.username || '').localeCompare((b.profiles as any)?.username || '');
+          break;
+        case 'category':
+          cmp = a.category.localeCompare(b.category);
+          break;
+        case 'status':
+          cmp = a.status.localeCompare(b.status);
+          break;
+        case 'created_at':
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+      }
+      return fbSortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return result;
+  }, [feedback, filterCategory, filterStatus, fbSortKey, fbSortDir]);
 
   const FEEDBACK_PER_PAGE = 10;
   const feedbackTotalPages = Math.max(1, Math.ceil(filtered.length / FEEDBACK_PER_PAGE));
@@ -253,11 +304,11 @@ const Admin = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Utilizador</TableHead>
-                  <TableHead>Categoria</TableHead>
+                  <FeedbackSortableHead label="Utilizador" sortKey="username" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
+                  <FeedbackSortableHead label="Categoria" sortKey="category" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
                   <TableHead>Mensagem</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Data</TableHead>
+                  <FeedbackSortableHead label="Estado" sortKey="status" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
+                  <FeedbackSortableHead label="Data" sortKey="created_at" currentKey={fbSortKey} dir={fbSortDir} onSort={handleFbSort} />
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>

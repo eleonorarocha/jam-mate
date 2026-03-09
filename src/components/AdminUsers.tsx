@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Users, Search, Shield, ShieldOff, Eye, Star, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,30 @@ const skillLabels: Record<string, string> = {
   professional: 'Profissional',
 };
 
+const skillOrder: Record<string, number> = {
+  beginner: 0,
+  intermediate: 1,
+  advanced: 2,
+  professional: 3,
+};
+
 const ITEMS_PER_PAGE = 10;
+
+type UserSortKey = 'username' | 'instrument' | 'skill_level' | 'city' | 'average_rating' | 'created_at';
+type SortDir = 'asc' | 'desc';
+
+const SortableHead = ({ label, sortKey, currentKey, dir, onSort }: { label: string; sortKey: string; currentKey: string; dir: SortDir; onSort: (key: string) => void }) => (
+  <TableHead className="cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => onSort(sortKey)}>
+    <span className="inline-flex items-center gap-1">
+      {label}
+      {currentKey === sortKey ? (
+        dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+      ) : (
+        <ArrowUpDown className="w-3 h-3 opacity-30" />
+      )}
+    </span>
+  </TableHead>
+);
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -52,6 +75,18 @@ const AdminUsers = () => {
   const [filterRole, setFilterRole] = useState('all');
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortKey, setSortKey] = useState<UserSortKey>('created_at');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+
+  const handleSort = (key: string) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key as UserSortKey);
+      setSortDir('asc');
+    }
+    setCurrentPage(1);
+  };
 
   useEffect(() => {
     loadData();
@@ -91,17 +126,45 @@ const AdminUsers = () => {
     }
   };
 
-  const filtered = users.filter((u) => {
-    const matchesSearch = !search || u.username.toLowerCase().includes(search.toLowerCase()) || (u.first_name || '').toLowerCase().includes(search.toLowerCase()) || (u.city || '').toLowerCase().includes(search.toLowerCase());
-    if (filterRole === 'admin') return matchesSearch && roles.some((r) => r.user_id === u.id && r.role === 'admin');
-    if (filterRole === 'user') return matchesSearch && !roles.some((r) => r.user_id === u.id && r.role === 'admin');
-    return matchesSearch;
-  });
+  const filtered = useMemo(() => {
+    let result = users.filter((u) => {
+      const matchesSearch = !search || u.username.toLowerCase().includes(search.toLowerCase()) || (u.first_name || '').toLowerCase().includes(search.toLowerCase()) || (u.city || '').toLowerCase().includes(search.toLowerCase());
+      if (filterRole === 'admin') return matchesSearch && roles.some((r) => r.user_id === u.id && r.role === 'admin');
+      if (filterRole === 'user') return matchesSearch && !roles.some((r) => r.user_id === u.id && r.role === 'admin');
+      return matchesSearch;
+    });
+
+    result.sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case 'username':
+          cmp = a.username.localeCompare(b.username);
+          break;
+        case 'instrument':
+          cmp = a.instrument.localeCompare(b.instrument);
+          break;
+        case 'skill_level':
+          cmp = (skillOrder[a.skill_level] ?? 0) - (skillOrder[b.skill_level] ?? 0);
+          break;
+        case 'city':
+          cmp = (a.city || '').localeCompare(b.city || '');
+          break;
+        case 'average_rating':
+          cmp = (a.average_rating || 0) - (b.average_rating || 0);
+          break;
+        case 'created_at':
+          cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+
+    return result;
+  }, [users, search, filterRole, roles, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const paginatedUsers = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  // Reset page when filters change
   useEffect(() => { setCurrentPage(1); }, [search, filterRole]);
 
   if (loading) {
@@ -190,13 +253,13 @@ const AdminUsers = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Utilizador</TableHead>
-                  <TableHead>Instrumento</TableHead>
-                  <TableHead>Nível</TableHead>
-                  <TableHead>Cidade</TableHead>
-                  <TableHead>Rating</TableHead>
+                  <SortableHead label="Utilizador" sortKey="username" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortableHead label="Instrumento" sortKey="instrument" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortableHead label="Nível" sortKey="skill_level" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortableHead label="Cidade" sortKey="city" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortableHead label="Rating" sortKey="average_rating" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
                   <TableHead>Roles</TableHead>
-                  <TableHead>Registo</TableHead>
+                  <SortableHead label="Registo" sortKey="created_at" currentKey={sortKey} dir={sortDir} onSort={handleSort} />
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
