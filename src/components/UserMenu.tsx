@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin, Image, Heart, UserPlus, LogIn } from 'lucide-react';
+import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin, Image, Heart, UserPlus, LogIn, Shield } from 'lucide-react';
+import { useAdmin } from '@/hooks/useAdmin';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,7 @@ const UserMenu = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const unreadCount = useUnreadMessages();
+  const { isAdmin } = useAdmin();
   const [profile, setProfile] = useState<{ username: string; avatar_url: string | null } | null>(null);
 
   useEffect(() => {
@@ -145,6 +147,12 @@ const UserMenu = () => {
           <span>Favoritos</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Administração</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
           <span>Configurações</span>

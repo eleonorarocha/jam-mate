@@ -20,6 +20,7 @@ import Favorites from "./pages/Favorites";
 import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import About from "./pages/About";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/about" element={<About />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
