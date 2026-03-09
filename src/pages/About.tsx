@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Music, MapPin, Users, Star, Heart, MessageSquare, ArrowLeft, Send, CheckCircle } from 'lucide-react';
+import { Music, MapPin, Users, Star, Heart, MessageSquare, ArrowLeft, Send, CheckCircle, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
