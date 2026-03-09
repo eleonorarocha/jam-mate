@@ -25,13 +25,17 @@ interface MusicianPopupProps {
   isAuthenticated?: boolean;
 }
 
-const MusicianPopup = ({ musician, distance, onClose }: MusicianPopupProps) => {
+const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: MusicianPopupProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [showBooking, setShowBooking] = useState(false);
 
   const handleViewProfile = () => {
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
     navigate(`/profile/${musician.id}`);
   };
 
