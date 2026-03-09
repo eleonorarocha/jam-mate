@@ -108,28 +108,6 @@ const Index = () => {
             onFilteredCountChange={setVisibleMusiciansCount}
             isAuthenticated={!!user}
           />
-          {/* CTA banner for non-logged users */}
-          {!user && (
-            <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent p-6 pt-12">
-              <div className="max-w-lg mx-auto text-center space-y-3">
-                <div className="flex items-center justify-center gap-2">
-                  <Music className="h-5 w-5 text-primary" />
-                  <h3 className="text-lg font-semibold">Encontra músicos perto de ti</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Regista-te para ver perfis completos, enviar mensagens e agendar jam sessions.
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <Button asChild>
-                    <Link to="/auth">Criar conta grátis</Link>
-                  </Button>
-                  <Button variant="outline" asChild>
-                    <Link to="/auth">Entrar</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
