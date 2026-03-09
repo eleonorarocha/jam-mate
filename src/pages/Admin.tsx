@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users } from 'lucide-react';
+import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, BarChart3 } from 'lucide-react';
 import AdminUsers from '@/components/AdminUsers';
+import AdminStats from '@/components/AdminStats';
 import Header from '@/components/Header';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -142,8 +143,11 @@ const Admin = () => {
           </div>
         </motion.div>
 
-        <Tabs defaultValue="feedback" className="space-y-6">
+        <Tabs defaultValue="stats" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="stats" className="gap-1.5">
+              <BarChart3 className="w-4 h-4" /> Estatísticas
+            </TabsTrigger>
             <TabsTrigger value="feedback" className="gap-1.5">
               <MessageSquare className="w-4 h-4" /> Feedback
             </TabsTrigger>
@@ -151,6 +155,10 @@ const Admin = () => {
               <Users className="w-4 h-4" /> Utilizadores
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="stats">
+            <AdminStats />
+          </TabsContent>
 
           <TabsContent value="feedback" className="space-y-6">
 
