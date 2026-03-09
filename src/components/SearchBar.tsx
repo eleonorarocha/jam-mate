@@ -93,6 +93,10 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
     setLocation(suggestion.text);
     setSuggestions([]);
     setShowSuggestions(false);
+    // Trigger search with coordinates to center the map
+    if (onSearch) {
+      onSearch(suggestion.text, date, suggestion.center);
+    }
   };
 
   return (

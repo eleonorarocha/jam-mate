@@ -121,6 +121,8 @@ const Index = () => {
             filters={mapFilters}
             onFilteredCountChange={setVisibleMusiciansCount}
             isAuthenticated={!!user}
+            flyTo={flyToCoords}
+            onFlyToComplete={() => setFlyToCoords(null)}
           />
         </div>
       </div>

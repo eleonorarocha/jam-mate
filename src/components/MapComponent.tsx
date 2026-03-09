@@ -391,6 +391,17 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     });
   }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange, onMusiciansChange, onMusicianSelect]);
 
+  // Fly to coordinates when selected from search
+  useEffect(() => {
+    if (!map.current || !flyTo) return;
+    map.current.flyTo({
+      center: flyTo,
+      zoom: 11,
+      duration: 1500,
+    });
+    onFlyToComplete?.();
+  }, [flyTo, onFlyToComplete]);
+
   // Handle highlighted musician from list hover
   useEffect(() => {
     markerElementsRef.current.forEach((el, id) => {
