@@ -252,17 +252,23 @@ const Settings = () => {
                   <CardDescription>Configure as suas preferências de notificação</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { label: 'Novas mensagens', desc: 'Receber notificações de novas mensagens' },
-                    { label: 'Pedidos de jam', desc: 'Receber notificações de novos pedidos' },
-                    { label: 'Lembretes', desc: 'Receber lembretes de jam sessions' },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between">
+                  {([
+                    { key: 'messages' as NotificationPrefKey, label: 'Novas mensagens', desc: 'Receber notificações de novas mensagens', icon: MessageSquare },
+                    { key: 'bookings' as NotificationPrefKey, label: 'Pedidos de jam', desc: 'Receber notificações de novos pedidos', icon: Music },
+                    { key: 'reminders' as NotificationPrefKey, label: 'Lembretes', desc: 'Receber lembretes de jam sessions', icon: Bell },
+                  ]).map((item) => (
+                    <div key={item.key} className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label>{item.label}</Label>
+                        <Label className="flex items-center gap-1.5">
+                          <item.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                          {item.label}
+                        </Label>
                         <p className="text-sm text-muted-foreground">{item.desc}</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={prefs[item.key]}
+                        onCheckedChange={(checked) => toggle(item.key, checked)}
+                      />
                     </div>
                   ))}
 
@@ -276,16 +282,8 @@ const Settings = () => {
                         <p className="text-sm text-muted-foreground">Reproduzir um som quando recebe notificações</p>
                       </div>
                       <Switch
-                        defaultChecked={isNotificationSoundEnabled()}
-                        onCheckedChange={(checked) => {
-                          setNotificationSoundEnabled(checked);
-                          toast({
-                            title: checked ? '🔔 Sons ativados' : '🔕 Sons desativados',
-                            description: checked
-                              ? 'Vai ouvir sons nas notificações.'
-                              : 'As notificações serão silenciosas.',
-                          });
-                        }}
+                        checked={prefs.sound}
+                        onCheckedChange={(checked) => toggle('sound', checked)}
                       />
                     </div>
                   </div>
