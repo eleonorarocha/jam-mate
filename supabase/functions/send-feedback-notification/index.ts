@@ -81,7 +81,7 @@ serve(async (req: Request): Promise<Response> => {
     const ratingStars = rating ? "⭐".repeat(rating) + "☆".repeat(5 - rating) : "Não avaliado";
 
     const emailResponse = await resend.emails.send({
-      from: "JamMate <onboarding@resend.dev>",
+      from: "JamMate <geral@jammate.com>",
       to: adminEmails,
       subject: `📬 Novo feedback de ${userName} — ${categoryMap[category] || category}`,
       html: `
