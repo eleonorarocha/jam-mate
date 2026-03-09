@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Key, Bell, Shield, Trash2, Settings as SettingsIcon, Mail, Lock } from 'lucide-react';
+import { Key, Bell, Shield, Trash2, Settings as SettingsIcon, Mail, Lock, Volume2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import PartnerPreferences from '@/components/PartnerPreferences';
@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { isNotificationSoundEnabled, setNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 
 const Settings = () => {
   const { user, loading } = useAuth();
@@ -263,6 +264,30 @@ const Settings = () => {
                       <Switch defaultChecked />
                     </div>
                   ))}
+
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="flex items-center gap-1.5">
+                          <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          Sons de notificação
+                        </Label>
+                        <p className="text-sm text-muted-foreground">Reproduzir um som quando recebe notificações</p>
+                      </div>
+                      <Switch
+                        defaultChecked={isNotificationSoundEnabled()}
+                        onCheckedChange={(checked) => {
+                          setNotificationSoundEnabled(checked);
+                          toast({
+                            title: checked ? '🔔 Sons ativados' : '🔕 Sons desativados',
+                            description: checked
+                              ? 'Vai ouvir sons nas notificações.'
+                              : 'As notificações serão silenciosas.',
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
