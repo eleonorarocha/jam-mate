@@ -143,6 +143,61 @@ const NotificationsDropdown = () => {
     };
   }, [user]);
 
+  // Fetch notification history
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchHistory = async () => {
+      setLoadingHistory(true);
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (!error && data) {
+        setHistory(data as any as NotificationHistoryItem[]);
+        setUnreadCount((data as any[]).filter((n: any) => !n.read).length);
+      }
+      setLoadingHistory(false);
+    };
+
+    fetchHistory();
+
+    const channel = supabase
+      .channel('notifications-history')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${user.id}`,
+      }, () => fetchHistory())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  const markAllRead = async () => {
+    if (!user) return;
+    await supabase
+      .from('notifications')
+      .update({ read: true } as any)
+      .eq('user_id', user.id)
+      .eq('read', false);
+    setHistory(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+  };
+
+  const getNotifIcon = (type: string) => {
+    switch (type) {
+      case 'message': return <MessageSquare className="h-4 w-4 text-primary" />;
+      case 'booking': return <Music className="h-4 w-4 text-primary" />;
+      case 'reminder': return <AlarmClock className="h-4 w-4 text-amber-500" />;
+      default: return <Bell className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
   const handleUpdateBookingStatus = async (
     booking: BookingNotification, 
     newStatus: 'accepted' | 'rejected', 
