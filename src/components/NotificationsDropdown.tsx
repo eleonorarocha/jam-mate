@@ -44,13 +44,25 @@ interface BookingNotification {
   };
 }
 
+interface NotificationHistoryItem {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
 const NotificationsDropdown = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [pendingBookings, setPendingBookings] = useState<BookingNotification[]>([]);
   const [rejectedBookings, setRejectedBookings] = useState<BookingNotification[]>([]);
+  const [history, setHistory] = useState<NotificationHistoryItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [bookingToReject, setBookingToReject] = useState<BookingNotification | null>(null);
