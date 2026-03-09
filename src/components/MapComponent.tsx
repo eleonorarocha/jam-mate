@@ -418,6 +418,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
           musician={selectedMusician}
           distance={selectedMusicianDistance}
           onClose={() => setSelectedMusician(null)}
+          isAuthenticated={isAuthenticated}
         />
       )}
     </>
