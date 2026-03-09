@@ -5,7 +5,7 @@ export const useNotificationSound = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const play = useCallback((type: 'message' | 'booking' = 'message') => {
-    if (!isNotificationSoundEnabled()) return;
+    if (!getNotifPref('sound')) return;
 
     try {
       if (!audioContextRef.current) {
