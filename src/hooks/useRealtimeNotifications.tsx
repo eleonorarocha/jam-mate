@@ -2,10 +2,12 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 export const useRealtimeNotifications = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const playSound = useNotificationSound();
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export const useRealtimeNotifications = () => {
             title: `💬 Nova mensagem de ${name}`,
             description: msg.content?.length > 60 ? msg.content.slice(0, 60) + '…' : msg.content,
           });
+          playSound('message');
         }
       )
       .subscribe();
@@ -72,6 +75,7 @@ export const useRealtimeNotifications = () => {
             title: '🎵 Novo pedido de jam!',
             description: `${name} quer tocar consigo.`,
           });
+          playSound('booking');
         }
       )
       .on(
@@ -100,11 +104,13 @@ export const useRealtimeNotifications = () => {
               title: '✅ Jam aceite!',
               description: `${name} aceitou o seu pedido.`,
             });
+            playSound('booking');
           } else if (booking.status === 'rejected') {
             toast({
               title: '❌ Pedido recusado',
               description: `${name} recusou o seu pedido.`,
             });
+            playSound('booking');
           }
         }
       )
