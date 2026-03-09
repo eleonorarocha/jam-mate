@@ -359,13 +359,29 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         el.style.transform = 'scale(1)';
       });
 
+      // Store marker element for highlighting
+      markerElementsRef.current.set(musician.id, el);
+
       const marker = new mapboxgl.Marker(el)
         .setLngLat([approximateCoord(musician.longitude), approximateCoord(musician.latitude)])
         .addTo(map.current!);
 
       markersRef.current.push(marker);
     });
-  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange]);
+  }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange, onMusiciansChange, onMusicianSelect]);
+
+  // Handle highlighted musician from list hover
+  useEffect(() => {
+    markerElementsRef.current.forEach((el, id) => {
+      if (id === highlightedMusicianId) {
+        el.style.transform = 'scale(1.3)';
+        el.style.zIndex = '1000';
+      } else {
+        el.style.transform = 'scale(1)';
+        el.style.zIndex = '';
+      }
+    });
+  }, [highlightedMusicianId]);
 
   return (
     <>
