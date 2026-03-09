@@ -75,7 +75,7 @@ serve(async (req: Request): Promise<Response> => {
     };
 
     const emailResponse = await resend.emails.send({
-      from: "JamMate <onboarding@resend.dev>",
+      from: "JamMate <geral@jammate.com>",
       to: [requesterAuth.user.email],
       subject: `🎉 ${musicianName} aceitou a tua Jam Session!`,
       html: `
