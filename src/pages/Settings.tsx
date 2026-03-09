@@ -19,6 +19,7 @@ const Settings = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { prefs, toggle } = useNotificationPreferences();
   const [mapboxToken, setMapboxToken] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
