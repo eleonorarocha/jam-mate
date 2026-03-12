@@ -12,7 +12,7 @@ export const useTypingIndicator = (conversationId: string | null, userId: string
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [typingUsername, setTypingUsername] = useState<string | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!conversationId || !userId) return;
