@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const escapeHtml = (str: string) =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 interface BookingRejectedRequest {
   bookingId: string;
   musicianId: string;
@@ -127,7 +130,7 @@ serve(async (req: Request): Promise<Response> => {
               ${rejectionReason ? `
               <div style="background-color: #fef3c7; border-radius: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid #fcd34d;">
                 <h3 style="color: #92400e; margin: 0 0 12px 0; font-size: 16px;">💬 Mensagem do músico</h3>
-                <p style="color: #78350f; margin: 0; font-size: 14px; line-height: 1.6;">${rejectionReason}</p>
+                <p style="color: #78350f; margin: 0; font-size: 14px; line-height: 1.6;">${escapeHtml(rejectionReason ?? '')}</p>
               </div>
               ` : ""}
               

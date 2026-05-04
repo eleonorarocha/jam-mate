@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const escapeHtml = (str: string) =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 interface FeedbackNotificationRequest {
   userId: string;
   category: string;
@@ -153,7 +156,7 @@ serve(async (req: Request): Promise<Response> => {
               
               <div style="background-color: #fafafa; border-left: 4px solid #8b5cf6; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
                 <p style="color: #71717a; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Mensagem</p>
-                <p style="color: #18181b; font-size: 14px; margin: 0; line-height: 1.6;">${message}</p>
+                <p style="color: #18181b; font-size: 14px; margin: 0; line-height: 1.6;">${escapeHtml(message ?? '')}</p>
               </div>
               
               <div style="text-align: center;">

@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const escapeHtml = (str: string) =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
 interface BookingNotificationRequest {
   musicianId: string;
   requesterId: string;
@@ -159,7 +162,7 @@ serve(async (req: Request): Promise<Response> => {
                 ${message ? `
                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e4e4e7;">
                   <p style="color: #71717a; font-size: 14px; margin: 0 0 8px 0;">💬 Mensagem:</p>
-                  <p style="color: #18181b; font-size: 14px; margin: 0; font-style: italic;">"${message}"</p>
+                  <p style="color: #18181b; font-size: 14px; margin: 0; font-style: italic;">"${escapeHtml(message ?? '')}"</p>
                 </div>
                 ` : ""}
               </div>
