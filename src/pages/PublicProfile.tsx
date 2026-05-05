@@ -95,7 +95,7 @@ const PublicProfile = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, username, first_name, bio, instrument, skill_level, city, country, average_rating, total_ratings, avatar_url, gender, phone_verified, email_verified')
+      .select('id, username, first_name, bio, instrument, skill_level, city, country, average_rating, total_ratings, avatar_url, gender')
       .eq('id', id)
       .maybeSingle();
 
@@ -109,8 +109,10 @@ const PublicProfile = () => {
       return;
     }
 
-    setProfile(data);
-    setIsVerified(data.phone_verified || data.email_verified || false);
+    const { data: sensitive } = await supabase.rpc('get_profile_sensitive', { _profile_id: id });
+    const s = sensitive?.[0];
+    setProfile({ ...data, phone_verified: s?.phone_verified ?? null, email_verified: s?.email_verified ?? null });
+    setIsVerified(s?.phone_verified || s?.email_verified || false);
     setLoading(false);
   };
 
