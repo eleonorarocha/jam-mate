@@ -46,20 +46,26 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
 
   const loadProfile = async () => {
     if (!user) return;
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    const { data } = await supabase
+      .from('profiles')
+      .select('username, first_name, bio, instrument, skill_level, city, country, gender, avatar_url')
+      .eq('id', user.id)
+      .single();
+    const { data: sensitive } = await supabase.rpc('get_profile_sensitive', { _profile_id: user.id });
+    const s = sensitive?.[0];
     if (data) {
       setProfile({
         username: data.username || '',
         first_name: data.first_name || '',
-        last_name: data.last_name || '',
+        last_name: s?.last_name || '',
         bio: data.bio || '',
         instrument: data.instrument || '',
         skill_level: data.skill_level || 'beginner',
         city: data.city || '',
         country: data.country || '',
-        phone: data.phone || '',
-        phone_verified: data.phone_verified || false,
-        email_verified: data.email_verified || false,
+        phone: s?.phone || '',
+        phone_verified: s?.phone_verified || false,
+        email_verified: s?.email_verified || false,
         gender: data.gender || '',
         avatar_url: data.avatar_url || null,
       });
