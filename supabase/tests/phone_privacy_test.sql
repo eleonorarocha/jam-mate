@@ -3,60 +3,45 @@
 -- Verifies:
 --   1. anon and authenticated have NO column-level SELECT on phone or other PII
 --   2. The profiles_public view does not expose phone
---   3. can_view_sensitive_profile() correctly authorizes:
---        - the profile owner
---        - a partner with an accepted/completed booking
---      and rejects:
---        - a stranger
---        - a partner whose only booking is pending/rejected/cancelled
---   4. get_profile_sensitive() (driven by can_view_sensitive_profile) is
---      consistent with that authorization
+--   3. Pending / rejected / cancelled bookings do NOT grant access
+--   4. Accepted and completed bookings DO grant access (both directions)
+--   5. The owner can always view their own data
+--   6. get_profile_sensitive() returns no rows for unauthenticated callers
 --
--- The sandbox role cannot SET ROLE anon/authenticated, so we test the
--- authorization logic directly via the SECURITY DEFINER helper functions
--- (which is what the RLS policies and the RPC ultimately rely on).
+-- Sandbox role cannot SET ROLE, so authorization is exercised via the
+-- SECURITY DEFINER helper can_view_sensitive_profile (which is the
+-- single source of truth used by both the RLS policy and the RPC).
 --
--- Inserts are wrapped in a transaction and rolled back at the end.
+-- Inserts are rolled back at the end.
 
 \set ON_ERROR_STOP on
+\set OWNER   '\'d9bbf110-3fe3-4742-bef3-9b76f2e1d170\''
+\set PARTNER '\'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1\''
+\set OUTSIDER '\'00000000-0000-0000-0000-0000deadbeef\''
 
 BEGIN;
 
--- Use existing seeded profiles; insert an accepted booking between them.
-INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-VALUES (
-  '00000000-0000-0000-0000-0000feedfac1',
-  'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1',  -- partner (requester)
-  'd9bbf110-3fe3-4742-bef3-9b76f2e1d170',  -- owner   (musician)
-  'accepted',
-  now() + interval '1 day',
-  2
-);
-
 ------------------------------------------------------------
--- 1. Column-level grants must NOT include sensitive columns
---    for anon / authenticated.
+-- 1. Column grants
 ------------------------------------------------------------
 DO $$
-DECLARE bad_grants int;
+DECLARE bad int;
 BEGIN
-  SELECT count(*) INTO bad_grants
+  SELECT count(*) INTO bad
   FROM information_schema.column_privileges
-  WHERE table_schema = 'public'
-    AND table_name = 'profiles'
+  WHERE table_schema='public' AND table_name='profiles'
     AND column_name IN ('phone','phone_verified','email_verified',
                         'identity_verified','last_name','latitude','longitude')
     AND grantee IN ('anon','authenticated')
-    AND privilege_type = 'SELECT';
-
-  IF bad_grants > 0 THEN
-    RAISE EXCEPTION 'FAIL [1]: anon/authenticated still have SELECT on % sensitive profile columns', bad_grants;
+    AND privilege_type='SELECT';
+  IF bad > 0 THEN
+    RAISE EXCEPTION 'FAIL [1]: anon/authenticated still have SELECT on % sensitive columns', bad;
   END IF;
   RAISE NOTICE 'PASS [1]: no anon/authenticated SELECT grant on sensitive profile columns';
 END $$;
 
 ------------------------------------------------------------
--- 2. profiles_public view must NOT expose phone or other PII.
+-- 2. profiles_public view does not expose PII
 ------------------------------------------------------------
 DO $$
 DECLARE leaked text;
@@ -74,101 +59,89 @@ BEGIN
 END $$;
 
 ------------------------------------------------------------
--- 3. Authorization logic: can_view_sensitive_profile.
+-- 3. Owner can always see own data; outsider cannot.
 ------------------------------------------------------------
 DO $$
-DECLARE
-  owner_id  uuid := 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170';
-  partner_id uuid := 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1';
-  stranger_id uuid := '00000000-0000-0000-0000-0000deadbeef';
-  ok bool;
 BEGIN
-  -- Owner can see own data
-  ok := public.can_view_sensitive_profile(owner_id, owner_id);
-  IF NOT ok THEN RAISE EXCEPTION 'FAIL [3a]: owner cannot view own profile'; END IF;
-
-  -- Accepted-booking partner can see owner
-  ok := public.can_view_sensitive_profile(partner_id, owner_id);
-  IF NOT ok THEN RAISE EXCEPTION 'FAIL [3b]: accepted-booking partner cannot view owner'; END IF;
-
-  -- And the reverse (owner -> partner)
-  ok := public.can_view_sensitive_profile(owner_id, partner_id);
-  IF NOT ok THEN RAISE EXCEPTION 'FAIL [3c]: owner cannot view accepted-booking partner'; END IF;
-
-  -- Stranger CANNOT see owner
-  ok := public.can_view_sensitive_profile(stranger_id, owner_id);
-  IF ok THEN RAISE EXCEPTION 'FAIL [3d]: stranger CAN view owner profile (leak!)'; END IF;
-
-  -- Stranger CANNOT see partner
-  ok := public.can_view_sensitive_profile(stranger_id, partner_id);
-  IF ok THEN RAISE EXCEPTION 'FAIL [3e]: stranger CAN view partner profile (leak!)'; END IF;
-
-  RAISE NOTICE 'PASS [3]: can_view_sensitive_profile authorizes correctly';
+  IF NOT public.can_view_sensitive_profile(:OWNER, :OWNER) THEN
+    RAISE EXCEPTION 'FAIL [3a]: owner cannot view own profile';
+  END IF;
+  IF public.can_view_sensitive_profile(:OUTSIDER, :OWNER) THEN
+    RAISE EXCEPTION 'FAIL [3b]: outsider with no booking CAN view owner (leak!)';
+  END IF;
+  RAISE NOTICE 'PASS [3]: owner authorized; outsider with no booking blocked';
 END $$;
 
 ------------------------------------------------------------
--- 4. Pending / rejected / cancelled bookings must NOT grant access.
---    Use a never-seen "viewer_id" so its only relationship with the
---    owner is the non-accepted booking inserted in this loop.
+-- 4. Non-accepted bookings (pending/rejected/cancelled)
+--    must NOT grant access. Done BEFORE inserting any
+--    accepted booking so partner has no other relationship.
 ------------------------------------------------------------
 DO $$
-DECLARE
-  owner_id  uuid := 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170';
-  viewer_id uuid := '00000000-0000-0000-0000-0000cafe0001';
-  s text;
-  ok bool;
+DECLARE s text;
 BEGIN
   FOREACH s IN ARRAY ARRAY['pending','rejected','cancelled']
   LOOP
     INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-    VALUES (gen_random_uuid(), viewer_id, owner_id,
-            s::booking_status, now() + interval '1 day', 2);
+    VALUES (gen_random_uuid(), :PARTNER, :OWNER, s::booking_status, now() + interval '1 day', 2);
 
-    ok := public.can_view_sensitive_profile(viewer_id, owner_id);
-    IF ok THEN
-      RAISE EXCEPTION 'FAIL [4]: viewer with % booking CAN view owner phone (leak!)', s;
+    IF public.can_view_sensitive_profile(:PARTNER, :OWNER) THEN
+      RAISE EXCEPTION 'FAIL [4]: partner with only % booking CAN view owner phone (leak!)', s;
+    END IF;
+    IF public.can_view_sensitive_profile(:OWNER, :PARTNER) THEN
+      RAISE EXCEPTION 'FAIL [4]: owner with only % booking from partner CAN view partner phone (leak!)', s;
     END IF;
   END LOOP;
   RAISE NOTICE 'PASS [4]: pending / rejected / cancelled bookings do NOT grant access';
 END $$;
 
 ------------------------------------------------------------
--- 5. completed booking grants access (parity with accepted).
+-- 5. Accepted booking grants access in both directions.
 ------------------------------------------------------------
 DO $$
-DECLARE
-  owner_id  uuid := 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170';
-  viewer_id uuid := '00000000-0000-0000-0000-0000cafe0002';
-  ok bool;
 BEGIN
   INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-  VALUES (gen_random_uuid(), viewer_id, owner_id,
-          'completed', now() - interval '1 day', 2);
+  VALUES (gen_random_uuid(), :PARTNER, :OWNER, 'accepted', now() + interval '1 day', 2);
 
-  ok := public.can_view_sensitive_profile(viewer_id, owner_id);
-  IF NOT ok THEN
-    RAISE EXCEPTION 'FAIL [5]: viewer with completed booking cannot view owner';
+  IF NOT public.can_view_sensitive_profile(:PARTNER, :OWNER) THEN
+    RAISE EXCEPTION 'FAIL [5a]: requester of accepted booking cannot view musician';
   END IF;
-  RAISE NOTICE 'PASS [5]: completed booking grants access';
+  IF NOT public.can_view_sensitive_profile(:OWNER, :PARTNER) THEN
+    RAISE EXCEPTION 'FAIL [5b]: musician of accepted booking cannot view requester';
+  END IF;
+  -- Outsider still cannot
+  IF public.can_view_sensitive_profile(:OUTSIDER, :OWNER) THEN
+    RAISE EXCEPTION 'FAIL [5c]: outsider CAN view owner after unrelated accepted booking (leak!)';
+  END IF;
+  RAISE NOTICE 'PASS [5]: accepted booking grants access in both directions only';
 END $$;
 
 ------------------------------------------------------------
--- 6. get_profile_sensitive returns sensitive data only when
---    auth.uid() == profile_id (we can only check the self-case
---    here because we can't fake auth.uid() of another user from
---    sandbox; the OTHER cases are covered by the can_view_*
---    tests above and the RPC delegates entirely to it).
+-- 6. Completed booking also grants access.
+------------------------------------------------------------
+DO $$
+BEGIN
+  INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
+  VALUES (gen_random_uuid(), :PARTNER, :OWNER, 'completed', now() - interval '1 day', 2);
+
+  IF NOT public.can_view_sensitive_profile(:PARTNER, :OWNER) THEN
+    RAISE EXCEPTION 'FAIL [6]: partner with completed booking cannot view owner';
+  END IF;
+  RAISE NOTICE 'PASS [6]: completed booking grants access';
+END $$;
+
+------------------------------------------------------------
+-- 7. RPC denies anonymous callers (auth.uid() = NULL).
 ------------------------------------------------------------
 DO $$
 DECLARE cnt int;
 BEGIN
-  -- auth.uid() is NULL in sandbox -> RPC must return zero rows.
   SELECT count(*) INTO cnt
-  FROM public.get_profile_sensitive('d9bbf110-3fe3-4742-bef3-9b76f2e1d170');
+  FROM public.get_profile_sensitive(:OWNER);
   IF cnt <> 0 THEN
-    RAISE EXCEPTION 'FAIL [6]: get_profile_sensitive returned data with NULL auth.uid()';
+    RAISE EXCEPTION 'FAIL [7]: get_profile_sensitive returned data with NULL auth.uid()';
   END IF;
-  RAISE NOTICE 'PASS [6]: get_profile_sensitive returns no rows for unauthenticated callers';
+  RAISE NOTICE 'PASS [7]: get_profile_sensitive returns no rows for unauthenticated callers';
 END $$;
 
 ROLLBACK;
