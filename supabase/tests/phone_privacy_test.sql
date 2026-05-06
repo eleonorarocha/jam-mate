@@ -15,9 +15,6 @@
 -- Inserts are rolled back at the end.
 
 \set ON_ERROR_STOP on
-\set OWNER   '\'d9bbf110-3fe3-4742-bef3-9b76f2e1d170\''
-\set PARTNER '\'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1\''
-\set OUTSIDER '\'00000000-0000-0000-0000-0000deadbeef\''
 
 BEGIN;
 
@@ -63,10 +60,10 @@ END $$;
 ------------------------------------------------------------
 DO $$
 BEGIN
-  IF NOT public.can_view_sensitive_profile(:OWNER, :OWNER) THEN
+  IF NOT public.can_view_sensitive_profile('d9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid) THEN
     RAISE EXCEPTION 'FAIL [3a]: owner cannot view own profile';
   END IF;
-  IF public.can_view_sensitive_profile(:OUTSIDER, :OWNER) THEN
+  IF public.can_view_sensitive_profile('00000000-0000-0000-0000-0000deadbeef'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid) THEN
     RAISE EXCEPTION 'FAIL [3b]: outsider with no booking CAN view owner (leak!)';
   END IF;
   RAISE NOTICE 'PASS [3]: owner authorized; outsider with no booking blocked';
@@ -83,12 +80,12 @@ BEGIN
   FOREACH s IN ARRAY ARRAY['pending','rejected','cancelled']
   LOOP
     INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-    VALUES (gen_random_uuid(), :PARTNER, :OWNER, s::booking_status, now() + interval '1 day', 2);
+    VALUES (gen_random_uuid(), 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid, s::booking_status, now() + interval '1 day', 2);
 
-    IF public.can_view_sensitive_profile(:PARTNER, :OWNER) THEN
+    IF public.can_view_sensitive_profile('ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid) THEN
       RAISE EXCEPTION 'FAIL [4]: partner with only % booking CAN view owner phone (leak!)', s;
     END IF;
-    IF public.can_view_sensitive_profile(:OWNER, :PARTNER) THEN
+    IF public.can_view_sensitive_profile('d9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid, 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid) THEN
       RAISE EXCEPTION 'FAIL [4]: owner with only % booking from partner CAN view partner phone (leak!)', s;
     END IF;
   END LOOP;
@@ -101,16 +98,16 @@ END $$;
 DO $$
 BEGIN
   INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-  VALUES (gen_random_uuid(), :PARTNER, :OWNER, 'accepted', now() + interval '1 day', 2);
+  VALUES (gen_random_uuid(), 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid, 'accepted', now() + interval '1 day', 2);
 
-  IF NOT public.can_view_sensitive_profile(:PARTNER, :OWNER) THEN
+  IF NOT public.can_view_sensitive_profile('ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid) THEN
     RAISE EXCEPTION 'FAIL [5a]: requester of accepted booking cannot view musician';
   END IF;
-  IF NOT public.can_view_sensitive_profile(:OWNER, :PARTNER) THEN
+  IF NOT public.can_view_sensitive_profile('d9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid, 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid) THEN
     RAISE EXCEPTION 'FAIL [5b]: musician of accepted booking cannot view requester';
   END IF;
   -- Outsider still cannot
-  IF public.can_view_sensitive_profile(:OUTSIDER, :OWNER) THEN
+  IF public.can_view_sensitive_profile('00000000-0000-0000-0000-0000deadbeef'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid) THEN
     RAISE EXCEPTION 'FAIL [5c]: outsider CAN view owner after unrelated accepted booking (leak!)';
   END IF;
   RAISE NOTICE 'PASS [5]: accepted booking grants access in both directions only';
@@ -122,9 +119,9 @@ END $$;
 DO $$
 BEGIN
   INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-  VALUES (gen_random_uuid(), :PARTNER, :OWNER, 'completed', now() - interval '1 day', 2);
+  VALUES (gen_random_uuid(), 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid, 'completed', now() - interval '1 day', 2);
 
-  IF NOT public.can_view_sensitive_profile(:PARTNER, :OWNER) THEN
+  IF NOT public.can_view_sensitive_profile('ce8a9c5e-5cfe-4563-a850-1a801a53c5b1'::uuid, 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid) THEN
     RAISE EXCEPTION 'FAIL [6]: partner with completed booking cannot view owner';
   END IF;
   RAISE NOTICE 'PASS [6]: completed booking grants access';
@@ -137,7 +134,7 @@ DO $$
 DECLARE cnt int;
 BEGIN
   SELECT count(*) INTO cnt
-  FROM public.get_profile_sensitive(:OWNER);
+  FROM public.get_profile_sensitive('d9bbf110-3fe3-4742-bef3-9b76f2e1d170'::uuid);
   IF cnt <> 0 THEN
     RAISE EXCEPTION 'FAIL [7]: get_profile_sensitive returned data with NULL auth.uid()';
   END IF;
