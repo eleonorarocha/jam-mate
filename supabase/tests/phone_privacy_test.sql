@@ -26,7 +26,6 @@ VALUES (
 );
 
 -- Capture the owner's real phone for assertion.
-\gset
 SELECT phone AS owner_phone FROM public.profiles
  WHERE id = 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170' \gset
 
