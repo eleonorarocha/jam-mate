@@ -108,25 +108,25 @@ END $$;
 
 ------------------------------------------------------------
 -- 4. Pending / rejected / cancelled bookings must NOT grant access.
+--    Use a never-seen "viewer_id" so its only relationship with the
+--    owner is the non-accepted booking inserted in this loop.
 ------------------------------------------------------------
 DO $$
 DECLARE
   owner_id  uuid := 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170';
-  partner_id uuid := 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1';
+  viewer_id uuid := '00000000-0000-0000-0000-0000cafe0001';
   s text;
   ok bool;
 BEGIN
   FOREACH s IN ARRAY ARRAY['pending','rejected','cancelled']
   LOOP
-    -- Replace booking with the non-accepted status.
-    DELETE FROM public.bookings WHERE id='00000000-0000-0000-0000-0000feedfac1';
     INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-    VALUES ('00000000-0000-0000-0000-0000feedfac1', partner_id, owner_id,
+    VALUES (gen_random_uuid(), viewer_id, owner_id,
             s::booking_status, now() + interval '1 day', 2);
 
-    ok := public.can_view_sensitive_profile(partner_id, owner_id);
+    ok := public.can_view_sensitive_profile(viewer_id, owner_id);
     IF ok THEN
-      RAISE EXCEPTION 'FAIL [4]: partner with % booking CAN view owner phone (leak!)', s;
+      RAISE EXCEPTION 'FAIL [4]: viewer with % booking CAN view owner phone (leak!)', s;
     END IF;
   END LOOP;
   RAISE NOTICE 'PASS [4]: pending / rejected / cancelled bookings do NOT grant access';
@@ -138,17 +138,16 @@ END $$;
 DO $$
 DECLARE
   owner_id  uuid := 'd9bbf110-3fe3-4742-bef3-9b76f2e1d170';
-  partner_id uuid := 'ce8a9c5e-5cfe-4563-a850-1a801a53c5b1';
+  viewer_id uuid := '00000000-0000-0000-0000-0000cafe0002';
   ok bool;
 BEGIN
-  DELETE FROM public.bookings WHERE id='00000000-0000-0000-0000-0000feedfac1';
   INSERT INTO public.bookings (id, requester_id, musician_id, status, scheduled_date, duration_hours)
-  VALUES ('00000000-0000-0000-0000-0000feedfac1', partner_id, owner_id,
+  VALUES (gen_random_uuid(), viewer_id, owner_id,
           'completed', now() - interval '1 day', 2);
 
-  ok := public.can_view_sensitive_profile(partner_id, owner_id);
+  ok := public.can_view_sensitive_profile(viewer_id, owner_id);
   IF NOT ok THEN
-    RAISE EXCEPTION 'FAIL [5]: partner with completed booking cannot view owner';
+    RAISE EXCEPTION 'FAIL [5]: viewer with completed booking cannot view owner';
   END IF;
   RAISE NOTICE 'PASS [5]: completed booking grants access';
 END $$;
