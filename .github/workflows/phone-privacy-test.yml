@@ -179,6 +179,7 @@ jobs:
           cp -v supabase/tests/phone_privacy_test.sql debug-output/ || true
 
       - name: Upload debug artifacts
+        id: upload_artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -186,3 +187,70 @@ jobs:
           path: debug-output/
           retention-days: 14
           if-no-files-found: warn
+
+      - name: Comment on PR with failure details
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const artifactName = `phone-privacy-debug-${context.runId}-${process.env.GITHUB_RUN_ATTEMPT}`;
+            const artifactUrl = steps_upload_url || `${runUrl}#artifacts`;
+
+            // Try to resolve a direct artifact download URL via the API.
+            let directUrl = `${runUrl}#artifacts`;
+            try {
+              const { data } = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId,
+              });
+              const match = data.artifacts.find(a => a.name === artifactName);
+              if (match) {
+                directUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts/${match.id}`;
+              }
+            } catch (e) {
+              core.warning(`Could not resolve artifact URL: ${e.message}`);
+            }
+
+            const marker = '<!-- phone-privacy-test-report -->';
+            const body = [
+              marker,
+              '### ❌ Phone Privacy Tests failed',
+              '',
+              `The \`phone_privacy_test.sql\` suite failed on attempt **${process.env.GITHUB_RUN_ATTEMPT}** of run [#${context.runId}](${runUrl}).`,
+              '',
+              `**Debug artifact:** [\`${artifactName}\`](${directUrl}) (retained 14 days)`,
+              '',
+              'Includes:',
+              '- `phone_privacy_test.log` — full test output',
+              '- `migrations.log` — migration apply log',
+              '- `grants.log` — GRANTs / ACLs for `profiles` and `profiles_public`',
+              '- `schema.log` — tables, functions, RLS policies snapshot',
+              '- `postgres.log` — Postgres container logs',
+              '',
+              'Merging is blocked until this check passes.',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
