@@ -1,0 +1,90 @@
+name: Phone Privacy Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  phone-privacy-test:
+    name: Run phone privacy SQL tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Wait for Postgres
+        run: |
+          for i in $(seq 1 30); do
+            pg_isready -h localhost -p 5432 -U postgres && break
+            sleep 2
+          done
+
+      - name: Bootstrap schema (roles, extensions, auth shim)
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          -- Supabase-like roles required by migrations
+          DO $$ BEGIN
+            CREATE ROLE anon NOLOGIN NOINHERIT;
+          EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+          DO $$ BEGIN
+            CREATE ROLE authenticated NOLOGIN NOINHERIT;
+          EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+          DO $$ BEGIN
+            CREATE ROLE service_role NOLOGIN NOINHERIT BYPASSRLS;
+          EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+          DO $$ BEGIN
+            CREATE ROLE authenticator NOINHERIT LOGIN PASSWORD 'postgres';
+          EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+          GRANT anon, authenticated, service_role TO authenticator;
+
+          CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+          -- Minimal auth schema shim so SECURITY DEFINER fns referencing auth.uid() work
+          CREATE SCHEMA IF NOT EXISTS auth;
+          CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
+            LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$;
+          CREATE TABLE IF NOT EXISTS auth.users (
+            id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+          );
+          SQL
+
+      - name: Apply migrations
+        run: |
+          shopt -s nullglob
+          for f in supabase/migrations/*.sql; do
+            echo "Applying $f"
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Run phone privacy tests
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/phone_privacy_test.sql
