@@ -116,6 +116,61 @@ jobs:
                 FROM pg_policies WHERE schemaname='public' ORDER BY tablename, policyname;" \
             >> debug-output/schema.log 2>&1 || true
 
+          echo "=== GRANTs & privileges snapshot ===" > debug-output/grants.log
+          for obj in profiles profiles_public; do
+            echo "============================================" >> debug-output/grants.log
+            echo "## public.$obj — \\dp+"                       >> debug-output/grants.log
+            echo "============================================" >> debug-output/grants.log
+            psql -v ON_ERROR_STOP=0 -c "\dp+ public.$obj"        >> debug-output/grants.log 2>&1 || true
+
+            echo "## public.$obj — table_privileges"            >> debug-output/grants.log
+            psql -v ON_ERROR_STOP=0 \
+              -c "SELECT grantee, privilege_type, is_grantable
+                  FROM information_schema.table_privileges
+                  WHERE table_schema='public' AND table_name='$obj'
+                  ORDER BY grantee, privilege_type;"             >> debug-output/grants.log 2>&1 || true
+
+            echo "## public.$obj — column_privileges"           >> debug-output/grants.log
+            psql -v ON_ERROR_STOP=0 \
+              -c "SELECT grantee, column_name, privilege_type, is_grantable
+                  FROM information_schema.column_privileges
+                  WHERE table_schema='public' AND table_name='$obj'
+                  ORDER BY grantee, column_name, privilege_type;" >> debug-output/grants.log 2>&1 || true
+
+            echo "## public.$obj — ACL via pg_class"            >> debug-output/grants.log
+            psql -v ON_ERROR_STOP=0 \
+              -c "SELECT n.nspname, c.relname, c.relkind, c.relrowsecurity, c.relforcerowsecurity, c.relacl
+                  FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+                  WHERE n.nspname='public' AND c.relname='$obj';" >> debug-output/grants.log 2>&1 || true
+
+            echo "## public.$obj — column ACLs via pg_attribute" >> debug-output/grants.log
+            psql -v ON_ERROR_STOP=0 \
+              -c "SELECT a.attname, a.attacl
+                  FROM pg_attribute a
+                  JOIN pg_class c ON c.oid=a.attrelid
+                  JOIN pg_namespace n ON n.oid=c.relnamespace
+                  WHERE n.nspname='public' AND c.relname='$obj'
+                    AND a.attnum > 0 AND NOT a.attisdropped
+                  ORDER BY a.attnum;"                            >> debug-output/grants.log 2>&1 || true
+          done
+
+          echo "## Helper functions — privileges"               >> debug-output/grants.log
+          psql -v ON_ERROR_STOP=0 \
+            -c "SELECT n.nspname, p.proname, pg_get_userbyid(p.proowner) AS owner,
+                       p.prosecdef AS security_definer, p.proacl
+                FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+                WHERE n.nspname='public'
+                  AND p.proname IN ('can_view_sensitive_profile','get_profile_sensitive',
+                                    'has_accepted_booking_with','has_role')
+                ORDER BY p.proname;"                              >> debug-output/grants.log 2>&1 || true
+
+          echo "## Roles overview"                              >> debug-output/grants.log
+          psql -v ON_ERROR_STOP=0 \
+            -c "SELECT rolname, rolsuper, rolinherit, rolbypassrls, rolcanlogin
+                FROM pg_roles
+                WHERE rolname IN ('anon','authenticated','service_role','authenticator','postgres')
+                ORDER BY rolname;"                                >> debug-output/grants.log 2>&1 || true
+
           cp -v supabase/tests/phone_privacy_test.sql debug-output/ || true
 
       - name: Upload debug artifacts
