@@ -250,10 +250,10 @@ const Auth = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    Recuperar password
+                    {t('auth.recover_title')}
                   </motion.h2>
                   <p className="text-muted-foreground">
-                    Introduza o seu email para receber um link de recuperação.
+                    {t('auth.recover_subtitle')}
                   </p>
                 </div>
 
@@ -265,8 +265,8 @@ const Auth = () => {
                   className="space-y-4"
                 >
                   <div className="space-y-1.5">
-                    <Label htmlFor="reset-email">Email</Label>
-                    <Input id="reset-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
+                    <Label htmlFor="reset-email">{t('auth.email')}</Label>
+                    <Input id="reset-email" type="email" placeholder={t('auth.email_ph')} value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
                     {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
 
@@ -283,7 +283,7 @@ const Auth = () => {
                           animate={{ rotate: 360 }}
                           transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                         />
-                      ) : 'Enviar link de recuperação'}
+                      ) : t('auth.send_recovery')}
                     </Button>
                   </motion.div>
                 </motion.form>
@@ -294,7 +294,7 @@ const Auth = () => {
                     onClick={() => { setShowForgotPassword(false); setErrors({}); }}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    ← Voltar ao login
+                    {t('auth.back_to_login')}
                   </button>
                 </div>
               </>
