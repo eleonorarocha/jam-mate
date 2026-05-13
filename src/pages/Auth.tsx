@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,19 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Music, Guitar, Headphones, Mic2, Piano, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
-
-const signUpSchema = z.object({
-  firstName: z.string().min(1, 'Nome é obrigatório').max(50, 'Nome muito longo'),
-  lastName: z.string().min(1, 'Sobrenome é obrigatório').max(50, 'Sobrenome muito longo'),
-  phone: z.string().min(9, 'Número de telefone inválido').max(20, 'Número muito longo'),
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Password deve ter pelo menos 6 caracteres'),
-});
-
-const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'Password é obrigatória'),
-});
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const floatingIcons = [
   { Icon: Guitar, x: '10%', y: '20%', delay: 0, size: 32 },
