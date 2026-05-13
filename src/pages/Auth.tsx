@@ -21,6 +21,7 @@ const floatingIcons = [
 ];
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -33,6 +34,20 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const { signUpSchema, loginSchema } = useMemo(() => ({
+    signUpSchema: z.object({
+      firstName: z.string().min(1, t('auth.validation.first_name_required')).max(50, t('auth.validation.first_name_long')),
+      lastName: z.string().min(1, t('auth.validation.last_name_required')).max(50, t('auth.validation.last_name_long')),
+      phone: z.string().min(9, t('auth.validation.phone_invalid')).max(20, t('auth.validation.phone_long')),
+      email: z.string().email(t('auth.validation.email_invalid')),
+      password: z.string().min(6, t('auth.validation.password_min')),
+    }),
+    loginSchema: z.object({
+      email: z.string().email(t('auth.validation.email_invalid')),
+      password: z.string().min(1, t('auth.validation.password_required')),
+    }),
+  }), [t]);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
