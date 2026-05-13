@@ -219,8 +219,8 @@ const Auth = () => {
 
       {/* Right panel — form */}
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className="p-6">
-          <Link to="/" className="flex items-center gap-2 w-fit hover:opacity-80 transition-opacity lg:hidden">
+        <header className="p-6 flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity lg:hidden">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
               <Music className="w-5 h-5 text-primary" />
             </div>
@@ -229,8 +229,9 @@ const Auth = () => {
             </span>
           </Link>
           <Link to="/" className="hidden lg:block text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Voltar à página inicial
+            {t('auth.back_home')}
           </Link>
+          <LanguageSwitcher variant="compact" className="ml-auto" />
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6">
