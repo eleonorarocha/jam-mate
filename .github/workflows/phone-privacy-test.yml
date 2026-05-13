@@ -195,7 +195,6 @@ jobs:
           script: |
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const artifactName = `phone-privacy-debug-${context.runId}-${process.env.GITHUB_RUN_ATTEMPT}`;
-            const artifactUrl = steps_upload_url || `${runUrl}#artifacts`;
 
             // Try to resolve a direct artifact download URL via the API.
             let directUrl = `${runUrl}#artifacts`;
