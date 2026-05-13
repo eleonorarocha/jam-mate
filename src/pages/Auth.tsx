@@ -92,7 +92,7 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' });
+        toast({ title: t('auth.toast_welcome_title'), description: t('auth.toast_welcome_desc') });
         navigate('/map');
       } else {
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -113,16 +113,16 @@ const Auth = () => {
             skill_level: 'beginner',
           });
           if (profileError) throw profileError;
-          toast({ title: 'Conta criada!', description: 'Complete o seu perfil para começar.' });
+          toast({ title: t('auth.toast_account_title'), description: t('auth.toast_account_desc') });
           navigate('/onboarding');
         }
       }
     } catch (error: any) {
       let message = error.message;
       if (message.includes('User already registered')) {
-        message = 'Este email já está registado. Tente fazer login.';
+        message = t('auth.err_already_registered');
       }
-      toast({ title: 'Erro', description: message, variant: 'destructive' });
+      toast({ title: t('auth.toast_error'), description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -131,7 +131,7 @@ const Auth = () => {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
-      setErrors({ email: 'Email é obrigatório' });
+      setErrors({ email: t('auth.validation.email_required') });
       return;
     }
     setLoading(true);
@@ -140,10 +140,10 @@ const Auth = () => {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      toast({ title: 'Email enviado!', description: 'Verifique a sua caixa de entrada para redefinir a password.' });
+      toast({ title: t('auth.toast_email_sent_title'), description: t('auth.toast_email_sent_desc') });
       setShowForgotPassword(false);
     } catch (error: any) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+      toast({ title: t('auth.toast_error'), description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
