@@ -1,0 +1,61 @@
+import { useTranslation } from 'react-i18next';
+import { Globe } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { SUPPORTED_LANGUAGES } from '@/i18n';
+
+interface LanguageSwitcherProps {
+  variant?: 'icon' | 'compact';
+  className?: string;
+}
+
+export const LanguageSwitcher = ({ variant = 'icon', className }: LanguageSwitcherProps) => {
+  const { i18n, t } = useTranslation();
+  const current =
+    SUPPORTED_LANGUAGES.find((l) => i18n.resolvedLanguage?.startsWith(l.code)) ??
+    SUPPORTED_LANGUAGES[1];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size={variant === 'icon' ? 'icon' : 'sm'}
+          className={className}
+          aria-label={t('language')}
+        >
+          {variant === 'icon' ? (
+            <Globe className="h-5 w-5" />
+          ) : (
+            <span className="flex items-center gap-2 text-sm">
+              <Globe className="h-4 w-4" />
+              <span>{current.flag}</span>
+              <span className="uppercase">{current.code}</span>
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {SUPPORTED_LANGUAGES.map((lang) => (
+          <DropdownMenuItem
+            key={lang.code}
+            onClick={() => i18n.changeLanguage(lang.code)}
+            className={
+              current.code === lang.code ? 'font-semibold text-primary' : undefined
+            }
+          >
+            <span className="mr-2">{lang.flag}</span>
+            {lang.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export default LanguageSwitcher;

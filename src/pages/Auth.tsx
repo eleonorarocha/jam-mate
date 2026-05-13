@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,19 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Music, Guitar, Headphones, Mic2, Piano, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
-
-const signUpSchema = z.object({
-  firstName: z.string().min(1, 'Nome é obrigatório').max(50, 'Nome muito longo'),
-  lastName: z.string().min(1, 'Sobrenome é obrigatório').max(50, 'Sobrenome muito longo'),
-  phone: z.string().min(9, 'Número de telefone inválido').max(20, 'Número muito longo'),
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Password deve ter pelo menos 6 caracteres'),
-});
-
-const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(1, 'Password é obrigatória'),
-});
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const floatingIcons = [
   { Icon: Guitar, x: '10%', y: '20%', delay: 0, size: 32 },
@@ -32,6 +21,7 @@ const floatingIcons = [
 ];
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -44,6 +34,20 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const { signUpSchema, loginSchema } = useMemo(() => ({
+    signUpSchema: z.object({
+      firstName: z.string().min(1, t('auth.validation.first_name_required')).max(50, t('auth.validation.first_name_long')),
+      lastName: z.string().min(1, t('auth.validation.last_name_required')).max(50, t('auth.validation.last_name_long')),
+      phone: z.string().min(9, t('auth.validation.phone_invalid')).max(20, t('auth.validation.phone_long')),
+      email: z.string().email(t('auth.validation.email_invalid')),
+      password: z.string().min(6, t('auth.validation.password_min')),
+    }),
+    loginSchema: z.object({
+      email: z.string().email(t('auth.validation.email_invalid')),
+      password: z.string().min(1, t('auth.validation.password_required')),
+    }),
+  }), [t]);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -88,7 +92,7 @@ const Auth = () => {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso.' });
+        toast({ title: t('auth.toast_welcome_title'), description: t('auth.toast_welcome_desc') });
         navigate('/map');
       } else {
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -109,16 +113,16 @@ const Auth = () => {
             skill_level: 'beginner',
           });
           if (profileError) throw profileError;
-          toast({ title: 'Conta criada!', description: 'Complete o seu perfil para começar.' });
+          toast({ title: t('auth.toast_account_title'), description: t('auth.toast_account_desc') });
           navigate('/onboarding');
         }
       }
     } catch (error: any) {
       let message = error.message;
       if (message.includes('User already registered')) {
-        message = 'Este email já está registado. Tente fazer login.';
+        message = t('auth.err_already_registered');
       }
-      toast({ title: 'Erro', description: message, variant: 'destructive' });
+      toast({ title: t('auth.toast_error'), description: message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -127,7 +131,7 @@ const Auth = () => {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
-      setErrors({ email: 'Email é obrigatório' });
+      setErrors({ email: t('auth.validation.email_required') });
       return;
     }
     setLoading(true);
@@ -136,10 +140,10 @@ const Auth = () => {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
-      toast({ title: 'Email enviado!', description: 'Verifique a sua caixa de entrada para redefinir a password.' });
+      toast({ title: t('auth.toast_email_sent_title'), description: t('auth.toast_email_sent_desc') });
       setShowForgotPassword(false);
     } catch (error: any) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+      toast({ title: t('auth.toast_error'), description: error.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -186,14 +190,14 @@ const Auth = () => {
             </span>
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Encontre músicos perto de si, organize jam sessions e faça parte de uma comunidade vibrante.
+            {t('auth.tagline')}
           </p>
 
           <div className="mt-10 grid grid-cols-3 gap-6">
             {[
-              { value: '500+', label: 'Músicos' },
-              { value: '1.2k', label: 'Jam Sessions' },
-              { value: '4.8★', label: 'Avaliação' },
+              { value: '500+', label: t('auth.stats.musicians') },
+              { value: '1.2k', label: t('auth.stats.sessions') },
+              { value: '4.8★', label: t('auth.stats.rating') },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -215,8 +219,8 @@ const Auth = () => {
 
       {/* Right panel — form */}
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className="p-6">
-          <Link to="/" className="flex items-center gap-2 w-fit hover:opacity-80 transition-opacity lg:hidden">
+        <header className="p-6 flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity lg:hidden">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
               <Music className="w-5 h-5 text-primary" />
             </div>
@@ -225,8 +229,9 @@ const Auth = () => {
             </span>
           </Link>
           <Link to="/" className="hidden lg:block text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Voltar à página inicial
+            {t('auth.back_home')}
           </Link>
+          <LanguageSwitcher variant="compact" className="ml-auto" />
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6">
@@ -245,10 +250,10 @@ const Auth = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    Recuperar password
+                    {t('auth.recover_title')}
                   </motion.h2>
                   <p className="text-muted-foreground">
-                    Introduza o seu email para receber um link de recuperação.
+                    {t('auth.recover_subtitle')}
                   </p>
                 </div>
 
@@ -260,8 +265,8 @@ const Auth = () => {
                   className="space-y-4"
                 >
                   <div className="space-y-1.5">
-                    <Label htmlFor="reset-email">Email</Label>
-                    <Input id="reset-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
+                    <Label htmlFor="reset-email">{t('auth.email')}</Label>
+                    <Input id="reset-email" type="email" placeholder={t('auth.email_ph')} value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
                     {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                   </div>
 
@@ -278,7 +283,7 @@ const Auth = () => {
                           animate={{ rotate: 360 }}
                           transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                         />
-                      ) : 'Enviar link de recuperação'}
+                      ) : t('auth.send_recovery')}
                     </Button>
                   </motion.div>
                 </motion.form>
@@ -289,7 +294,7 @@ const Auth = () => {
                     onClick={() => { setShowForgotPassword(false); setErrors({}); }}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    ← Voltar ao login
+                    {t('auth.back_to_login')}
                   </button>
                 </div>
               </>
@@ -303,12 +308,10 @@ const Auth = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {isLogin ? 'Bem-vindo de volta' : 'Criar conta'}
+                    {isLogin ? t('auth.welcome_back') : t('auth.create_account')}
                   </motion.h2>
                   <p className="text-muted-foreground">
-                    {isLogin
-                      ? 'Entre para encontrar músicos e jam sessions.'
-                      : 'Junte-se à comunidade de músicos.'}
+                    {isLogin ? t('auth.subtitle_login') : t('auth.subtitle_signup')}
                   </p>
                 </div>
 
@@ -326,45 +329,45 @@ const Auth = () => {
                       <>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
-                            <Label htmlFor="firstName">Nome</Label>
-                            <Input id="firstName" placeholder="João" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={errors.firstName ? 'border-destructive' : ''} />
+                            <Label htmlFor="firstName">{t('auth.first_name')}</Label>
+                            <Input id="firstName" placeholder={t('auth.first_name_ph')} value={firstName} onChange={(e) => setFirstName(e.target.value)} className={errors.firstName ? 'border-destructive' : ''} />
                             {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
                           </div>
                           <div className="space-y-1.5">
-                            <Label htmlFor="lastName">Sobrenome</Label>
-                            <Input id="lastName" placeholder="Silva" value={lastName} onChange={(e) => setLastName(e.target.value)} className={errors.lastName ? 'border-destructive' : ''} />
+                            <Label htmlFor="lastName">{t('auth.last_name')}</Label>
+                            <Input id="lastName" placeholder={t('auth.last_name_ph')} value={lastName} onChange={(e) => setLastName(e.target.value)} className={errors.lastName ? 'border-destructive' : ''} />
                             {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
                           </div>
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="phone">Telefone</Label>
-                          <Input id="phone" type="tel" placeholder="+351 912 345 678" value={phone} onChange={(e) => setPhone(e.target.value)} className={errors.phone ? 'border-destructive' : ''} />
+                          <Label htmlFor="phone">{t('auth.phone')}</Label>
+                          <Input id="phone" type="tel" placeholder={t('auth.phone_ph')} value={phone} onChange={(e) => setPhone(e.target.value)} className={errors.phone ? 'border-destructive' : ''} />
                           {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
                         </div>
                       </>
                     )}
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
+                      <Label htmlFor="email">{t('auth.email')}</Label>
+                      <Input id="email" type="email" placeholder={t('auth.email_ph')} value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
                       {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">{t('auth.password')}</Label>
                         {isLogin && (
                           <button
                             type="button"
                             onClick={() => { setShowForgotPassword(true); setErrors({}); }}
                             className="text-xs text-primary hover:underline"
                           >
-                            Esqueceu a password?
+                            {t('auth.forgot_password')}
                           </button>
                         )}
                       </div>
                       <div className="relative">
-                        <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={`pr-10 ${errors.password ? 'border-destructive' : ''}`} />
+                        <Input id="password" type={showPassword ? 'text' : 'password'} placeholder={t('auth.password_ph')} value={password} onChange={(e) => setPassword(e.target.value)} className={`pr-10 ${errors.password ? 'border-destructive' : ''}`} />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
@@ -390,7 +393,7 @@ const Auth = () => {
                             animate={{ rotate: 360 }}
                             transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                           />
-                        ) : isLogin ? 'Entrar' : 'Criar Conta'}
+                        ) : isLogin ? t('auth.sign_in') : t('auth.sign_up')}
                       </Button>
                     </motion.div>
                   </motion.form>
@@ -402,7 +405,7 @@ const Auth = () => {
                       <div className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="bg-background px-3 text-muted-foreground">ou</span>
+                      <span className="bg-background px-3 text-muted-foreground">{t('auth.or')}</span>
                     </div>
                   </div>
                   <button
@@ -410,8 +413,8 @@ const Auth = () => {
                     onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {isLogin ? 'Não tem conta? ' : 'Já tem conta? '}
-                    <span className="font-medium text-primary">{isLogin ? 'Criar conta' : 'Entrar'}</span>
+                    {isLogin ? t('auth.no_account') : t('auth.have_account')}
+                    <span className="font-medium text-primary">{isLogin ? t('auth.go_signup') : t('auth.go_login')}</span>
                   </button>
                 </div>
               </>

@@ -1,0 +1,61 @@
+{
+  "auth": {
+    "back_home": "← Retour à l'accueil",
+    "tagline": "Trouvez des musiciens près de chez vous, organisez des jam sessions et rejoignez une communauté vibrante.",
+    "stats": { "musicians": "Musiciens", "sessions": "Jam Sessions", "rating": "Note" },
+
+    "welcome_back": "Bon retour",
+    "create_account": "Créer un compte",
+    "subtitle_login": "Connectez-vous pour trouver des musiciens et des jam sessions.",
+    "subtitle_signup": "Rejoignez la communauté des musiciens.",
+
+    "first_name": "Prénom",
+    "last_name": "Nom",
+    "phone": "Téléphone",
+    "email": "Email",
+    "password": "Mot de passe",
+    "first_name_ph": "Jean",
+    "last_name_ph": "Dupont",
+    "phone_ph": "+33 6 12 34 56 78",
+    "email_ph": "vous@email.com",
+    "password_ph": "••••••••",
+
+    "forgot_password": "Mot de passe oublié ?",
+    "sign_in": "Se connecter",
+    "sign_up": "Créer le compte",
+
+    "no_account": "Pas encore de compte ? ",
+    "have_account": "Vous avez déjà un compte ? ",
+    "go_signup": "Créer un compte",
+    "go_login": "Se connecter",
+    "or": "ou",
+
+    "recover_title": "Récupérer le mot de passe",
+    "recover_subtitle": "Saisissez votre email pour recevoir un lien de récupération.",
+    "send_recovery": "Envoyer le lien",
+    "back_to_login": "← Retour à la connexion",
+
+    "toast_welcome_title": "Bienvenue !",
+    "toast_welcome_desc": "Connexion réussie.",
+    "toast_account_title": "Compte créé !",
+    "toast_account_desc": "Complétez votre profil pour commencer.",
+    "toast_email_sent_title": "Email envoyé !",
+    "toast_email_sent_desc": "Vérifiez votre boîte de réception pour réinitialiser votre mot de passe.",
+    "toast_error": "Erreur",
+    "err_already_registered": "Cet email est déjà enregistré. Essayez de vous connecter.",
+
+    "validation": {
+      "first_name_required": "Le prénom est requis",
+      "first_name_long": "Prénom trop long",
+      "last_name_required": "Le nom est requis",
+      "last_name_long": "Nom trop long",
+      "phone_invalid": "Numéro de téléphone invalide",
+      "phone_long": "Numéro trop long",
+      "email_invalid": "Email invalide",
+      "email_required": "Email requis",
+      "password_min": "Le mot de passe doit contenir au moins 6 caractères",
+      "password_required": "Mot de passe requis"
+    }
+  },
+  "language": "Langue"
+}
