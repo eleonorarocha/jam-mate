@@ -190,14 +190,14 @@ const Auth = () => {
             </span>
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Encontre músicos perto de si, organize jam sessions e faça parte de uma comunidade vibrante.
+            {t('auth.tagline')}
           </p>
 
           <div className="mt-10 grid grid-cols-3 gap-6">
             {[
-              { value: '500+', label: 'Músicos' },
-              { value: '1.2k', label: 'Jam Sessions' },
-              { value: '4.8★', label: 'Avaliação' },
+              { value: '500+', label: t('auth.stats.musicians') },
+              { value: '1.2k', label: t('auth.stats.sessions') },
+              { value: '4.8★', label: t('auth.stats.rating') },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
