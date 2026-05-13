@@ -308,12 +308,10 @@ const Auth = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    {isLogin ? 'Bem-vindo de volta' : 'Criar conta'}
+                    {isLogin ? t('auth.welcome_back') : t('auth.create_account')}
                   </motion.h2>
                   <p className="text-muted-foreground">
-                    {isLogin
-                      ? 'Entre para encontrar músicos e jam sessions.'
-                      : 'Junte-se à comunidade de músicos.'}
+                    {isLogin ? t('auth.subtitle_login') : t('auth.subtitle_signup')}
                   </p>
                 </div>
 
@@ -331,45 +329,45 @@ const Auth = () => {
                       <>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1.5">
-                            <Label htmlFor="firstName">Nome</Label>
-                            <Input id="firstName" placeholder="João" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={errors.firstName ? 'border-destructive' : ''} />
+                            <Label htmlFor="firstName">{t('auth.first_name')}</Label>
+                            <Input id="firstName" placeholder={t('auth.first_name_ph')} value={firstName} onChange={(e) => setFirstName(e.target.value)} className={errors.firstName ? 'border-destructive' : ''} />
                             {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
                           </div>
                           <div className="space-y-1.5">
-                            <Label htmlFor="lastName">Sobrenome</Label>
-                            <Input id="lastName" placeholder="Silva" value={lastName} onChange={(e) => setLastName(e.target.value)} className={errors.lastName ? 'border-destructive' : ''} />
+                            <Label htmlFor="lastName">{t('auth.last_name')}</Label>
+                            <Input id="lastName" placeholder={t('auth.last_name_ph')} value={lastName} onChange={(e) => setLastName(e.target.value)} className={errors.lastName ? 'border-destructive' : ''} />
                             {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
                           </div>
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="phone">Telefone</Label>
-                          <Input id="phone" type="tel" placeholder="+351 912 345 678" value={phone} onChange={(e) => setPhone(e.target.value)} className={errors.phone ? 'border-destructive' : ''} />
+                          <Label htmlFor="phone">{t('auth.phone')}</Label>
+                          <Input id="phone" type="tel" placeholder={t('auth.phone_ph')} value={phone} onChange={(e) => setPhone(e.target.value)} className={errors.phone ? 'border-destructive' : ''} />
                           {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
                         </div>
                       </>
                     )}
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
+                      <Label htmlFor="email">{t('auth.email')}</Label>
+                      <Input id="email" type="email" placeholder={t('auth.email_ph')} value={email} onChange={(e) => setEmail(e.target.value)} className={errors.email ? 'border-destructive' : ''} />
                       {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">{t('auth.password')}</Label>
                         {isLogin && (
                           <button
                             type="button"
                             onClick={() => { setShowForgotPassword(true); setErrors({}); }}
                             className="text-xs text-primary hover:underline"
                           >
-                            Esqueceu a password?
+                            {t('auth.forgot_password')}
                           </button>
                         )}
                       </div>
                       <div className="relative">
-                        <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={`pr-10 ${errors.password ? 'border-destructive' : ''}`} />
+                        <Input id="password" type={showPassword ? 'text' : 'password'} placeholder={t('auth.password_ph')} value={password} onChange={(e) => setPassword(e.target.value)} className={`pr-10 ${errors.password ? 'border-destructive' : ''}`} />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
@@ -395,7 +393,7 @@ const Auth = () => {
                             animate={{ rotate: 360 }}
                             transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
                           />
-                        ) : isLogin ? 'Entrar' : 'Criar Conta'}
+                        ) : isLogin ? t('auth.sign_in') : t('auth.sign_up')}
                       </Button>
                     </motion.div>
                   </motion.form>
@@ -407,7 +405,7 @@ const Auth = () => {
                       <div className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-xs">
-                      <span className="bg-background px-3 text-muted-foreground">ou</span>
+                      <span className="bg-background px-3 text-muted-foreground">{t('auth.or')}</span>
                     </div>
                   </div>
                   <button
@@ -415,8 +413,8 @@ const Auth = () => {
                     onClick={() => { setIsLogin(!isLogin); setErrors({}); }}
                     className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
-                    {isLogin ? 'Não tem conta? ' : 'Já tem conta? '}
-                    <span className="font-medium text-primary">{isLogin ? 'Criar conta' : 'Entrar'}</span>
+                    {isLogin ? t('auth.no_account') : t('auth.have_account')}
+                    <span className="font-medium text-primary">{isLogin ? t('auth.go_signup') : t('auth.go_login')}</span>
                   </button>
                 </div>
               </>
