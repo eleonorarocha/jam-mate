@@ -170,7 +170,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                   className="w-full"
                   onClick={() => navigate('/auth')}
                 >
-                  Registar para contactar
+                  {t('map.popup.register_to_contact')}
                 </Button>
               )}
             </div>
