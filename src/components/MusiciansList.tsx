@@ -49,6 +49,7 @@ const MusiciansList = ({
   onMusicianClick,
   onMusicianHover,
 }: MusiciansListProps) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { isFavorite } = useFavorites();
 
