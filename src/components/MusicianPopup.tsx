@@ -27,6 +27,7 @@ interface MusicianPopupProps {
 }
 
 const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: MusicianPopupProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -46,19 +47,19 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
     const { error } = await supabase.from('messages').insert({
       sender_id: user.id,
       receiver_id: musician.id,
-      content: 'Olá! Gostaria de conversar sobre uma jam session.',
+      content: t('map.popup.default_message'),
     });
 
     if (error) {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível enviar a mensagem.',
+        title: t('map.popup.error_title'),
+        description: t('map.popup.error_desc'),
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Mensagem enviada!',
-        description: 'A sua mensagem foi enviada com sucesso.',
+        title: t('map.popup.message_sent_title'),
+        description: t('map.popup.message_sent_desc'),
       });
       onClose();
     }
