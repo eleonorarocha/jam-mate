@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -9,10 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, SlidersHorizontal, MapPin, CalendarIcon, X } from 'lucide-react';
-import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { format, type Locale } from 'date-fns';
+import { pt, enUS, es, fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MapFiltersState } from './MapFilters';
+
+const dateLocales: Record<string, Locale> = { pt, en: enUS, es, fr };
 
 interface ExtendedFilters extends MapFiltersState {
   searchQuery?: string;
@@ -25,7 +28,7 @@ interface MapFiltersBarProps {
   onFiltersChange: (filters: ExtendedFilters) => void;
 }
 
-const instruments = [
+const INSTRUMENT_KEYS = [
   'Guitarra', 'Piano', 'Bateria', 'Baixo', 'Violino', 'Saxofone',
   'Trompete', 'Flauta', 'Violoncelo', 'Voz', 'Ukulele', 'Outro'
 ];
