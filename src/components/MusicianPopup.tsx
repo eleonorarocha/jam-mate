@@ -160,7 +160,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                       disabled={user?.id === musician.id}
                     >
                       <Calendar className="h-4 w-4 mr-1" />
-                      Agendar
+                      {t('map.popup.schedule')}
                     </Button>
                   </div>
                 </>
