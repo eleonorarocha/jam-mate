@@ -34,6 +34,8 @@ const INSTRUMENT_KEYS = [
 ];
 
 const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocales[i18n.language?.split('-')[0]] || enUS;
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [dateOpen, setDateOpen] = useState(false);
 
