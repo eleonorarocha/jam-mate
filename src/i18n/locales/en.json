@@ -57,5 +57,71 @@
       "password_required": "Password is required"
     }
   },
-  "language": "Language"
+  "language": "Language",
+  "map": {
+    "search_musician": "Search musician...",
+    "city_country": "City or country...",
+    "instrument": "Instrument",
+    "all": "All",
+    "availability": "Availability",
+    "clear_date": "Clear date",
+    "filters": "Filters",
+    "advanced_filters": "Advanced filters",
+    "filter_musicians": "Filter musicians",
+    "clear": "Clear",
+    "clear_all_filters": "Clear all filters",
+    "level": "Level",
+    "all_levels": "All levels",
+    "gender": "Gender",
+    "all_genders": "All genders",
+    "max_distance": "Max distance",
+    "no_limit": "No limit",
+    "favorites_only": "Favorites only",
+    "show_only_favorites": "Show favorites only",
+    "showing_all": "Showing all musicians",
+    "showing_within": "Showing musicians within {{km}} km of you",
+    "all_instruments": "All instruments",
+    "no_musicians": "No musicians found",
+    "adjust_filters": "Try adjusting the filters",
+    "musicians_found_one": "{{count}} musician found",
+    "musicians_found_other": "{{count}} musicians found",
+    "skill": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "professional": "Professional"
+    },
+    "gender_opts": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "prefer_not_to_say": "Prefer not to say"
+    },
+    "instruments": {
+      "Guitarra": "Guitar",
+      "Piano": "Piano",
+      "Bateria": "Drums",
+      "Baixo": "Bass",
+      "Violino": "Violin",
+      "Saxofone": "Saxophone",
+      "Trompete": "Trumpet",
+      "Flauta": "Flute",
+      "Violoncelo": "Cello",
+      "Voz": "Vocals",
+      "Ukulele": "Ukulele",
+      "Outro": "Other"
+    },
+    "popup": {
+      "no_instrument": "Instrument not specified",
+      "view_profile": "View Full Profile",
+      "message": "Message",
+      "schedule": "Schedule",
+      "register_to_contact": "Register to contact",
+      "default_message": "Hi! I'd like to chat about a jam session.",
+      "message_sent_title": "Message sent!",
+      "message_sent_desc": "Your message was sent successfully.",
+      "error_title": "Error",
+      "error_desc": "Could not send the message."
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -33,35 +34,16 @@ interface MapFiltersProps {
   onFiltersChange: (filters: MapFiltersState) => void;
 }
 
-const INSTRUMENTS = [
-  'Guitarra',
-  'Piano',
-  'Bateria',
-  'Baixo',
-  'Violino',
-  'Saxofone',
-  'Trompete',
-  'Flauta',
-  'Violoncelo',
-  'Voz',
-  'Outro',
+const INSTRUMENT_KEYS = [
+  'Guitarra', 'Piano', 'Bateria', 'Baixo', 'Violino', 'Saxofone',
+  'Trompete', 'Flauta', 'Violoncelo', 'Voz', 'Outro',
 ];
 
-const SKILL_LEVELS = [
-  { value: 'beginner', label: 'Iniciante' },
-  { value: 'intermediate', label: 'Intermédio' },
-  { value: 'advanced', label: 'Avançado' },
-  { value: 'professional', label: 'Profissional' },
-];
-
-const GENDERS = [
-  { value: 'male', label: 'Masculino' },
-  { value: 'female', label: 'Feminino' },
-  { value: 'other', label: 'Outro' },
-  { value: 'prefer_not_to_say', label: 'Prefere não dizer' },
-];
+const SKILL_LEVEL_KEYS = ['beginner', 'intermediate', 'advanced', 'professional'] as const;
+const GENDER_KEYS = ['male', 'female', 'other', 'prefer_not_to_say'] as const;
 
 const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const activeFiltersCount = [
@@ -98,7 +80,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
           className="bg-background/95 backdrop-blur shadow-lg"
         >
           <Filter className="h-4 w-4 mr-2" />
-          Filtros
+          {t('map.filters')}
           {activeFiltersCount > 0 && (
             <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
               {activeFiltersCount}
@@ -109,7 +91,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
       <SheetContent side="left" className="w-80">
         <SheetHeader>
           <SheetTitle className="flex items-center justify-between">
-            Filtrar músicos
+            {t('map.filter_musicians')}
             {activeFiltersCount > 0 && (
               <Button
                 variant="ghost"
@@ -118,7 +100,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
                 className="text-muted-foreground"
               >
                 <X className="h-4 w-4 mr-1" />
-                Limpar
+                {t('map.clear')}
               </Button>
             )}
           </SheetTitle>
@@ -129,11 +111,11 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2 cursor-pointer">
               <Heart className="h-4 w-4 text-red-500" />
-              Mostrar apenas favoritos
+              {t('map.show_only_favorites')}
             </Label>
             <Switch
               checked={filters.favoritesOnly}
-              onCheckedChange={(checked) => 
+              onCheckedChange={(checked) =>
                 onFiltersChange({ ...filters, favoritesOnly: checked })
               }
             />
@@ -144,10 +126,10 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Distância máxima
+                {t('map.max_distance')}
               </Label>
               <span className="text-sm font-medium">
-                {filters.maxDistance === 0 ? 'Sem limite' : `${filters.maxDistance} km`}
+                {filters.maxDistance === 0 ? t('map.no_limit') : `${filters.maxDistance} km`}
               </span>
             </div>
             <Slider
@@ -158,26 +140,26 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              {filters.maxDistance === 0 
-                ? 'A mostrar todos os músicos' 
-                : `A mostrar músicos até ${filters.maxDistance} km de si`}
+              {filters.maxDistance === 0
+                ? t('map.showing_all')
+                : t('map.showing_within', { km: filters.maxDistance })}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Instrumento</Label>
+            <Label>{t('map.instrument')}</Label>
             <Select
               value={filters.instrument || 'all'}
               onValueChange={(value) => handleFilterChange('instrument', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos os instrumentos" />
+                <SelectValue placeholder={t('map.all_instruments')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os instrumentos</SelectItem>
-                {INSTRUMENTS.map((instrument) => (
+                <SelectItem value="all">{t('map.all_instruments')}</SelectItem>
+                {INSTRUMENT_KEYS.map((instrument) => (
                   <SelectItem key={instrument} value={instrument}>
-                    {instrument}
+                    {t(`map.instruments.${instrument}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -185,19 +167,19 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label>Nível</Label>
+            <Label>{t('map.level')}</Label>
             <Select
               value={filters.skillLevel || 'all'}
               onValueChange={(value) => handleFilterChange('skillLevel', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos os níveis" />
+                <SelectValue placeholder={t('map.all_levels')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os níveis</SelectItem>
-                {SKILL_LEVELS.map((level) => (
-                  <SelectItem key={level.value} value={level.value}>
-                    {level.label}
+                <SelectItem value="all">{t('map.all_levels')}</SelectItem>
+                {SKILL_LEVEL_KEYS.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {t(`map.skill.${level}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -205,19 +187,19 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label>Género</Label>
+            <Label>{t('map.gender')}</Label>
             <Select
               value={filters.gender || 'all'}
               onValueChange={(value) => handleFilterChange('gender', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos os géneros" />
+                <SelectValue placeholder={t('map.all_genders')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os géneros</SelectItem>
-                {GENDERS.map((gender) => (
-                  <SelectItem key={gender.value} value={gender.value}>
-                    {gender.label}
+                <SelectItem value="all">{t('map.all_genders')}</SelectItem>
+                {GENDER_KEYS.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {t(`map.gender_opts.${g}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

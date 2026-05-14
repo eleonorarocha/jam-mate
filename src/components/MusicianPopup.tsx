@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ interface MusicianPopupProps {
 }
 
 const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: MusicianPopupProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -45,19 +47,19 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
     const { error } = await supabase.from('messages').insert({
       sender_id: user.id,
       receiver_id: musician.id,
-      content: 'Olá! Gostaria de conversar sobre uma jam session.',
+      content: t('map.popup.default_message'),
     });
 
     if (error) {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível enviar a mensagem.',
+        title: t('map.popup.error_title'),
+        description: t('map.popup.error_desc'),
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Mensagem enviada!',
-        description: 'A sua mensagem foi enviada com sucesso.',
+        title: t('map.popup.message_sent_title'),
+        description: t('map.popup.message_sent_desc'),
       });
       onClose();
     }
@@ -112,7 +114,11 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
             <div className="flex items-center justify-between">
-              <Badge variant="secondary">{musician.instrument || 'Instrumento não especificado'}</Badge>
+              <Badge variant="secondary">
+                {musician.instrument
+                  ? t(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
+                  : t('map.popup.no_instrument')}
+              </Badge>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-primary text-primary" />
                 <span className="text-sm font-medium">
@@ -134,7 +140,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                     className="w-full"
                   >
                     <ExternalLink className="h-4 w-4 mr-1" />
-                    Ver Perfil Completo
+                    {t('map.popup.view_profile')}
                   </Button>
                   <div className="flex gap-2">
                     <Button
@@ -144,7 +150,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                       disabled={user?.id === musician.id}
                     >
                       <MessageSquare className="h-4 w-4 mr-1" />
-                      Mensagem
+                      {t('map.popup.message')}
                     </Button>
                     <Button
                       size="sm"
@@ -154,7 +160,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                       disabled={user?.id === musician.id}
                     >
                       <Calendar className="h-4 w-4 mr-1" />
-                      Agendar
+                      {t('map.popup.schedule')}
                     </Button>
                   </div>
                 </>
@@ -164,7 +170,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                   className="w-full"
                   onClick={() => navigate('/auth')}
                 >
-                  Registar para contactar
+                  {t('map.popup.register_to_contact')}
                 </Button>
               )}
             </div>
