@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -33,33 +34,13 @@ interface MapFiltersProps {
   onFiltersChange: (filters: MapFiltersState) => void;
 }
 
-const INSTRUMENTS = [
-  'Guitarra',
-  'Piano',
-  'Bateria',
-  'Baixo',
-  'Violino',
-  'Saxofone',
-  'Trompete',
-  'Flauta',
-  'Violoncelo',
-  'Voz',
-  'Outro',
+const INSTRUMENT_KEYS = [
+  'Guitarra', 'Piano', 'Bateria', 'Baixo', 'Violino', 'Saxofone',
+  'Trompete', 'Flauta', 'Violoncelo', 'Voz', 'Outro',
 ];
 
-const SKILL_LEVELS = [
-  { value: 'beginner', label: 'Iniciante' },
-  { value: 'intermediate', label: 'Intermédio' },
-  { value: 'advanced', label: 'Avançado' },
-  { value: 'professional', label: 'Profissional' },
-];
-
-const GENDERS = [
-  { value: 'male', label: 'Masculino' },
-  { value: 'female', label: 'Feminino' },
-  { value: 'other', label: 'Outro' },
-  { value: 'prefer_not_to_say', label: 'Prefere não dizer' },
-];
+const SKILL_LEVEL_KEYS = ['beginner', 'intermediate', 'advanced', 'professional'] as const;
+const GENDER_KEYS = ['male', 'female', 'other', 'prefer_not_to_say'] as const;
 
 const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
   const [open, setOpen] = useState(false);
