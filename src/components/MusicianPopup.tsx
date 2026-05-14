@@ -140,7 +140,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                     className="w-full"
                   >
                     <ExternalLink className="h-4 w-4 mr-1" />
-                    Ver Perfil Completo
+                    {t('map.popup.view_profile')}
                   </Button>
                   <div className="flex gap-2">
                     <Button
