@@ -150,7 +150,7 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                       disabled={user?.id === musician.id}
                     >
                       <MessageSquare className="h-4 w-4 mr-1" />
-                      Mensagem
+                      {t('map.popup.message')}
                     </Button>
                     <Button
                       size="sm"
