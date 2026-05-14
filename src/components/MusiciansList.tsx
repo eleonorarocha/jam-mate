@@ -79,9 +79,9 @@ const MusiciansList = ({
     return (
       <div className="flex-1 flex items-center justify-center p-8 text-center">
         <div>
-          <p className="text-muted-foreground">Nenhum músico encontrado</p>
+          <p className="text-muted-foreground">{t('map.no_musicians')}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Tenta ajustar os filtros
+            {t('map.adjust_filters')}
           </p>
         </div>
       </div>
@@ -92,7 +92,7 @@ const MusiciansList = ({
     <ScrollArea className="flex-1">
       <div className="p-4 space-y-3">
         <p className="text-sm text-muted-foreground mb-2">
-          {sortedMusicians.length} músico{sortedMusicians.length !== 1 ? 's' : ''} encontrado{sortedMusicians.length !== 1 ? 's' : ''}
+          {t(sortedMusicians.length === 1 ? 'map.musicians_found_one' : 'map.musicians_found_other', { count: sortedMusicians.length })}
         </p>
         {sortedMusicians.map((musician) => (
           <MusicianCard
