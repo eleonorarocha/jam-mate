@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import MusicianCard from './MusicianCard';
 import { useFavorites } from '@/hooks/useFavorites';
