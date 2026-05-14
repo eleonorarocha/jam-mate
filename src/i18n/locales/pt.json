@@ -57,5 +57,71 @@
       "password_required": "Password é obrigatória"
     }
   },
-  "language": "Idioma"
+  "language": "Idioma",
+  "map": {
+    "search_musician": "Procurar músico...",
+    "city_country": "Cidade ou país...",
+    "instrument": "Instrumento",
+    "all": "Todos",
+    "availability": "Disponibilidade",
+    "clear_date": "Limpar data",
+    "filters": "Filtros",
+    "advanced_filters": "Filtros avançados",
+    "filter_musicians": "Filtrar músicos",
+    "clear": "Limpar",
+    "clear_all_filters": "Limpar todos os filtros",
+    "level": "Nível",
+    "all_levels": "Todos os níveis",
+    "gender": "Género",
+    "all_genders": "Todos os géneros",
+    "max_distance": "Distância máxima",
+    "no_limit": "Sem limite",
+    "favorites_only": "Apenas favoritos",
+    "show_only_favorites": "Mostrar apenas favoritos",
+    "showing_all": "A mostrar todos os músicos",
+    "showing_within": "A mostrar músicos até {{km}} km de si",
+    "all_instruments": "Todos os instrumentos",
+    "no_musicians": "Nenhum músico encontrado",
+    "adjust_filters": "Tenta ajustar os filtros",
+    "musicians_found_one": "{{count}} músico encontrado",
+    "musicians_found_other": "{{count}} músicos encontrados",
+    "skill": {
+      "beginner": "Iniciante",
+      "intermediate": "Intermédio",
+      "advanced": "Avançado",
+      "professional": "Profissional"
+    },
+    "gender_opts": {
+      "male": "Masculino",
+      "female": "Feminino",
+      "other": "Outro",
+      "prefer_not_to_say": "Prefere não dizer"
+    },
+    "instruments": {
+      "Guitarra": "Guitarra",
+      "Piano": "Piano",
+      "Bateria": "Bateria",
+      "Baixo": "Baixo",
+      "Violino": "Violino",
+      "Saxofone": "Saxofone",
+      "Trompete": "Trompete",
+      "Flauta": "Flauta",
+      "Violoncelo": "Violoncelo",
+      "Voz": "Voz",
+      "Ukulele": "Ukulele",
+      "Outro": "Outro"
+    },
+    "popup": {
+      "no_instrument": "Instrumento não especificado",
+      "view_profile": "Ver Perfil Completo",
+      "message": "Mensagem",
+      "schedule": "Agendar",
+      "register_to_contact": "Registar para contactar",
+      "default_message": "Olá! Gostaria de conversar sobre uma jam session.",
+      "message_sent_title": "Mensagem enviada!",
+      "message_sent_desc": "A sua mensagem foi enviada com sucesso.",
+      "error_title": "Erro",
+      "error_desc": "Não foi possível enviar a mensagem."
+    }
+  }
 }
