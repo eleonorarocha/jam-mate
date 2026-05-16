@@ -148,7 +148,7 @@ const HomeMapSidebar = ({
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold">Filtros</h2>
+          <h2 className="font-semibold">{t('map.filters')}</h2>
           {activeFiltersCount > 0 && (
             <Badge variant="secondary" className="ml-1">
               {activeFiltersCount}
@@ -164,7 +164,7 @@ const HomeMapSidebar = ({
               className="h-8 px-2 text-xs"
             >
               <X className="h-3 w-3 mr-1" />
-              Limpar
+              {t('map.clear')}
             </Button>
           )}
           <Button
@@ -183,12 +183,12 @@ const HomeMapSidebar = ({
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">
-            {visibleCount} {visibleCount === 1 ? 'músico encontrado' : 'músicos encontrados'}
+            {t(visibleCount === 1 ? 'map.musicians_found_one' : 'map.musicians_found_other', { count: visibleCount })}
           </span>
         </div>
         {activeFiltersCount > 0 && (
           <Button variant="ghost" size="sm" onClick={handleClearFilters} className="h-7 text-xs text-muted-foreground hover:text-foreground">
-            Limpar filtros
+            {t('map.clear_all_filters')}
           </Button>
         )}
       </div>
