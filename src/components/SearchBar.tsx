@@ -6,7 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { pt, enUS, es, fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
+
+const dateLocaleMap: Record<string, typeof pt> = { pt, en: enUS, es, fr };
 
 interface SearchBarProps {
   onSearch?: (location: string, date: Date | undefined, coordinates?: [number, number]) => void;
