@@ -6,7 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { pt, enUS, es, fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
+
+const dateLocaleMap: Record<string, typeof pt> = { pt, en: enUS, es, fr };
 
 interface SearchBarProps {
   onSearch?: (location: string, date: Date | undefined, coordinates?: [number, number]) => void;
@@ -21,6 +24,8 @@ interface GeocoderSuggestion {
 }
 
 const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleMap[i18n.language?.split('-')[0]] || enUS;
   const [location, setLocation] = useState('');
   const [date, setDate] = useState<Date | undefined>();
   const [suggestions, setSuggestions] = useState<GeocoderSuggestion[]>([]);
@@ -52,7 +57,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
     setIsLoading(true);
     try {
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&types=place,locality,neighborhood&language=pt&limit=5`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&types=place,locality,neighborhood&language=${i18n.language?.split('-')[0] || 'en'}&limit=5`
       );
       const data = await res.json();
       setSuggestions(data.features || []);
@@ -117,7 +122,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
           <MapPin className="h-5 w-5 text-muted-foreground shrink-0" />
           <Input
             type="text"
-            placeholder="Onde? (cidade, região...)"
+            placeholder={t('map.where_ph')}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
@@ -153,7 +158,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
             <button className="flex items-center gap-2 px-4 py-2 hover:bg-muted rounded-full transition-colors">
               <CalendarDays className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                {date ? format(date, 'dd MMM', { locale: pt }) : 'Quando?'}
+                {date ? format(date, 'dd MMM', { locale: dateLocale }) : t('map.when_ph')}
               </span>
             </button>
           </PopoverTrigger>
@@ -162,7 +167,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
               mode="single"
               selected={date}
               onSelect={setDate}
-              locale={pt}
+              locale={dateLocale}
               initialFocus
             />
           </PopoverContent>

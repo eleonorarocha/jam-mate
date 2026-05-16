@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import { pt, enUS, es, fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -71,17 +72,10 @@ const instruments = [
   'Outro',
 ];
 
-const skillLevels = [
-  { value: 'beginner', label: 'Iniciante' },
-  { value: 'intermediate', label: 'Intermédio' },
-  { value: 'advanced', label: 'Avançado' },
-  { value: 'professional', label: 'Profissional' },
-];
+const SKILL_LEVEL_KEYS = ['beginner', 'intermediate', 'advanced', 'professional'] as const;
+const GENDER_KEYS = ['male', 'female'] as const;
 
-const genders = [
-  { value: 'male', label: 'Masculino' },
-  { value: 'female', label: 'Feminino' },
-];
+const dateLocaleMap: Record<string, typeof pt> = { pt, en: enUS, es, fr };
 
 const HomeMapSidebar = ({
   filters,
@@ -91,6 +85,8 @@ const HomeMapSidebar = ({
   visibleCount = 0,
   isAuthenticated = true,
 }: HomeMapSidebarProps) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleMap[i18n.language?.split('-')[0]] || enUS;
   const activeFiltersCount = [
     filters.searchQuery,
     filters.city,
@@ -152,7 +148,7 @@ const HomeMapSidebar = ({
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold">Filtros</h2>
+          <h2 className="font-semibold">{t('map.filters')}</h2>
           {activeFiltersCount > 0 && (
             <Badge variant="secondary" className="ml-1">
               {activeFiltersCount}
@@ -168,7 +164,7 @@ const HomeMapSidebar = ({
               className="h-8 px-2 text-xs"
             >
               <X className="h-3 w-3 mr-1" />
-              Limpar
+              {t('map.clear')}
             </Button>
           )}
           <Button
@@ -187,12 +183,12 @@ const HomeMapSidebar = ({
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium">
-            {visibleCount} {visibleCount === 1 ? 'músico encontrado' : 'músicos encontrados'}
+            {t(visibleCount === 1 ? 'map.musicians_found_one' : 'map.musicians_found_other', { count: visibleCount })}
           </span>
         </div>
         {activeFiltersCount > 0 && (
           <Button variant="ghost" size="sm" onClick={handleClearFilters} className="h-7 text-xs text-muted-foreground hover:text-foreground">
-            Limpar filtros
+            {t('map.clear_all_filters')}
           </Button>
         )}
       </div>
@@ -204,10 +200,10 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <Search className="h-4 w-4" />
-              Pesquisar por nome
+              {t('map.search_by_name')}
             </Label>
             <Input
-              placeholder="Nome do músico..."
+              placeholder={t('map.musician_name_ph')}
               value={filters.searchQuery}
               onChange={(e) =>
                 onFiltersChange({ ...filters, searchQuery: e.target.value })
@@ -221,10 +217,10 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <MapPin className="h-4 w-4" />
-              Cidade / Região
+              {t('map.city_region')}
             </Label>
             <Input
-              placeholder="Ex: Lisboa, Porto..."
+              placeholder={t('map.city_region_ph')}
               value={filters.city}
               onChange={(e) =>
                 onFiltersChange({ ...filters, city: e.target.value })
@@ -239,12 +235,12 @@ const HomeMapSidebar = ({
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <MapPin className="h-4 w-4" />
-                Distância máxima
+                {t('map.max_distance')}
               </Label>
               <span className="text-sm text-muted-foreground">
                 {filters.maxDistance === 0
-                  ? 'Sem limite'
-                  : `${filters.maxDistance} km`}
+                  ? t('map.no_limit')
+                  : `${filters.maxDistance} ${t('map.km_suffix')}`}
               </span>
             </div>
             <Slider
@@ -257,8 +253,8 @@ const HomeMapSidebar = ({
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Sem limite</span>
-              <span>500 km</span>
+              <span>{t('map.no_limit')}</span>
+              <span>500 {t('map.km_suffix')}</span>
             </div>
           </div>
 
@@ -268,7 +264,7 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <Music className="h-4 w-4" />
-              Instrumento
+              {t('map.instrument')}
             </Label>
             <Select
               value={filters.instrument}
@@ -280,13 +276,13 @@ const HomeMapSidebar = ({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos os instrumentos" />
+                <SelectValue placeholder={t('map.all_instruments')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os instrumentos</SelectItem>
+                <SelectItem value="all">{t('map.all_instruments')}</SelectItem>
                 {instruments.map((instrument) => (
                   <SelectItem key={instrument} value={instrument}>
-                    {instrument}
+                    {t(`map.instruments.${instrument}`, { defaultValue: instrument })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -299,7 +295,7 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <GraduationCap className="h-4 w-4" />
-              Nível de experiência
+              {t('map.experience_level')}
             </Label>
             <Select
               value={filters.skillLevel}
@@ -311,13 +307,13 @@ const HomeMapSidebar = ({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos os níveis" />
+                <SelectValue placeholder={t('map.all_levels')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os níveis</SelectItem>
-                {skillLevels.map((level) => (
-                  <SelectItem key={level.value} value={level.value}>
-                    {level.label}
+                <SelectItem value="all">{t('map.all_levels')}</SelectItem>
+                {SKILL_LEVEL_KEYS.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {t(`map.skill.${key}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -328,7 +324,7 @@ const HomeMapSidebar = ({
 
           {/* Gender Filter */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Género</Label>
+            <Label className="text-sm font-medium">{t('map.gender')}</Label>
             <Select
               value={filters.gender}
               onValueChange={(value) =>
@@ -339,13 +335,13 @@ const HomeMapSidebar = ({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos" />
+                <SelectValue placeholder={t('map.all')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {genders.map((gender) => (
-                  <SelectItem key={gender.value} value={gender.value}>
-                    {gender.label}
+                <SelectItem value="all">{t('map.all')}</SelectItem>
+                {GENDER_KEYS.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {t(`map.gender_opts.${key}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -360,7 +356,7 @@ const HomeMapSidebar = ({
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm font-medium">
                   <CalendarIcon className="h-4 w-4" />
-                  Disponibilidade
+                  {t('map.availability')}
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -373,8 +369,8 @@ const HomeMapSidebar = ({
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filters.availabilityDate
-                        ? format(new Date(filters.availabilityDate), "PPP", { locale: pt })
-                        : "Selecionar data"}
+                        ? format(new Date(filters.availabilityDate), "PPP", { locale: dateLocale })
+                        : t('map.select_date')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -401,7 +397,7 @@ const HomeMapSidebar = ({
                     className="h-7 text-xs text-muted-foreground hover:text-foreground w-full"
                   >
                     <X className="h-3 w-3 mr-1" />
-                    Limpar data
+                    {t('map.clear_date')}
                   </Button>
                 )}
               </div>
@@ -412,7 +408,7 @@ const HomeMapSidebar = ({
               <div className="flex items-center justify-between">
                 <Label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
                   <Heart className="h-4 w-4 text-destructive" />
-                  Apenas favoritos
+                  {t('map.favorites_only')}
                 </Label>
                 <Switch
                   checked={filters.favoritesOnly}
