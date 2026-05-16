@@ -200,10 +200,10 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <Search className="h-4 w-4" />
-              Pesquisar por nome
+              {t('map.search_by_name')}
             </Label>
             <Input
-              placeholder="Nome do músico..."
+              placeholder={t('map.musician_name_ph')}
               value={filters.searchQuery}
               onChange={(e) =>
                 onFiltersChange({ ...filters, searchQuery: e.target.value })
@@ -217,10 +217,10 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <MapPin className="h-4 w-4" />
-              Cidade / Região
+              {t('map.city_region')}
             </Label>
             <Input
-              placeholder="Ex: Lisboa, Porto..."
+              placeholder={t('map.city_region_ph')}
               value={filters.city}
               onChange={(e) =>
                 onFiltersChange({ ...filters, city: e.target.value })
@@ -235,12 +235,12 @@ const HomeMapSidebar = ({
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2 text-sm font-medium">
                 <MapPin className="h-4 w-4" />
-                Distância máxima
+                {t('map.max_distance')}
               </Label>
               <span className="text-sm text-muted-foreground">
                 {filters.maxDistance === 0
-                  ? 'Sem limite'
-                  : `${filters.maxDistance} km`}
+                  ? t('map.no_limit')
+                  : `${filters.maxDistance} ${t('map.km_suffix')}`}
               </span>
             </div>
             <Slider
@@ -253,8 +253,8 @@ const HomeMapSidebar = ({
               className="w-full"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Sem limite</span>
-              <span>500 km</span>
+              <span>{t('map.no_limit')}</span>
+              <span>500 {t('map.km_suffix')}</span>
             </div>
           </div>
 
@@ -264,7 +264,7 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <Music className="h-4 w-4" />
-              Instrumento
+              {t('map.instrument')}
             </Label>
             <Select
               value={filters.instrument}
@@ -276,13 +276,13 @@ const HomeMapSidebar = ({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos os instrumentos" />
+                <SelectValue placeholder={t('map.all_instruments')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os instrumentos</SelectItem>
+                <SelectItem value="all">{t('map.all_instruments')}</SelectItem>
                 {instruments.map((instrument) => (
                   <SelectItem key={instrument} value={instrument}>
-                    {instrument}
+                    {t(`map.instruments.${instrument}`, { defaultValue: instrument })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -295,7 +295,7 @@ const HomeMapSidebar = ({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-sm font-medium">
               <GraduationCap className="h-4 w-4" />
-              Nível de experiência
+              {t('map.experience_level')}
             </Label>
             <Select
               value={filters.skillLevel}
@@ -307,13 +307,13 @@ const HomeMapSidebar = ({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos os níveis" />
+                <SelectValue placeholder={t('map.all_levels')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os níveis</SelectItem>
-                {skillLevels.map((level) => (
-                  <SelectItem key={level.value} value={level.value}>
-                    {level.label}
+                <SelectItem value="all">{t('map.all_levels')}</SelectItem>
+                {SKILL_LEVEL_KEYS.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {t(`map.skill.${key}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -324,7 +324,7 @@ const HomeMapSidebar = ({
 
           {/* Gender Filter */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Género</Label>
+            <Label className="text-sm font-medium">{t('map.gender')}</Label>
             <Select
               value={filters.gender}
               onValueChange={(value) =>
@@ -335,13 +335,13 @@ const HomeMapSidebar = ({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Todos" />
+                <SelectValue placeholder={t('map.all')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {genders.map((gender) => (
-                  <SelectItem key={gender.value} value={gender.value}>
-                    {gender.label}
+                <SelectItem value="all">{t('map.all')}</SelectItem>
+                {GENDER_KEYS.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {t(`map.gender_opts.${key}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -356,7 +356,7 @@ const HomeMapSidebar = ({
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-sm font-medium">
                   <CalendarIcon className="h-4 w-4" />
-                  Disponibilidade
+                  {t('map.availability')}
                 </Label>
                 <Popover>
                   <PopoverTrigger asChild>
@@ -369,8 +369,8 @@ const HomeMapSidebar = ({
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {filters.availabilityDate
-                        ? format(new Date(filters.availabilityDate), "PPP", { locale: pt })
-                        : "Selecionar data"}
+                        ? format(new Date(filters.availabilityDate), "PPP", { locale: dateLocale })
+                        : t('map.select_date')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -397,7 +397,7 @@ const HomeMapSidebar = ({
                     className="h-7 text-xs text-muted-foreground hover:text-foreground w-full"
                   >
                     <X className="h-3 w-3 mr-1" />
-                    Limpar data
+                    {t('map.clear_date')}
                   </Button>
                 )}
               </div>
@@ -408,7 +408,7 @@ const HomeMapSidebar = ({
               <div className="flex items-center justify-between">
                 <Label className="flex items-center gap-2 cursor-pointer text-sm font-medium">
                   <Heart className="h-4 w-4 text-destructive" />
-                  Apenas favoritos
+                  {t('map.favorites_only')}
                 </Label>
                 <Switch
                   checked={filters.favoritesOnly}
