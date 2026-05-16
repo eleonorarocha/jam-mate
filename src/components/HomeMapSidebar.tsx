@@ -85,6 +85,8 @@ const HomeMapSidebar = ({
   visibleCount = 0,
   isAuthenticated = true,
 }: HomeMapSidebarProps) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleMap[i18n.language?.split('-')[0]] || enUS;
   const activeFiltersCount = [
     filters.searchQuery,
     filters.city,
