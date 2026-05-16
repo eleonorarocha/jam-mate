@@ -167,7 +167,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
               mode="single"
               selected={date}
               onSelect={setDate}
-              locale={pt}
+              locale={dateLocale}
               initialFocus
             />
           </PopoverContent>
