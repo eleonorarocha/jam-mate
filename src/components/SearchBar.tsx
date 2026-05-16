@@ -122,7 +122,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
           <MapPin className="h-5 w-5 text-muted-foreground shrink-0" />
           <Input
             type="text"
-            placeholder="Onde? (cidade, região...)"
+            placeholder={t('map.where_ph')}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
