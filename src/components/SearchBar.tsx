@@ -158,7 +158,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
             <button className="flex items-center gap-2 px-4 py-2 hover:bg-muted rounded-full transition-colors">
               <CalendarDays className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">
-                {date ? format(date, 'dd MMM', { locale: pt }) : 'Quando?'}
+                {date ? format(date, 'dd MMM', { locale: dateLocale }) : t('map.when_ph')}
               </span>
             </button>
           </PopoverTrigger>
