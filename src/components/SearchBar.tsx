@@ -24,6 +24,8 @@ interface GeocoderSuggestion {
 }
 
 const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
+  const { t, i18n } = useTranslation();
+  const dateLocale = dateLocaleMap[i18n.language?.split('-')[0]] || enUS;
   const [location, setLocation] = useState('');
   const [date, setDate] = useState<Date | undefined>();
   const [suggestions, setSuggestions] = useState<GeocoderSuggestion[]>([]);
