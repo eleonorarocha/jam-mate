@@ -72,17 +72,11 @@ const instruments = [
   'Outro',
 ];
 
-const skillLevels = [
-  { value: 'beginner', label: 'Iniciante' },
-  { value: 'intermediate', label: 'Intermédio' },
-  { value: 'advanced', label: 'Avançado' },
-  { value: 'professional', label: 'Profissional' },
-];
+const SKILL_LEVEL_KEYS = ['beginner', 'intermediate', 'advanced', 'professional'] as const;
+const GENDER_KEYS = ['male', 'female'] as const;
 
-const genders = [
-  { value: 'male', label: 'Masculino' },
-  { value: 'female', label: 'Feminino' },
-];
+const dateLocaleMap: Record<string, Locale> = { pt, en: enUS, es, fr };
+type Locale = typeof pt;
 
 const HomeMapSidebar = ({
   filters,
