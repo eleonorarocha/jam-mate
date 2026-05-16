@@ -57,7 +57,7 @@ const SearchBar = ({ onSearch, onClear }: SearchBarProps) => {
     setIsLoading(true);
     try {
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&types=place,locality,neighborhood&language=pt&limit=5`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&types=place,locality,neighborhood&language=${i18n.language?.split('-')[0] || 'en'}&limit=5`
       );
       const data = await res.json();
       setSuggestions(data.features || []);
