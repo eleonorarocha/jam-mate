@@ -4,6 +4,7 @@
 // Cobertura:
 //   - `map.*`   → componentes do mapa
 //   - `pages.*` → títulos/metadados das rotas (todo o src/)
+//   - `nav.*`   → menu de navegação e links entre páginas (todo o src/)
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,7 +26,7 @@ const MAP_FILES = [
   'src/pages/Map.tsx',
 ];
 
-const NAMESPACES = ['map.', 'pages.'];
+const NAMESPACES = ['map.', 'pages.', 'nav.'];
 
 function read(file) {
   try { return readFileSync(join(ROOT, file), 'utf8'); } catch { return ''; }
@@ -46,7 +47,7 @@ function extractKeys(src, prefixes) {
   // t('key', ...) ou t("key", ...)
   const tRe = /\bt\(\s*['"]([^'"`]+)['"]/g;
   // Strings literais "pages.x.title" usadas noutros contextos (ex.: ROUTE_TITLE_KEYS).
-  const litRe = /['"]((?:map|pages)\.[a-zA-Z0-9_.]+)['"]/g;
+  const litRe = /['"]((?:map|pages|nav)\.[a-zA-Z0-9_.]+)['"]/g;
   for (const re of [tRe, litRe]) {
     let m;
     while ((m = re.exec(src))) {
@@ -72,9 +73,9 @@ const usedKeys = new Set();
 for (const f of MAP_FILES) {
   for (const k of extractKeys(read(f), ['map.'])) usedKeys.add(k);
 }
-// pages.* — varre todo o src/
+// pages.* + nav.* — varre todo o src/
 for (const f of walkDir(join(ROOT, 'src'))) {
-  for (const k of extractKeys(readFileSync(f, 'utf8'), ['pages.'])) usedKeys.add(k);
+  for (const k of extractKeys(readFileSync(f, 'utf8'), ['pages.', 'nav.'])) usedKeys.add(k);
 }
 
 const locales = {};
