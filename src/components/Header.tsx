@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Music, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import UserMenu from './UserMenu';
 import NotificationsDropdown from './NotificationsDropdown';
 import ThemeToggle from './ThemeToggle';
@@ -9,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const Header = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -26,12 +28,12 @@ const Header = () => {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" asChild className="h-9 w-9">
-                <Link to="/about">
+                <Link to="/about" aria-label={t('nav.about_tooltip')}>
                   <Info className="h-4 w-4" />
                 </Link>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Sobre nós</TooltipContent>
+            <TooltipContent>{t('nav.about_tooltip')}</TooltipContent>
           </Tooltip>
           <ThemeToggle />
           {user && <NotificationsDropdown />}

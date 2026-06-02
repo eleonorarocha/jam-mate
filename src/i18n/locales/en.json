@@ -183,5 +183,22 @@
     "not_found": {
       "title": "Page not found"
     }
+  },
+  "nav": {
+    "about_tooltip": "About us",
+    "welcome": "Welcome to JamMate",
+    "create_account": "Create account",
+    "sign_in": "Sign in",
+    "username_fallback": "User",
+    "explore_map": "Explore Map",
+    "my_profile": "My Profile",
+    "messages": "Messages",
+    "schedule": "Schedule",
+    "ratings": "Ratings",
+    "gallery": "Gallery",
+    "favorites": "Favorites",
+    "admin": "Admin",
+    "settings": "Settings",
+    "sign_out": "Sign out"
   }
 }

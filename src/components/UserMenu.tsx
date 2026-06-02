@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { User, Settings, MessageSquare, Star, Calendar, LogOut, MapPin, Image, Heart, UserPlus, LogIn, Shield } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import {
@@ -18,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 const UserMenu = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const unreadCount = useUnreadMessages();
   const { isAdmin } = useAdmin();
   const [profile, setProfile] = useState<{ username: string; avatar_url: string | null } | null>(null);
@@ -72,16 +74,16 @@ const UserMenu = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
-            <p className="text-sm text-muted-foreground">Bem-vindo ao JamMate</p>
+            <p className="text-sm text-muted-foreground">{t('nav.welcome')}</p>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate('/auth')} className="cursor-pointer">
             <UserPlus className="mr-2 h-4 w-4" />
-            <span>Criar conta</span>
+            <span>{t('nav.create_account')}</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate('/auth')} className="cursor-pointer">
             <LogIn className="mr-2 h-4 w-4" />
-            <span>Entrar</span>
+            <span>{t('nav.sign_in')}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -108,22 +110,22 @@ const UserMenu = () => {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile?.username || 'Utilizador'}</p>
+            <p className="text-sm font-medium leading-none">{profile?.username || t('nav.username_fallback')}</p>
             <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate('/map')} className="cursor-pointer">
           <MapPin className="mr-2 h-4 w-4" />
-          <span>Explorar Mapa</span>
+          <span>{t('nav.explore_map')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
           <User className="mr-2 h-4 w-4" />
-          <span>Meu Perfil</span>
+          <span>{t('nav.my_profile')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/messages')} className="cursor-pointer">
           <MessageSquare className="mr-2 h-4 w-4" />
-          <span>Mensagens</span>
+          <span>{t('nav.messages')}</span>
           {unreadCount > 0 && (
             <span className="ml-auto min-w-[20px] h-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1.5">
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -132,35 +134,35 @@ const UserMenu = () => {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/calendar')} className="cursor-pointer">
           <Calendar className="mr-2 h-4 w-4" />
-          <span>Agenda</span>
+          <span>{t('nav.schedule')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/ratings')} className="cursor-pointer">
           <Star className="mr-2 h-4 w-4" />
-          <span>Avaliações</span>
+          <span>{t('nav.ratings')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/gallery')} className="cursor-pointer">
           <Image className="mr-2 h-4 w-4" />
-          <span>Galeria</span>
+          <span>{t('nav.gallery')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/favorites')} className="cursor-pointer">
           <Heart className="mr-2 h-4 w-4" />
-          <span>Favoritos</span>
+          <span>{t('nav.favorites')}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {isAdmin && (
           <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
             <Shield className="mr-2 h-4 w-4" />
-            <span>Administração</span>
+            <span>{t('nav.admin')}</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
-          <span>Configurações</span>
+          <span>{t('nav.settings')}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Sair</span>
+          <span>{t('nav.sign_out')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
