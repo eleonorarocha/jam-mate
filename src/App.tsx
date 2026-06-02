@@ -21,6 +21,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import About from "./pages/About";
 import Admin from "./pages/Admin";
+import { RouteTitle } from "./components/RouteTitle";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <RealtimeNotifications />
+          <RouteTitle />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
