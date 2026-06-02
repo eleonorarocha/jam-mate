@@ -2,13 +2,15 @@
   "auth": {
     "back_home": "← Voltar à página inicial",
     "tagline": "Encontre músicos perto de si, organize jam sessions e faça parte de uma comunidade vibrante.",
-    "stats": { "musicians": "Músicos", "sessions": "Jam Sessions", "rating": "Avaliação" },
-
+    "stats": {
+      "musicians": "Músicos",
+      "sessions": "Jam Sessions",
+      "rating": "Avaliação"
+    },
     "welcome_back": "Bem-vindo de volta",
     "create_account": "Criar conta",
     "subtitle_login": "Entre para encontrar músicos e jam sessions.",
     "subtitle_signup": "Junte-se à comunidade de músicos.",
-
     "first_name": "Nome",
     "last_name": "Sobrenome",
     "phone": "Telefone",
@@ -19,22 +21,18 @@
     "phone_ph": "+351 912 345 678",
     "email_ph": "seu@email.com",
     "password_ph": "••••••••",
-
     "forgot_password": "Esqueceu a password?",
     "sign_in": "Entrar",
     "sign_up": "Criar Conta",
-
     "no_account": "Não tem conta? ",
     "have_account": "Já tem conta? ",
     "go_signup": "Criar conta",
     "go_login": "Entrar",
     "or": "ou",
-
     "recover_title": "Recuperar password",
     "recover_subtitle": "Introduza o seu email para receber um link de recuperação.",
     "send_recovery": "Enviar link de recuperação",
     "back_to_login": "← Voltar ao login",
-
     "toast_welcome_title": "Bem-vindo!",
     "toast_welcome_desc": "Login realizado com sucesso.",
     "toast_account_title": "Conta criada!",
@@ -43,7 +41,6 @@
     "toast_email_sent_desc": "Verifique a sua caixa de entrada para redefinir a password.",
     "toast_error": "Erro",
     "err_already_registered": "Este email já está registado. Tente fazer login.",
-
     "validation": {
       "first_name_required": "Nome é obrigatório",
       "first_name_long": "Nome muito longo",
@@ -134,6 +131,57 @@
       "message_sent_desc": "A sua mensagem foi enviada com sucesso.",
       "error_title": "Erro",
       "error_desc": "Não foi possível enviar a mensagem."
+    }
+  },
+  "pages": {
+    "brand": "JamMate",
+    "index": {
+      "title": "Início"
+    },
+    "auth": {
+      "title": "Entrar ou criar conta"
+    },
+    "onboarding": {
+      "title": "Bem-vindo"
+    },
+    "reset_password": {
+      "title": "Redefinir password"
+    },
+    "map": {
+      "title": "Mapa de músicos"
+    },
+    "profile": {
+      "title": "O meu perfil"
+    },
+    "public_profile": {
+      "title": "Perfil do músico"
+    },
+    "messages": {
+      "title": "Mensagens"
+    },
+    "calendar": {
+      "title": "Calendário"
+    },
+    "ratings": {
+      "title": "Avaliações"
+    },
+    "settings": {
+      "title": "Definições"
+    },
+    "gallery": {
+      "title": "Galeria de sessões"
+    },
+    "favorites": {
+      "title": "Favoritos"
+    },
+    "about": {
+      "title": "Sobre"
+    },
+    "admin": {
+      "title": "Administração"
+    },
+    "not_found": {
+      "title": "Página não encontrada"
     }
   }
 }
