@@ -21,7 +21,7 @@ const floatingIcons = [
 ];
 
 const Auth = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -111,6 +111,7 @@ const Auth = () => {
             phone,
             instrument: '',
             skill_level: 'beginner',
+            language: (i18n.resolvedLanguage || i18n.language || 'pt').slice(0, 2),
           });
           if (profileError) throw profileError;
           toast({ title: t('auth.toast_account_title'), description: t('auth.toast_account_desc') });

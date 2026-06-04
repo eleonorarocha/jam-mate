@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LanguageSwitcherProps {
   variant?: 'icon' | 'compact';
@@ -19,6 +20,15 @@ export const LanguageSwitcher = ({ variant = 'icon', className }: LanguageSwitch
   const current =
     SUPPORTED_LANGUAGES.find((l) => i18n.resolvedLanguage?.startsWith(l.code)) ??
     SUPPORTED_LANGUAGES[1];
+
+  const handleChange = async (code: string) => {
+    await i18n.changeLanguage(code);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('profiles').update({ language: code }).eq('id', user.id);
+    }
+  };
+
 
   return (
     <DropdownMenu>
@@ -44,7 +54,7 @@ export const LanguageSwitcher = ({ variant = 'icon', className }: LanguageSwitch
         {SUPPORTED_LANGUAGES.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => i18n.changeLanguage(lang.code)}
+            onClick={() => handleChange(lang.code)}
             className={
               current.code === lang.code ? 'font-semibold text-primary' : undefined
             }
