@@ -5,8 +5,21 @@ import i18n from '@/i18n';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 
 const SUPPORTED = SUPPORTED_LANGUAGES.map((l) => l.code) as readonly string[];
+const MANUAL_FLAG = 'jammate-lang-manual';
 
-async function syncLanguageFromProfile(userId: string) {
+async function reconcileLanguage(userId: string) {
+  const manual =
+    typeof sessionStorage !== 'undefined' && sessionStorage.getItem(MANUAL_FLAG);
+  const currentLang = (i18n.resolvedLanguage || i18n.language || '').slice(0, 2);
+
+  if (manual && SUPPORTED.includes(currentLang)) {
+    // User explicitly chose a language during this session — push to profile.
+    await supabase.from('profiles').update({ language: currentLang }).eq('id', userId);
+    sessionStorage.removeItem(MANUAL_FLAG);
+    return;
+  }
+
+  // Otherwise, pull saved preference from profile.
   const { data } = await supabase
     .from('profiles')
     .select('language')
@@ -30,8 +43,7 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         setLoading(false);
         if (session?.user) {
-          // Defer to avoid blocking auth callback
-          setTimeout(() => { syncLanguageFromProfile(session.user.id); }, 0);
+          setTimeout(() => { reconcileLanguage(session.user.id); }, 0);
         }
       }
     );
@@ -41,7 +53,7 @@ export const useAuth = () => {
       setUser(session?.user ?? null);
       setLoading(false);
       if (session?.user) {
-        syncLanguageFromProfile(session.user.id);
+        reconcileLanguage(session.user.id);
       }
     });
 

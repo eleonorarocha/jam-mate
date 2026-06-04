@@ -23,9 +23,12 @@ export const LanguageSwitcher = ({ variant = 'icon', className }: LanguageSwitch
 
   const handleChange = async (code: string) => {
     await i18n.changeLanguage(code);
+    // Mark as an explicit user choice so post-login sync pushes (not pulls).
+    try { sessionStorage.setItem('jammate-lang-manual', '1'); } catch { /* ignore */ }
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.from('profiles').update({ language: code }).eq('id', user.id);
+      try { sessionStorage.removeItem('jammate-lang-manual'); } catch { /* ignore */ }
     }
   };
 
