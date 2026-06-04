@@ -74,9 +74,9 @@ const usedKeys = new Set();
 for (const f of MAP_FILES) {
   for (const k of extractKeys(read(f), ['map.'])) usedKeys.add(k);
 }
-// pages.* + nav.* — varre todo o src/
+// pages.* + nav.* + auth.* — varre todo o src/
 for (const f of walkDir(join(ROOT, 'src'))) {
-  for (const k of extractKeys(readFileSync(f, 'utf8'), ['pages.', 'nav.'])) usedKeys.add(k);
+  for (const k of extractKeys(readFileSync(f, 'utf8'), ['pages.', 'nav.', 'auth.'])) usedKeys.add(k);
 }
 
 const locales = {};
