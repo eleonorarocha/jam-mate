@@ -54,7 +54,7 @@ export const LanguageSwitcher = ({ variant = 'icon', className }: LanguageSwitch
         {SUPPORTED_LANGUAGES.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => i18n.changeLanguage(lang.code)}
+            onClick={() => handleChange(lang.code)}
             className={
               current.code === lang.code ? 'font-semibold text-primary' : undefined
             }
