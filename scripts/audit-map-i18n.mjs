@@ -27,7 +27,7 @@ const MAP_FILES = [
   'src/pages/Map.tsx',
 ];
 
-const NAMESPACES = ['map.', 'pages.', 'nav.'];
+const NAMESPACES = ['map.', 'pages.', 'nav.', 'auth.'];
 
 function read(file) {
   try { return readFileSync(join(ROOT, file), 'utf8'); } catch { return ''; }
