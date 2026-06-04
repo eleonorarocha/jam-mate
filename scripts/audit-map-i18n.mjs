@@ -48,7 +48,7 @@ function extractKeys(src, prefixes) {
   // t('key', ...) ou t("key", ...)
   const tRe = /\bt\(\s*['"]([^'"`]+)['"]/g;
   // Strings literais "pages.x.title" usadas noutros contextos (ex.: ROUTE_TITLE_KEYS).
-  const litRe = /['"]((?:map|pages|nav)\.[a-zA-Z0-9_.]+)['"]/g;
+  const litRe = /['"]((?:map|pages|nav|auth)\.[a-zA-Z0-9_.]+)['"]/g;
   for (const re of [tRe, litRe]) {
     let m;
     while ((m = re.exec(src))) {
