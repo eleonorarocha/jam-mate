@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ALTER COLUMN language DROP NOT NULL; ALTER TABLE public.profiles ALTER COLUMN language DROP DEFAULT;

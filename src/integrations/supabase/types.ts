@@ -356,7 +356,7 @@ export type Database = {
           id: string
           identity_verified: boolean | null
           instrument: string
-          language: string
+          language: string | null
           last_name: string | null
           latitude: number | null
           longitude: number | null
@@ -386,7 +386,7 @@ export type Database = {
           id: string
           identity_verified?: boolean | null
           instrument: string
-          language?: string
+          language?: string | null
           last_name?: string | null
           latitude?: number | null
           longitude?: number | null
@@ -416,7 +416,7 @@ export type Database = {
           id?: string
           identity_verified?: boolean | null
           instrument?: string
-          language?: string
+          language?: string | null
           last_name?: string | null
           latitude?: number | null
           longitude?: number | null

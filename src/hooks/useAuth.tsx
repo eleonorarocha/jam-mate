@@ -7,6 +7,16 @@ import { SUPPORTED_LANGUAGES } from '@/i18n';
 const SUPPORTED = SUPPORTED_LANGUAGES.map((l) => l.code) as readonly string[];
 const MANUAL_FLAG = 'jammate-lang-manual';
 
+function detectBrowserLang(): string {
+  if (typeof navigator === 'undefined') return 'en';
+  const candidates = [navigator.language, ...(navigator.languages || [])];
+  for (const raw of candidates) {
+    const code = (raw || '').toLowerCase().slice(0, 2);
+    if (SUPPORTED.includes(code)) return code;
+  }
+  return 'en';
+}
+
 async function reconcileLanguage(userId: string) {
   const manual =
     typeof sessionStorage !== 'undefined' && sessionStorage.getItem(MANUAL_FLAG);
@@ -19,16 +29,22 @@ async function reconcileLanguage(userId: string) {
     return;
   }
 
-  // Otherwise, pull saved preference from profile.
+  // Pull saved preference from profile.
   const { data } = await supabase
     .from('profiles')
     .select('language')
     .eq('id', userId)
     .maybeSingle();
-  const lang = data?.language;
-  if (lang && SUPPORTED.includes(lang) && i18n.resolvedLanguage !== lang) {
-    await i18n.changeLanguage(lang);
+  const saved = data?.language;
+  if (saved && SUPPORTED.includes(saved)) {
+    if (i18n.resolvedLanguage !== saved) await i18n.changeLanguage(saved);
+    return;
   }
+
+  // Profile has no language set → fall back to browser locale and persist it.
+  const fallback = detectBrowserLang();
+  if (i18n.resolvedLanguage !== fallback) await i18n.changeLanguage(fallback);
+  await supabase.from('profiles').update({ language: fallback }).eq('id', userId);
 }
 
 export const useAuth = () => {
