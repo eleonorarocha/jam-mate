@@ -5,6 +5,7 @@
 //   - `map.*`   → componentes do mapa
 //   - `pages.*` → títulos/metadados das rotas (todo o src/)
 //   - `nav.*`   → menu de navegação e links entre páginas (todo o src/)
+//   - `auth.*`  → ecrãs de autenticação (login/registo/recuperação) (todo o src/)
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname, resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
