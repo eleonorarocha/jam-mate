@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
 import { supabase } from '@/integrations/supabase/client';
+import { updateProfileLanguage, normalizeLanguage } from '@/lib/profileLanguage';
 
 interface LanguageSwitcherProps {
   variant?: 'icon' | 'compact';
@@ -22,15 +23,17 @@ export const LanguageSwitcher = ({ variant = 'icon', className }: LanguageSwitch
     SUPPORTED_LANGUAGES[1];
 
   const handleChange = async (code: string) => {
-    await i18n.changeLanguage(code);
+    const safe = normalizeLanguage(code);
+    await i18n.changeLanguage(safe);
     // Mark as an explicit user choice so post-login sync pushes (not pulls).
     try { sessionStorage.setItem('jammate-lang-manual', '1'); } catch { /* ignore */ }
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      await supabase.from('profiles').update({ language: code }).eq('id', user.id);
+      await updateProfileLanguage(user.id, safe);
       try { sessionStorage.removeItem('jammate-lang-manual'); } catch { /* ignore */ }
     }
   };
+
 
 
   return (

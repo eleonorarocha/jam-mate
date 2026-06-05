@@ -10,6 +10,8 @@ import { Music, Guitar, Headphones, Mic2, Piano, Eye, EyeOff } from 'lucide-reac
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { normalizeLanguage } from '@/lib/profileLanguage';
+
 
 const floatingIcons = [
   { Icon: Guitar, x: '10%', y: '20%', delay: 0, size: 32 },
@@ -111,7 +113,7 @@ const Auth = () => {
             phone,
             instrument: '',
             skill_level: 'beginner',
-            language: (i18n.resolvedLanguage || i18n.language || 'pt').slice(0, 2),
+            language: normalizeLanguage(i18n.resolvedLanguage || i18n.language || 'pt'),
           });
           if (profileError) throw profileError;
           toast({ title: t('auth.toast_account_title'), description: t('auth.toast_account_desc') });
