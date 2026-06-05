@@ -111,7 +111,7 @@ const Auth = () => {
             phone,
             instrument: '',
             skill_level: 'beginner',
-            language: (i18n.resolvedLanguage || i18n.language || 'pt').slice(0, 2),
+            language: normalizeLanguage(i18n.resolvedLanguage || i18n.language || 'pt'),
           });
           if (profileError) throw profileError;
           toast({ title: t('auth.toast_account_title'), description: t('auth.toast_account_desc') });
