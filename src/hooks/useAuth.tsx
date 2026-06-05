@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import i18n from '@/i18n';
 import { SUPPORTED_LANGUAGES } from '@/i18n';
+import { updateProfileLanguage, normalizeLanguage } from '@/lib/profileLanguage';
 
 const SUPPORTED = SUPPORTED_LANGUAGES.map((l) => l.code) as readonly string[];
 const MANUAL_FLAG = 'jammate-lang-manual';
@@ -24,7 +25,7 @@ async function reconcileLanguage(userId: string) {
 
   if (manual && SUPPORTED.includes(currentLang)) {
     // User explicitly chose a language during this session — push to profile.
-    await supabase.from('profiles').update({ language: currentLang }).eq('id', userId);
+    await updateProfileLanguage(userId, currentLang);
     sessionStorage.removeItem(MANUAL_FLAG);
     return;
   }
@@ -42,10 +43,11 @@ async function reconcileLanguage(userId: string) {
   }
 
   // Profile has no language set → fall back to browser locale and persist it.
-  const fallback = detectBrowserLang();
+  const fallback = normalizeLanguage(detectBrowserLang());
   if (i18n.resolvedLanguage !== fallback) await i18n.changeLanguage(fallback);
-  await supabase.from('profiles').update({ language: fallback }).eq('id', userId);
+  await updateProfileLanguage(userId, fallback);
 }
+
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
