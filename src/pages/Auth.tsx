@@ -10,6 +10,8 @@ import { Music, Guitar, Headphones, Mic2, Piano, Eye, EyeOff } from 'lucide-reac
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { normalizeLanguage } from '@/lib/profileLanguage';
+
 
 const floatingIcons = [
   { Icon: Guitar, x: '10%', y: '20%', delay: 0, size: 32 },
