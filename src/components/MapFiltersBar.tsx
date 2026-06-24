@@ -66,7 +66,8 @@ const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
   ].filter(Boolean).length;
 
   return (
-    <div className="flex items-center gap-2 p-3 bg-background border-b">
+    <div className="flex flex-wrap items-center gap-2 p-3 bg-background border-b overflow-x-auto">
+
       {/* Search by name */}
       <div className="relative flex-1 max-w-xs">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
