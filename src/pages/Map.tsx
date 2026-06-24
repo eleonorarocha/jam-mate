@@ -131,7 +131,7 @@ const Map = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden">
+    <div className="flex flex-col h-screen bg-background overflow-hidden pt-16">
       <Header />
       <div className="relative z-10 shrink-0">
         <MapFiltersBar filters={filters} onFiltersChange={setFilters} />
