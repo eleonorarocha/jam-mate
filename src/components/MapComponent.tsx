@@ -306,50 +306,95 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     // Clear marker elements map
     markerElementsRef.current.clear();
 
-    // Create markers for filtered musicians
+    // Create Airbnb-style pill markers for filtered musicians
     filteredMusicians.forEach((musician) => {
       const isMatch = isCompatibleMatch(musician);
       const isFav = isFavorite(musician.id);
-      
+      const isHighlighted = highlightedMusicianId === musician.id;
+
       const el = document.createElement('div');
       el.className = 'musician-marker';
       el.style.position = 'relative';
-      el.style.backgroundImage = musician.avatar_url
-        ? `url(${musician.avatar_url})`
-        : '';
-      el.style.width = isMatch ? '48px' : '40px';
-      el.style.height = isMatch ? '48px' : '40px';
-      el.style.borderRadius = '50%';
       el.style.cursor = 'pointer';
-      el.style.backgroundColor = 'hsl(var(--primary))';
-      el.style.border = isMatch ? '4px solid hsl(142, 76%, 36%)' : '3px solid white';
-      el.style.boxShadow = isMatch 
-        ? '0 0 12px 4px hsla(142, 76%, 36%, 0.5), 0 2px 8px rgba(0,0,0,0.3)' 
-        : '0 2px 8px rgba(0,0,0,0.3)';
-      el.style.backgroundSize = 'cover';
-      el.style.backgroundPosition = 'center';
-      el.style.transition = 'transform 0.2s ease';
-      
-      if (isMatch) {
-        el.style.animation = 'pulse 2s infinite';
+      el.style.transition = 'transform 0.15s ease, box-shadow 0.15s ease';
+      el.style.transformOrigin = 'center bottom';
+
+      // Build the pill
+      const pill = document.createElement('div');
+      pill.style.display = 'inline-flex';
+      pill.style.alignItems = 'center';
+      pill.style.gap = '6px';
+      pill.style.padding = '6px 10px 6px 6px';
+      pill.style.borderRadius = '9999px';
+      pill.style.background = isHighlighted ? '#222' : '#fff';
+      pill.style.color = isHighlighted ? '#fff' : '#222';
+      pill.style.border = isMatch
+        ? '2px solid hsl(142, 76%, 36%)'
+        : '1px solid rgba(0,0,0,0.08)';
+      pill.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)';
+      pill.style.font = '600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      pill.style.whiteSpace = 'nowrap';
+
+      // Avatar / initial circle
+      const avatar = document.createElement('div');
+      avatar.style.width = '24px';
+      avatar.style.height = '24px';
+      avatar.style.borderRadius = '50%';
+      avatar.style.flexShrink = '0';
+      avatar.style.display = 'flex';
+      avatar.style.alignItems = 'center';
+      avatar.style.justifyContent = 'center';
+      avatar.style.background = 'hsl(var(--primary))';
+      avatar.style.color = '#fff';
+      avatar.style.font = '700 11px/1 inherit';
+      avatar.style.overflow = 'hidden';
+      if (musician.avatar_url) {
+        avatar.style.backgroundImage = `url(${musician.avatar_url})`;
+        avatar.style.backgroundSize = 'cover';
+        avatar.style.backgroundPosition = 'center';
+      } else {
+        avatar.textContent = (musician.username || '?').charAt(0).toUpperCase();
+      }
+      pill.appendChild(avatar);
+
+      // Instrument label
+      const label = document.createElement('span');
+      label.textContent = musician.instrument || '🎵';
+      pill.appendChild(label);
+
+      // Rating
+      if (musician.average_rating && musician.average_rating > 0) {
+        const rating = document.createElement('span');
+        rating.style.display = 'inline-flex';
+        rating.style.alignItems = 'center';
+        rating.style.gap = '2px';
+        rating.style.fontSize = '12px';
+        rating.style.opacity = '0.85';
+        rating.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.5 5.79 22l2.39-8.15L2 9.36h7.61z"/></svg>${musician.average_rating.toFixed(1)}`;
+        pill.appendChild(rating);
       }
 
-      // Add favorite heart indicator
+      el.appendChild(pill);
+
+      if (isMatch) {
+        el.style.animation = 'jm-pulse 2s infinite';
+      }
+
+      // Favorite heart badge
       if (isFav) {
         const heartBadge = document.createElement('div');
-        heartBadge.className = 'favorite-badge';
-        heartBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+        heartBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
         heartBadge.style.position = 'absolute';
-        heartBadge.style.top = '-4px';
-        heartBadge.style.right = '-4px';
-        heartBadge.style.backgroundColor = 'white';
+        heartBadge.style.top = '-6px';
+        heartBadge.style.right = '-6px';
+        heartBadge.style.backgroundColor = '#fff';
         heartBadge.style.borderRadius = '50%';
-        heartBadge.style.width = '20px';
-        heartBadge.style.height = '20px';
+        heartBadge.style.width = '18px';
+        heartBadge.style.height = '18px';
         heartBadge.style.display = 'flex';
         heartBadge.style.alignItems = 'center';
         heartBadge.style.justifyContent = 'center';
-        heartBadge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        heartBadge.style.boxShadow = '0 1px 3px rgba(0,0,0,0.25)';
         el.appendChild(heartBadge);
       }
 
@@ -371,24 +416,25 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
           }
         }
       });
-      
+
       el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.1)';
+        el.style.transform = 'scale(1.08)';
+        el.style.zIndex = '900';
       });
-      
       el.addEventListener('mouseleave', () => {
         el.style.transform = 'scale(1)';
+        el.style.zIndex = '';
       });
 
-      // Store marker element for highlighting
       markerElementsRef.current.set(musician.id, el);
 
-      const marker = new mapboxgl.Marker(el)
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([approximateCoord(musician.longitude), approximateCoord(musician.latitude)])
         .addTo(map.current!);
 
       markersRef.current.push(marker);
     });
+
   }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange, onMusiciansChange, onMusicianSelect]);
 
   // Fly to coordinates when selected from search
@@ -419,12 +465,13 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     <>
       <style>
         {`
-          @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 12px 4px hsla(142, 76%, 36%, 0.5), 0 2px 8px rgba(0,0,0,0.3); }
-            50% { box-shadow: 0 0 20px 8px hsla(142, 76%, 36%, 0.3), 0 2px 8px rgba(0,0,0,0.3); }
+          @keyframes jm-pulse {
+            0%, 100% { filter: drop-shadow(0 0 0 hsla(142, 76%, 36%, 0.6)); }
+            50% { filter: drop-shadow(0 0 6px hsla(142, 76%, 36%, 0.7)); }
           }
         `}
       </style>
+
       <div ref={mapContainer} className="absolute inset-0" />
       {selectedMusician && (
         <MusicianPopup
