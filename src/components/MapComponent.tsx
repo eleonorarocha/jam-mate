@@ -435,6 +435,26 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       markersRef.current.push(marker);
     });
 
+    // Auto-fit map to visible markers
+    if (filteredMusicians.length > 0 && map.current) {
+      const bounds = new mapboxgl.LngLatBounds();
+      filteredMusicians.forEach((m) => {
+        bounds.extend([approximateCoord(m.longitude), approximateCoord(m.latitude)]);
+      });
+      if (userLocation) {
+        bounds.extend([userLocation.lng, userLocation.lat]);
+      }
+      try {
+        map.current.fitBounds(bounds, {
+          padding: 80,
+          maxZoom: 12,
+          duration: 800,
+        });
+      } catch (_) {
+        // ignore (e.g. single point edge cases)
+      }
+    }
+
   }, [musicians, filters, isCompatibleMatch, isFavorite, userLocation, blockedIds, busyMusicianIds, onFilteredCountChange, onMusiciansChange, onMusicianSelect]);
 
   // Fly to coordinates when selected from search
