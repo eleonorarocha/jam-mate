@@ -159,6 +159,9 @@ export function RouteTitle() {
     upsertMeta("og:title", fullTitle, "property");
     upsertMeta("og:description", meta.description, "property");
     upsertMeta("og:url", pathname, "property");
+    upsertMeta("og:type", "website", "property");
+    upsertMeta("twitter:title", fullTitle);
+    upsertMeta("twitter:description", meta.description);
     upsertCanonical(pathname);
   }, [pathname, t, i18n.language]);
 
