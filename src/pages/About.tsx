@@ -11,6 +11,28 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import JsonLd from '@/components/JsonLd';
+
+const faqItems = [
+  { q: 'O JamMate é gratuito?', a: 'Sim! O JamMate é totalmente gratuito. Podes criar conta, explorar o mapa, enviar propostas de jam e avaliar outros músicos sem qualquer custo.' },
+  { q: 'Como encontro músicos perto de mim?', a: 'Usa o mapa interativo na página principal. Podes filtrar por instrumento, nível de experiência, género e distância para encontrar músicos compatíveis na tua zona.' },
+  { q: 'Como funciona o sistema de avaliações?', a: 'Após uma jam session concluída, ambos os participantes podem avaliar-se mutuamente em 4 critérios: Localização, Respeito, Pontualidade e Diversão, numa escala de 1 a 5 estrelas, com um comentário obrigatório.' },
+  { q: 'A minha localização exata é visível?', a: 'Não. Para proteger a tua privacidade, a tua localização no mapa é aproximada (~1km de precisão). A localização exata nunca é partilhada com outros utilizadores.' },
+  { q: 'Posso agendar uma jam session pela plataforma?', a: 'Sim! Ao visitar o perfil de outro músico, podes enviar uma proposta de jam com data, hora e duração. O músico recebe uma notificação e pode aceitar ou recusar.' },
+  { q: 'Como posso bloquear outro utilizador?', a: 'No perfil de qualquer utilizador, encontras a opção de bloquear. Utilizadores bloqueados não conseguem ver o teu perfil, enviar-te mensagens ou propostas de jam.' },
+  { q: 'Que instrumentos são suportados?', a: 'O JamMate suporta mais de 20 instrumentos, incluindo guitarra, baixo, bateria, piano, voz, violino, saxofone, trompete e muitos mais. Podes selecionar o teu durante o registo.' },
+  { q: 'Como posso editar o meu perfil?', a: 'Acede ao teu perfil através do menu de utilizador no canto superior direito. Lá podes alterar a tua foto, bio, instrumento, nível de experiência e preferências de parceiro.' },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqItems.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+};
 
 const values = [
   {
