@@ -8,6 +8,31 @@ import MapComponent from '@/components/MapComponent';
 import HomeMapSidebar, { HomeFiltersState } from '@/components/HomeMapSidebar';
 import { MapFiltersState } from '@/components/MapFilters';
 import MapboxTokenForm from '@/components/landing/MapboxTokenForm';
+import JsonLd from '@/components/JsonLd';
+
+const siteSchema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'JamMate',
+    url: '/',
+    description: 'JamMate é a plataforma para encontrares músicos perto de ti e agendar jam sessions ao vivo.',
+    inLanguage: 'pt-PT',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: '/map?city={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'JamMate',
+    url: '/',
+    description: 'Comunidade de músicos que se conectam localmente para tocar em conjunto.',
+    sameAs: [],
+  },
+];
 
 const Index = () => {
   const { user, loading } = useAuth();
