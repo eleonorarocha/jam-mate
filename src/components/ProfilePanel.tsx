@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, CheckCircle, AlertCircle, Camera, Music, MapPin, Shield, Loader2 } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, Camera, Music, MapPin, Shield, Loader2, Music2 } from 'lucide-react';
 import AvatarCropper from '@/components/AvatarCropper';
+import MusicSnippetSection from '@/components/MusicSnippetSection';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -317,6 +318,14 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
             <Label htmlFor="bio" className="text-xs font-medium">Bio</Label>
             <Textarea id="bio" value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} rows={3} placeholder="Conte um pouco sobre si e o seu estilo musical..." className="resize-none" />
           </div>
+        </div>
+      </motion.div>
+
+      {/* Music Snippet Section */}
+      <motion.div variants={itemVariants}>
+        <SectionTitle icon={<Music2 className="w-4 h-4" />} title="O teu som" />
+        <div className="mt-3">
+          <MusicSnippetSection />
         </div>
       </motion.div>
 

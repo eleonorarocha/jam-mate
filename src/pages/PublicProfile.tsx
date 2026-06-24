@@ -26,6 +26,7 @@ import BookingDialog from '@/components/BookingDialog';
 import BlockUserButton from '@/components/BlockUserButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import JsonLd from '@/components/JsonLd';
+import PublicMusicSnippet from '@/components/PublicMusicSnippet';
 
 interface ProfileData {
   id: string;
@@ -302,6 +303,13 @@ const PublicProfile = () => {
                   </div>
                 </>
               )}
+
+              {/* Music Snippet */}
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-2">O som</h3>
+                <PublicMusicSnippet userId={profile.id} />
+              </div>
 
               {/* Action Buttons */}
               {!isOwnProfile && (
