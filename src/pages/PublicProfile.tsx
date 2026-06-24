@@ -25,6 +25,7 @@ import Header from '@/components/Header';
 import BookingDialog from '@/components/BookingDialog';
 import BlockUserButton from '@/components/BlockUserButton';
 import FavoriteButton from '@/components/FavoriteButton';
+import JsonLd from '@/components/JsonLd';
 
 interface ProfileData {
   id: string;
