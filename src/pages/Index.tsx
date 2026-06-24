@@ -118,6 +118,7 @@ const Index = () => {
   // Map view for everyone (authenticated or not)
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <JsonLd id="home-site" data={siteSchema} />
       <Header />
       <div className="flex-1 flex pt-16">
         <HomeMapSidebar
