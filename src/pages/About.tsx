@@ -135,6 +135,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd id="about-faq" data={faqSchema} />
       <Header />
 
       <main className="pt-20 pb-16">
