@@ -1,0 +1,11 @@
+# JamMate
+
+> Airbnb para músicos — encontra e agenda jam sessions com músicos perto de ti.
+
+JamMate é uma plataforma que conecta músicos de todos os níveis para jam sessions presenciais. Os utilizadores podem explorar um mapa interativo, descobrir músicos por instrumento, nível de habilidade e localização, e agendar sessões com avaliações detalhadas.
+
+## Pages
+
+- [/](/): Página inicial com mapa interativo para descobrir músicos nas proximidades.
+- [/map](/map): Mapa completo com filtros avançados por instrumento, nível, género e distância.
+- [/about](/about): Sobre o JamMate, valores da comunidade, estatísticas e formulário de feedback.
