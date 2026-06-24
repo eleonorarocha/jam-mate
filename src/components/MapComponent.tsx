@@ -465,12 +465,13 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     <>
       <style>
         {`
-          @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 12px 4px hsla(142, 76%, 36%, 0.5), 0 2px 8px rgba(0,0,0,0.3); }
-            50% { box-shadow: 0 0 20px 8px hsla(142, 76%, 36%, 0.3), 0 2px 8px rgba(0,0,0,0.3); }
+          @keyframes jm-pulse {
+            0%, 100% { filter: drop-shadow(0 0 0 hsla(142, 76%, 36%, 0.6)); }
+            50% { filter: drop-shadow(0 0 6px hsla(142, 76%, 36%, 0.7)); }
           }
         `}
       </style>
+
       <div ref={mapContainer} className="absolute inset-0" />
       {selectedMusician && (
         <MusicianPopup
