@@ -25,6 +25,7 @@ import Header from '@/components/Header';
 import BookingDialog from '@/components/BookingDialog';
 import BlockUserButton from '@/components/BlockUserButton';
 import FavoriteButton from '@/components/FavoriteButton';
+import JsonLd from '@/components/JsonLd';
 
 interface ProfileData {
   id: string;
@@ -195,8 +196,39 @@ const PublicProfile = () => {
 
   const isOwnProfile = user?.id === profile.id;
 
+  const personSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: profile.first_name || profile.username,
+    alternateName: profile.username,
+    identifier: profile.id,
+    url: `/profile/${profile.id}`,
+    description: profile.bio || `${profile.instrument} no JamMate.`,
+    jobTitle: 'Músico',
+    knowsAbout: profile.instrument ? [profile.instrument] : undefined,
+    image: profile.avatar_url || undefined,
+    address: (profile.city || profile.country)
+      ? {
+          '@type': 'PostalAddress',
+          addressLocality: profile.city || undefined,
+          addressCountry: profile.country || undefined,
+        }
+      : undefined,
+    aggregateRating:
+      profile.average_rating && profile.total_ratings
+        ? {
+            '@type': 'AggregateRating',
+            ratingValue: profile.average_rating,
+            ratingCount: profile.total_ratings,
+            bestRating: 5,
+            worstRating: 1,
+          }
+        : undefined,
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd id={`profile-${profile.id}`} data={personSchema} />
       <Header />
       <div className="container max-w-4xl mx-auto py-8 px-4">
         <Button
