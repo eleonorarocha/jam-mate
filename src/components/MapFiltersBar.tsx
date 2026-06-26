@@ -59,7 +59,6 @@ const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
   const activeFiltersCount = [
     filters.instrument,
     filters.skillLevel,
-    filters.gender,
     filters.maxDistance > 0,
     filters.favoritesOnly,
     filters.availabilityDate,
