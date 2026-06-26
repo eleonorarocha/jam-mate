@@ -92,7 +92,6 @@ const HomeMapSidebar = ({
     filters.city,
     filters.instrument,
     filters.skillLevel,
-    filters.gender,
     filters.maxDistance > 0,
     filters.favoritesOnly,
     filters.availabilityDate,
