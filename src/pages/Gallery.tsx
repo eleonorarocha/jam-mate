@@ -177,7 +177,7 @@ const Gallery = () => {
           <div className="flex items-center justify-between mb-8">
             <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent-foreground text-xs font-medium mb-3">
-                <Image className="w-3 h-3" />
+                <ImageIcon className="w-3 h-3" />
                 Média
               </div>
               <h1 className="text-3xl font-bold">Galeria</h1>
