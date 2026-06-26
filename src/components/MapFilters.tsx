@@ -183,26 +183,13 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
 
-          <div className="space-y-2">
-            <Label>{t('map.gender')}</Label>
-            <Select
-              value={filters.gender || 'all'}
-              onValueChange={(value) => handleFilterChange('gender', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('map.all_genders')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('map.all_genders')}</SelectItem>
-                {GENDER_KEYS.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {t(`map.gender_opts.${g}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+export default MapFilters;
         </div>
       </SheetContent>
     </Sheet>
