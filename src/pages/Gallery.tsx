@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Image, Video, Music2, Upload, Trash2, Globe, Lock } from 'lucide-react';
+import { Image as ImageIcon, Video, Music2, Upload, Trash2, Globe, Lock, LayoutGrid } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
@@ -14,6 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+
+type MediaTypeFilter = 'all' | 'image' | 'video' | 'audio';
+
+const TYPE_FILTERS: { key: MediaTypeFilter; label: string; icon: typeof ImageIcon }[] = [
+  { key: 'all', label: 'Todos', icon: LayoutGrid },
+  { key: 'image', label: 'Fotos', icon: ImageIcon },
+  { key: 'video', label: 'Vídeos', icon: Video },
+  { key: 'audio', label: 'Áudios', icon: Music2 },
+];
 
 interface MediaItem {
   id: string;
