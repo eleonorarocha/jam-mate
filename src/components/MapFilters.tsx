@@ -40,7 +40,6 @@ const INSTRUMENT_KEYS = [
 ];
 
 const SKILL_LEVEL_KEYS = ['beginner', 'intermediate', 'advanced', 'professional'] as const;
-const GENDER_KEYS = ['male', 'female', 'other', 'prefer_not_to_say'] as const;
 
 const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
   const { t } = useTranslation();
@@ -49,7 +48,6 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
   const activeFiltersCount = [
     filters.instrument,
     filters.skillLevel,
-    filters.gender,
     filters.maxDistance > 0,
     filters.favoritesOnly,
   ].filter(Boolean).length;
