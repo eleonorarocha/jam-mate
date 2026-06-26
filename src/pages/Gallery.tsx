@@ -270,4 +270,43 @@ const Gallery = () => {
   );
 };
 
+interface TypeFilterBarProps {
+  items: MediaItem[];
+  active: MediaTypeFilter;
+  onChange: (next: MediaTypeFilter) => void;
+}
+
+const TypeFilterBar = ({ items, active, onChange }: TypeFilterBarProps) => {
+  const counts = useMemo(() => ({
+    all: items.length,
+    image: items.filter((i) => i.media_type === 'image').length,
+    video: items.filter((i) => i.media_type === 'video').length,
+    audio: items.filter((i) => i.media_type === 'audio').length,
+  }), [items]);
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {TYPE_FILTERS.map(({ key, label, icon: Icon }) => {
+        const isActive = active === key;
+        return (
+          <Button
+            key={key}
+            type="button"
+            size="sm"
+            variant={isActive ? 'default' : 'outline'}
+            onClick={() => onChange(key)}
+            className="gap-1.5"
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+            <span className={`ml-1 text-xs ${isActive ? 'opacity-90' : 'text-muted-foreground'}`}>
+              {counts[key]}
+            </span>
+          </Button>
+        );
+      })}
+    </div>
+  );
+};
+
 export default Gallery;
