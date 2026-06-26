@@ -190,10 +190,3 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
 };
 
 export default MapFilters;
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-};
-
-export default MapFilters;
