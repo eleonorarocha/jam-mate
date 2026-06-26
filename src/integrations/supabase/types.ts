@@ -554,6 +554,42 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          provider: string | null
+          provider_subscription_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          provider?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          provider?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -752,6 +788,7 @@ export type Database = {
         Args: { _by_user_id: string; _user_id: string }
         Returns: boolean
       }
+      is_pro: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
@@ -763,6 +800,8 @@ export type Database = {
         | "cancelled"
       gender_type: "male" | "female"
       skill_level: "beginner" | "intermediate" | "advanced" | "professional"
+      subscription_status: "active" | "cancelled" | "expired"
+      subscription_tier: "free" | "pro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -900,6 +939,8 @@ export const Constants = {
       ],
       gender_type: ["male", "female"],
       skill_level: ["beginner", "intermediate", "advanced", "professional"],
+      subscription_status: ["active", "cancelled", "expired"],
+      subscription_tier: ["free", "pro"],
     },
   },
 } as const
