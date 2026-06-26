@@ -59,7 +59,6 @@ const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
   const activeFiltersCount = [
     filters.instrument,
     filters.skillLevel,
-    filters.gender,
     filters.maxDistance > 0,
     filters.favoritesOnly,
     filters.availabilityDate,
@@ -187,23 +186,8 @@ const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
               </Select>
             </div>
 
-            {/* Gender */}
-            <div className="space-y-2">
-              <Label>{t('map.gender')}</Label>
-              <Select
-                value={filters.gender || 'all'}
-                onValueChange={(v) => updateFilter('gender', v === 'all' ? '' : v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('map.all')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('map.all')}</SelectItem>
-                  <SelectItem value="male">{t('map.gender_opts.male')}</SelectItem>
-                  <SelectItem value="female">{t('map.gender_opts.female')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+
 
             {/* Distance */}
             <div className="space-y-3">

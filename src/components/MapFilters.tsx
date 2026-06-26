@@ -40,7 +40,6 @@ const INSTRUMENT_KEYS = [
 ];
 
 const SKILL_LEVEL_KEYS = ['beginner', 'intermediate', 'advanced', 'professional'] as const;
-const GENDER_KEYS = ['male', 'female', 'other', 'prefer_not_to_say'] as const;
 
 const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
   const { t } = useTranslation();
@@ -49,7 +48,6 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
   const activeFiltersCount = [
     filters.instrument,
     filters.skillLevel,
-    filters.gender,
     filters.maxDistance > 0,
     filters.favoritesOnly,
   ].filter(Boolean).length;
@@ -180,26 +178,6 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
                 {SKILL_LEVEL_KEYS.map((level) => (
                   <SelectItem key={level} value={level}>
                     {t(`map.skill.${level}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t('map.gender')}</Label>
-            <Select
-              value={filters.gender || 'all'}
-              onValueChange={(value) => handleFilterChange('gender', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('map.all_genders')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('map.all_genders')}</SelectItem>
-                {GENDER_KEYS.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {t(`map.gender_opts.${g}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
