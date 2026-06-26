@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Image, Video, Music2, Upload, Trash2, Globe, Lock } from 'lucide-react';
+import { Image as ImageIcon, Video, Music2, Upload, Trash2, Globe, Lock, LayoutGrid } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
@@ -14,6 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+
+type MediaTypeFilter = 'all' | 'image' | 'video' | 'audio';
+
+const TYPE_FILTERS: { key: MediaTypeFilter; label: string; icon: typeof ImageIcon }[] = [
+  { key: 'all', label: 'Todos', icon: LayoutGrid },
+  { key: 'image', label: 'Fotos', icon: ImageIcon },
+  { key: 'video', label: 'Vídeos', icon: Video },
+  { key: 'audio', label: 'Áudios', icon: Music2 },
+];
 
 interface MediaItem {
   id: string;
@@ -37,6 +46,8 @@ const Gallery = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadForm, setUploadForm] = useState({ title: '', description: '', isPublic: false });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [myFilter, setMyFilter] = useState<MediaTypeFilter>('all');
+  const [pubFilter, setPubFilter] = useState<MediaTypeFilter>('all');
 
   useEffect(() => {
     if (!loading && !user) navigate('/auth');
@@ -50,9 +61,16 @@ const Gallery = () => {
     if (!user) return;
     const { data: userMedia } = await supabase.from('jam_media').select('*').eq('uploader_id', user.id).order('created_at', { ascending: false });
     if (userMedia) setMyMedia(userMedia as MediaItem[]);
-    const { data: pubMedia } = await supabase.from('jam_media').select('*').eq('is_public', true).order('created_at', { ascending: false }).limit(50);
+    // Exclude the user's own files from the public gallery to avoid duplicates with "Os Meus Ficheiros"
+    const { data: pubMedia } = await supabase.from('jam_media').select('*').eq('is_public', true).neq('uploader_id', user.id).order('created_at', { ascending: false }).limit(50);
     if (pubMedia) setPublicMedia(pubMedia as MediaItem[]);
   };
+
+  const filterByType = (items: MediaItem[], filter: MediaTypeFilter) =>
+    filter === 'all' ? items : items.filter((m) => m.media_type === filter);
+
+  const countByType = (items: MediaItem[], filter: MediaTypeFilter) =>
+    filter === 'all' ? items.length : items.filter((m) => m.media_type === filter).length;
 
   const getMediaType = (file: File): 'image' | 'video' | 'audio' | null => {
     if (file.type.startsWith('image/')) return 'image';
@@ -168,7 +186,7 @@ const Gallery = () => {
           <div className="flex items-center justify-between mb-8">
             <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/15 text-accent-foreground text-xs font-medium mb-3">
-                <Image className="w-3 h-3" />
+                <ImageIcon className="w-3 h-3" />
                 Média
               </div>
               <h1 className="text-3xl font-bold">Galeria</h1>
@@ -185,19 +203,33 @@ const Gallery = () => {
               <TabsTrigger value="my-media">Os Meus Ficheiros</TabsTrigger>
               <TabsTrigger value="public">Galeria Pública</TabsTrigger>
             </TabsList>
-            <TabsContent value="my-media" className="mt-6">
-              {myMedia.length === 0 ? (
-                <Card><CardHeader><CardTitle className="text-lg">Sem ficheiros</CardTitle><CardDescription>Ainda não carregou nenhum ficheiro. Partilhe memórias das suas jam sessions!</CardDescription></CardHeader></Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{myMedia.map((item) => renderMediaItem(item, true))}</div>
-              )}
+
+            <TabsContent value="my-media" className="mt-6 space-y-4">
+              <TypeFilterBar items={myMedia} active={myFilter} onChange={setMyFilter} />
+              {(() => {
+                const filtered = filterByType(myMedia, myFilter);
+                if (myMedia.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Sem ficheiros</CardTitle><CardDescription>Ainda não carregou nenhum ficheiro. Partilhe memórias das suas jam sessions!</CardDescription></CardHeader></Card>;
+                }
+                if (filtered.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Nada nesta categoria</CardTitle><CardDescription>Não tem ficheiros deste tipo. Experimente outro filtro.</CardDescription></CardHeader></Card>;
+                }
+                return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{filtered.map((item) => renderMediaItem(item, true))}</div>;
+              })()}
             </TabsContent>
-            <TabsContent value="public" className="mt-6">
-              {publicMedia.length === 0 ? (
-                <Card><CardHeader><CardTitle className="text-lg">Galeria vazia</CardTitle><CardDescription>Ainda não há ficheiros públicos. Seja o primeiro a partilhar!</CardDescription></CardHeader></Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{publicMedia.map((item) => renderMediaItem(item, false))}</div>
-              )}
+
+            <TabsContent value="public" className="mt-6 space-y-4">
+              <TypeFilterBar items={publicMedia} active={pubFilter} onChange={setPubFilter} />
+              {(() => {
+                const filtered = filterByType(publicMedia, pubFilter);
+                if (publicMedia.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Galeria vazia</CardTitle><CardDescription>Ainda não há ficheiros públicos de outros utilizadores.</CardDescription></CardHeader></Card>;
+                }
+                if (filtered.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Nada nesta categoria</CardTitle><CardDescription>Sem ficheiros deste tipo na galeria pública.</CardDescription></CardHeader></Card>;
+                }
+                return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{filtered.map((item) => renderMediaItem(item, false))}</div>;
+              })()}
             </TabsContent>
           </Tabs>
         </div>
@@ -234,6 +266,45 @@ const Gallery = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+interface TypeFilterBarProps {
+  items: MediaItem[];
+  active: MediaTypeFilter;
+  onChange: (next: MediaTypeFilter) => void;
+}
+
+const TypeFilterBar = ({ items, active, onChange }: TypeFilterBarProps) => {
+  const counts = useMemo(() => ({
+    all: items.length,
+    image: items.filter((i) => i.media_type === 'image').length,
+    video: items.filter((i) => i.media_type === 'video').length,
+    audio: items.filter((i) => i.media_type === 'audio').length,
+  }), [items]);
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {TYPE_FILTERS.map(({ key, label, icon: Icon }) => {
+        const isActive = active === key;
+        return (
+          <Button
+            key={key}
+            type="button"
+            size="sm"
+            variant={isActive ? 'default' : 'outline'}
+            onClick={() => onChange(key)}
+            className="gap-1.5"
+          >
+            <Icon className="h-3.5 w-3.5" />
+            {label}
+            <span className={`ml-1 text-xs ${isActive ? 'opacity-90' : 'text-muted-foreground'}`}>
+              {counts[key]}
+            </span>
+          </Button>
+        );
+      })}
     </div>
   );
 };
