@@ -321,31 +321,7 @@ const HomeMapSidebar = ({
 
           <Separator />
 
-          {/* Gender Filter */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">{t('map.gender')}</Label>
-            <Select
-              value={filters.gender}
-              onValueChange={(value) =>
-                onFiltersChange({
-                  ...filters,
-                  gender: value === 'all' ? '' : value,
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('map.all')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('map.all')}</SelectItem>
-                {GENDER_KEYS.map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {t(`map.gender_opts.${key}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+
 
           {isAuthenticated && (
             <>
