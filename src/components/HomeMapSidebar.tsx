@@ -73,7 +73,7 @@ const instruments = [
 ];
 
 const SKILL_LEVEL_KEYS = ['beginner', 'intermediate', 'advanced', 'professional'] as const;
-const GENDER_KEYS = ['male', 'female'] as const;
+
 
 const dateLocaleMap: Record<string, typeof pt> = { pt, en: enUS, es, fr };
 
