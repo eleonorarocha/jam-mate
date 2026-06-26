@@ -203,19 +203,33 @@ const Gallery = () => {
               <TabsTrigger value="my-media">Os Meus Ficheiros</TabsTrigger>
               <TabsTrigger value="public">Galeria Pública</TabsTrigger>
             </TabsList>
-            <TabsContent value="my-media" className="mt-6">
-              {myMedia.length === 0 ? (
-                <Card><CardHeader><CardTitle className="text-lg">Sem ficheiros</CardTitle><CardDescription>Ainda não carregou nenhum ficheiro. Partilhe memórias das suas jam sessions!</CardDescription></CardHeader></Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{myMedia.map((item) => renderMediaItem(item, true))}</div>
-              )}
+
+            <TabsContent value="my-media" className="mt-6 space-y-4">
+              <TypeFilterBar items={myMedia} active={myFilter} onChange={setMyFilter} />
+              {(() => {
+                const filtered = filterByType(myMedia, myFilter);
+                if (myMedia.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Sem ficheiros</CardTitle><CardDescription>Ainda não carregou nenhum ficheiro. Partilhe memórias das suas jam sessions!</CardDescription></CardHeader></Card>;
+                }
+                if (filtered.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Nada nesta categoria</CardTitle><CardDescription>Não tem ficheiros deste tipo. Experimente outro filtro.</CardDescription></CardHeader></Card>;
+                }
+                return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{filtered.map((item) => renderMediaItem(item, true))}</div>;
+              })()}
             </TabsContent>
-            <TabsContent value="public" className="mt-6">
-              {publicMedia.length === 0 ? (
-                <Card><CardHeader><CardTitle className="text-lg">Galeria vazia</CardTitle><CardDescription>Ainda não há ficheiros públicos. Seja o primeiro a partilhar!</CardDescription></CardHeader></Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{publicMedia.map((item) => renderMediaItem(item, false))}</div>
-              )}
+
+            <TabsContent value="public" className="mt-6 space-y-4">
+              <TypeFilterBar items={publicMedia} active={pubFilter} onChange={setPubFilter} />
+              {(() => {
+                const filtered = filterByType(publicMedia, pubFilter);
+                if (publicMedia.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Galeria vazia</CardTitle><CardDescription>Ainda não há ficheiros públicos de outros utilizadores.</CardDescription></CardHeader></Card>;
+                }
+                if (filtered.length === 0) {
+                  return <Card><CardHeader><CardTitle className="text-lg">Nada nesta categoria</CardTitle><CardDescription>Sem ficheiros deste tipo na galeria pública.</CardDescription></CardHeader></Card>;
+                }
+                return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{filtered.map((item) => renderMediaItem(item, false))}</div>;
+              })()}
             </TabsContent>
           </Tabs>
         </div>
