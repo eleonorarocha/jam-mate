@@ -46,6 +46,8 @@ const Gallery = () => {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadForm, setUploadForm] = useState({ title: '', description: '', isPublic: false });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [myFilter, setMyFilter] = useState<MediaTypeFilter>('all');
+  const [pubFilter, setPubFilter] = useState<MediaTypeFilter>('all');
 
   useEffect(() => {
     if (!loading && !user) navigate('/auth');
@@ -59,9 +61,16 @@ const Gallery = () => {
     if (!user) return;
     const { data: userMedia } = await supabase.from('jam_media').select('*').eq('uploader_id', user.id).order('created_at', { ascending: false });
     if (userMedia) setMyMedia(userMedia as MediaItem[]);
-    const { data: pubMedia } = await supabase.from('jam_media').select('*').eq('is_public', true).order('created_at', { ascending: false }).limit(50);
+    // Exclude the user's own files from the public gallery to avoid duplicates with "Os Meus Ficheiros"
+    const { data: pubMedia } = await supabase.from('jam_media').select('*').eq('is_public', true).neq('uploader_id', user.id).order('created_at', { ascending: false }).limit(50);
     if (pubMedia) setPublicMedia(pubMedia as MediaItem[]);
   };
+
+  const filterByType = (items: MediaItem[], filter: MediaTypeFilter) =>
+    filter === 'all' ? items : items.filter((m) => m.media_type === filter);
+
+  const countByType = (items: MediaItem[], filter: MediaTypeFilter) =>
+    filter === 'all' ? items.length : items.filter((m) => m.media_type === filter).length;
 
   const getMediaType = (file: File): 'image' | 'video' | 'audio' | null => {
     if (file.type.startsWith('image/')) return 'image';
