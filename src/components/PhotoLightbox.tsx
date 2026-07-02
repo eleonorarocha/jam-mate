@@ -32,11 +32,14 @@ export default function PhotoLightbox({
   onOpenChange,
   onIndexChange,
 }: PhotoLightboxProps) {
+  const { t } = useTranslation();
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const dragState = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   const photo = photos[index];
+  const positionLabel = photos.length > 0 ? `${index + 1} / ${photos.length}` : '';
 
   const reset = useCallback(() => {
     setZoom(1);
