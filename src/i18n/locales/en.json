@@ -122,6 +122,8 @@
     "km_suffix": "km",
     "popup": {
       "no_instrument": "Instrument not specified",
+      "no_skill_level": "Level not specified",
+      "no_rating": "No ratings yet",
       "approx_area": "Approximate area",
       "view_profile": "View Full Profile",
       "message": "Message",

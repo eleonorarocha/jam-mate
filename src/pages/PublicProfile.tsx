@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -74,6 +75,7 @@ const skillLevelLabels: Record<string, string> = {
 const PublicProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { isBlocked } = useBlockedUsers();
@@ -280,11 +282,17 @@ const PublicProfile = () => {
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Music className="h-3 w-3" />
-                  {profile.instrument || 'Instrumento não especificado'}
+                  {profile.instrument || t('map.popup.no_instrument')}
                 </Badge>
-                <Badge variant="outline">
-                  {skillLevelLabels[profile.skill_level] || profile.skill_level}
-                </Badge>
+                {profile.skill_level ? (
+                  <Badge variant="outline">
+                    {skillLevelLabels[profile.skill_level] || profile.skill_level}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-muted-foreground">
+                    {t('map.popup.no_skill_level')}
+                  </Badge>
+                )}
                 {profile.gender && profile.gender !== 'prefer_not_to_say' && (
                   <Badge variant="outline" className="flex items-center gap-1">
                     <User className="h-3 w-3" />
@@ -347,12 +355,20 @@ const PublicProfile = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary">
-                  {profile.average_rating?.toFixed(1) || '0.0'}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {profile.total_ratings || 0} avaliações
-                </p>
+                {profile.average_rating != null ? (
+                  <>
+                    <div className="text-4xl font-bold text-primary">
+                      {profile.average_rating.toFixed(1)}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {profile.total_ratings || 0} avaliações
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {t('map.popup.no_rating')}
+                  </p>
+                )}
               </div>
 
               {ratings.length > 0 && (

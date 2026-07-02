@@ -122,6 +122,8 @@
     "km_suffix": "km",
     "popup": {
       "no_instrument": "Instrumento não especificado",
+      "no_skill_level": "Nível não especificado",
+      "no_rating": "Sem avaliações",
       "approx_area": "Zona aproximada",
       "view_profile": "Ver Perfil Completo",
       "message": "Mensagem",
