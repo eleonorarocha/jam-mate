@@ -102,12 +102,14 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                 </button>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3" />
-                  {musician.city}{musician.country ? `, ${musician.country}` : ''}
+                  <span>
+                    {t('map.popup.approx_area', { defaultValue: 'Zona aproximada' })}: {musician.city}{musician.country ? `, ${musician.country}` : ''}
+                  </span>
                 </div>
                 {distance !== null && distance !== undefined && (
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Navigation className="h-3 w-3" />
-                    {distance < 1 ? `${Math.round(distance * 1000)} m` : `${Math.round(distance)} km`}
+                    ~{distance < 1 ? `${Math.round(distance * 1000)} m` : `${Math.round(distance)} km`}
                   </div>
                 )}
               </div>
