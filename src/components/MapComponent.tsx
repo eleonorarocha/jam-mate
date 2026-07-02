@@ -221,7 +221,10 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       center: [0, 30],
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-left');
+    map.current.addControl(
+      new mapboxgl.NavigationControl({ showCompass: false, visualizePitch: false }),
+      'top-right',
+    );
 
     loadMusicians();
 
