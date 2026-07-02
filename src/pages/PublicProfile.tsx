@@ -131,6 +131,23 @@ const PublicProfile = () => {
     setLoading(false);
   };
 
+  const loadPhotos = async () => {
+    if (!id) return;
+
+    const { data } = await supabase
+      .from('jam_media')
+      .select('id, media_url, thumbnail_url, title, description')
+      .eq('uploader_id', id)
+      .eq('media_type', 'image')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+      .limit(12);
+
+    if (data) {
+      setPhotos(data as PhotoItem[]);
+    }
+  };
+
   const loadRatings = async () => {
     if (!id) return;
 
