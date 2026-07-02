@@ -123,20 +123,32 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                     ? t(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
                     : t('map.popup.no_instrument')}
                 </Badge>
-                {musician.skill_level && (
+                {musician.skill_level ? (
                   <Badge variant="outline">
                     {t(`map.skill_levels.${musician.skill_level}`, { defaultValue: musician.skill_level })}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-muted-foreground">
+                    {t('map.popup.no_skill_level')}
                   </Badge>
                 )}
               </div>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-primary text-primary" />
-                <span className="text-sm font-medium">
-                  {musician.average_rating?.toFixed(1) || '0.0'}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  ({musician.total_ratings || 0})
-                </span>
+                {musician.average_rating != null ? (
+                  <>
+                    <span className="text-sm font-medium">
+                      {musician.average_rating.toFixed(1)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      ({musician.total_ratings || 0})
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    {t('map.popup.no_rating')}
+                  </span>
+                )}
               </div>
             </div>
 
