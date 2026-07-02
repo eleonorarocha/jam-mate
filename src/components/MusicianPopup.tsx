@@ -116,12 +116,19 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
             </div>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary">
-                {musician.instrument
-                  ? t(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
-                  : t('map.popup.no_instrument')}
-              </Badge>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary">
+                  {musician.instrument
+                    ? t(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
+                    : t('map.popup.no_instrument')}
+                </Badge>
+                {musician.skill_level && (
+                  <Badge variant="outline">
+                    {t(`map.skill_levels.${musician.skill_level}`, { defaultValue: musician.skill_level })}
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-primary text-primary" />
                 <span className="text-sm font-medium">
