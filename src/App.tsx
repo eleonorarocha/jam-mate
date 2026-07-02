@@ -21,6 +21,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import About from "./pages/About";
 import Admin from "./pages/Admin";
+import LightboxDemo from "./pages/LightboxDemo";
 import { RouteTitle } from "./components/RouteTitle";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,9 @@ const App = () => (
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
+            {import.meta.env.DEV && (
+              <Route path="/dev/lightbox-demo" element={<LightboxDemo />} />
+            )}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
