@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { render, cleanup, screen } from '@testing-library/react';
+import { render, cleanup, screen, within } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { expect as vExpect } from 'vitest';
 import '@/i18n';
@@ -33,9 +33,10 @@ describe('PhotoLightbox accessibility', () => {
     expect(dialog).toHaveAccessibleDescription();
 
     // Toolbar and icon-only buttons all have accessible names
-    expect(screen.getByRole('toolbar')).toBeInTheDocument();
+    const scoped = within(dialog);
+    expect(scoped.getByRole('toolbar')).toBeInTheDocument();
     for (const name of [/zoom in/i, /zoom out/i, /reset/i, /close/i, /next/i, /previous/i]) {
-      expect(screen.getByRole('button', { name })).toBeInTheDocument();
+      expect(scoped.getByRole('button', { name })).toBeInTheDocument();
     }
 
     // Live region present for screen-reader announcements on navigation
