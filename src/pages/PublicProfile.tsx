@@ -75,6 +75,7 @@ const skillLevelLabels: Record<string, string> = {
 const PublicProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const { isBlocked } = useBlockedUsers();
