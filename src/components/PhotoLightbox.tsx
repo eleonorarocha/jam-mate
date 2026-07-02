@@ -136,6 +136,14 @@ export default function PhotoLightbox({
           e.preventDefault();
           imageRef.current?.focus();
         }}
+        onCloseAutoFocus={(e) => {
+          // Restore focus to the element that opened the lightbox (the thumbnail).
+          const target = triggerRef.current;
+          if (target && typeof target.focus === 'function' && document.contains(target)) {
+            e.preventDefault();
+            target.focus();
+          }
+        }}
       >
         <VisuallyHidden asChild>
           <DialogTitle>
