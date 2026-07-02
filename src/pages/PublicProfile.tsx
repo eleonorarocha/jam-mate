@@ -29,6 +29,7 @@ import BlockUserButton from '@/components/BlockUserButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import JsonLd from '@/components/JsonLd';
 import PublicMusicSnippet from '@/components/PublicMusicSnippet';
+import PhotoLightbox from '@/components/PhotoLightbox';
 
 interface ProfileData {
   id: string;
@@ -92,6 +93,8 @@ const PublicProfile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -349,21 +352,34 @@ const PublicProfile = () => {
                 </h3>
                 {photos.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {photos.map((photo) => (
-                      <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-muted border">
+                    {photos.map((photo, i) => (
+                      <button
+                        type="button"
+                        key={photo.id}
+                        onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                        className="aspect-square rounded-lg overflow-hidden bg-muted border group focus:outline-none focus:ring-2 focus:ring-primary"
+                        aria-label={photo.title || t('public_profile.photos')}
+                      >
                         <img
                           src={photo.thumbnail_url || photo.media_url}
                           alt={photo.title || t('public_profile.photos')}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform cursor-zoom-in"
                           loading="lazy"
                         />
-                      </div>
+                      </button>
                     ))}
                   </div>
                 ) : (
                   <p className="text-muted-foreground italic">{t('public_profile.no_photos')}</p>
                 )}
               </div>
+              <PhotoLightbox
+                photos={photos}
+                index={lightboxIndex}
+                open={lightboxOpen}
+                onOpenChange={setLightboxOpen}
+                onIndexChange={setLightboxIndex}
+              />
 
               {/* Music Snippet */}
               <Separator />
