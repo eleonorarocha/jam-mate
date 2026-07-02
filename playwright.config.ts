@@ -10,6 +10,15 @@ export default defineConfig({
     trace: 'off',
     viewport: { width: 1280, height: 900 },
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        // Sandbox ships Chromium 1194; pin executablePath so we don't need `playwright install`.
+        launchOptions: { executablePath: '/chromium-1194/chrome-linux/chrome' },
+      },
+    },
+  ],
   // Dev server is expected to already be running on :8080 in the sandbox.
 });
