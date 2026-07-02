@@ -100,6 +100,7 @@ const PublicProfile = () => {
     if (id) {
       loadProfile();
       loadRatings();
+      loadPhotos();
     }
   }, [id]);
 
