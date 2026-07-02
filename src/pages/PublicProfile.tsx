@@ -355,12 +355,20 @@ const PublicProfile = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <div className="text-4xl font-bold text-primary">
-                  {profile.average_rating?.toFixed(1) || '0.0'}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {profile.total_ratings || 0} avaliações
-                </p>
+                {profile.average_rating != null ? (
+                  <>
+                    <div className="text-4xl font-bold text-primary">
+                      {profile.average_rating.toFixed(1)}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {profile.total_ratings || 0} avaliações
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {t('map.popup.no_rating')}
+                  </p>
+                )}
               </div>
 
               {ratings.length > 0 && (
