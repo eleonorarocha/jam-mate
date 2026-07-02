@@ -14,7 +14,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: {
-        ...devices['Desktop Chrome'],
+        browserName: 'chromium',
         // Sandbox ships Chromium 1194; pin executablePath so we don't need `playwright install`.
         launchOptions: { executablePath: '/chromium-1194/chrome-linux/chrome' },
       },
