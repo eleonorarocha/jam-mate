@@ -219,15 +219,43 @@ const PublicProfile = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="flex items-center justify-center h-[calc(100vh-64px)]">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        <div
+          className="flex flex-col items-center justify-center h-[calc(100vh-64px)] gap-3"
+          role="status"
+          aria-live="polite"
+        >
+          <div
+            className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"
+            aria-hidden="true"
+          />
+          <p className="text-sm text-muted-foreground">A carregar perfil…</p>
         </div>
       </div>
     );
   }
 
-  if (!profile) {
-    return null;
+  if (notFound || !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container max-w-xl mx-auto py-16 px-4 text-center">
+          <p className="text-sm font-medium text-muted-foreground mb-2">Erro 404</p>
+          <h1 className="text-3xl font-bold mb-3">Perfil não encontrado</h1>
+          <p className="text-muted-foreground mb-8">
+            Este perfil não existe, foi removido ou o link está incorreto.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Button onClick={() => navigate('/map')}>
+              Explorar o mapa
+            </Button>
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Voltar
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   const isOwnProfile = user?.id === profile.id;
