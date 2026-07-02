@@ -35,8 +35,9 @@ describe('PhotoLightbox accessibility', () => {
     // Toolbar and icon-only buttons all have accessible names
     const scoped = within(dialog);
     expect(scoped.getByRole('toolbar')).toBeInTheDocument();
+    // shadcn DialogContent ships a built-in Close button too, so use getAllByRole
     for (const name of [/zoom in/i, /zoom out/i, /reset/i, /close/i, /next/i, /previous/i]) {
-      expect(scoped.getByRole('button', { name })).toBeInTheDocument();
+      expect(scoped.getAllByRole('button', { name }).length).toBeGreaterThan(0);
     }
 
     // Live region present for screen-reader announcements on navigation
