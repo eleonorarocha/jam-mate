@@ -122,6 +122,7 @@
     "km_suffix": "km",
     "popup": {
       "no_instrument": "Instrument not specified",
+      "approx_area": "Approximate area",
       "view_profile": "View Full Profile",
       "message": "Message",
       "schedule": "Schedule",
