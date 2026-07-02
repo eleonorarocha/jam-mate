@@ -59,6 +59,14 @@ interface Rating {
   rater_id: string;
 }
 
+interface PhotoItem {
+  id: string;
+  media_url: string;
+  thumbnail_url: string | null;
+  title: string | null;
+  description: string | null;
+}
+
 const genderLabels: Record<string, string> = {
   male: 'Masculino',
   female: 'Feminino',
