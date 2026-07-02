@@ -226,6 +226,21 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       'top-right',
     );
 
+    map.current.addControl(
+      new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: false,
+        showUserHeading: false,
+        showAccuracyCircle: false,
+      }),
+      'top-right',
+    );
+
+    map.current.addControl(
+      new mapboxgl.ScaleControl({ maxWidth: 100, unit: 'metric' }),
+      'bottom-left',
+    );
+
     loadMusicians();
 
     return () => {
