@@ -96,20 +96,25 @@ const PublicProfile = () => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     if (id) {
+      setNotFound(false);
       loadProfile();
       loadRatings();
       loadPhotos();
+    } else {
+      setNotFound(true);
+      setLoading(false);
     }
   }, [id]);
 
   const loadProfile = async () => {
     if (!id) return;
-    
+
     setLoading(true);
     const { data, error } = await supabase
       .from('profiles')
@@ -118,12 +123,9 @@ const PublicProfile = () => {
       .maybeSingle();
 
     if (error || !data) {
-      toast({
-        title: 'Erro',
-        description: 'Perfil não encontrado.',
-        variant: 'destructive',
-      });
-      navigate('/map');
+      setProfile(null);
+      setNotFound(true);
+      setLoading(false);
       return;
     }
 
