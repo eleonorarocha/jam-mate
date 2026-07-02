@@ -20,6 +20,7 @@ interface MusicianPopupProps {
     average_rating: number | null;
     total_ratings: number | null;
     avatar_url: string | null;
+    skill_level?: string;
   };
   distance?: number | null;
   onClose: () => void;
@@ -101,24 +102,33 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                 </button>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3" />
-                  {musician.city}{musician.country ? `, ${musician.country}` : ''}
+                  <span>
+                    {t('map.popup.approx_area', { defaultValue: 'Zona aproximada' })}: {musician.city}{musician.country ? `, ${musician.country}` : ''}
+                  </span>
                 </div>
                 {distance !== null && distance !== undefined && (
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Navigation className="h-3 w-3" />
-                    {distance < 1 ? `${Math.round(distance * 1000)} m` : `${Math.round(distance)} km`}
+                    ~{distance < 1 ? `${Math.round(distance * 1000)} m` : `${Math.round(distance)} km`}
                   </div>
                 )}
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary">
-                {musician.instrument
-                  ? t(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
-                  : t('map.popup.no_instrument')}
-              </Badge>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary">
+                  {musician.instrument
+                    ? t(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
+                    : t('map.popup.no_instrument')}
+                </Badge>
+                {musician.skill_level && (
+                  <Badge variant="outline">
+                    {t(`map.skill_levels.${musician.skill_level}`, { defaultValue: musician.skill_level })}
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center gap-1">
                 <Star className="h-4 w-4 fill-primary text-primary" />
                 <span className="text-sm font-medium">
