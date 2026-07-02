@@ -39,14 +39,17 @@ test.describe('PhotoLightbox — keyboard & focus (dev harness)', () => {
     await expect(live).toContainText(/Mountain river/);
 
     await page.keyboard.press('ArrowRight');
-    // Second photo has no title, live region falls back to "Photo 2 of 4"
-    await expect(live).toContainText(/2\s*(of|\/)\s*4/i);
+    await expect(live).toContainText(/Portrait of a pug/);
+
+    await page.keyboard.press('ArrowRight');
+    // Third mock photo has no title → live region falls back to "Photo 3 of 4"
+    await expect(live).toContainText(/3\s*(of|\/)\s*4/i);
 
     await page.keyboard.press('ArrowRight');
     await expect(live).toContainText(/Forest canopy/);
 
     await page.keyboard.press('ArrowLeft');
-    await expect(live).toContainText(/2\s*(of|\/)\s*4/i);
+    await expect(live).toContainText(/3\s*(of|\/)\s*4/i);
   });
 
   test('+ / − / 0 change and reset zoom', async ({ page }) => {
