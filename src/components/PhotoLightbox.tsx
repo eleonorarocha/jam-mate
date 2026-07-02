@@ -119,37 +119,77 @@ export default function PhotoLightbox({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-[95vw] w-[95vw] h-[95vh] p-0 bg-background/95 backdrop-blur border-none overflow-hidden [&>button]:hidden"
+        aria-label={t('lightbox.dialog_label', 'Photo viewer')}
+        onOpenAutoFocus={(e) => {
+          // Move focus to the image instead of the first button so screen-reader users
+          // hear the photo announcement and can use keyboard shortcuts immediately.
+          e.preventDefault();
+          imageRef.current?.focus();
+        }}
       >
+        <VisuallyHidden asChild>
+          <DialogTitle>
+            {photo.title || t('lightbox.dialog_label', 'Photo viewer')} — {positionLabel}
+          </DialogTitle>
+        </VisuallyHidden>
+        <VisuallyHidden asChild>
+          <DialogDescription>
+            {t(
+              'lightbox.instructions',
+              'Use left and right arrow keys to navigate. Plus and minus to zoom. Zero to reset. Escape to close.'
+            )}
+          </DialogDescription>
+        </VisuallyHidden>
+
+        {/* Live region announces photo changes to screen readers */}
+        <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {photo.title
+            ? `${photo.title} — ${positionLabel}`
+            : t('lightbox.photo_of', { current: index + 1, total: photos.length, defaultValue: 'Photo {{current}} of {{total}}' })}
+        </div>
+
         {/* Top bar */}
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-3 bg-gradient-to-b from-background/80 to-transparent">
-          <div className="text-sm text-foreground/90 truncate max-w-[60%]">
-            {photo.title || `${index + 1} / ${photos.length}`}
+          <div className="text-sm text-foreground/90 truncate max-w-[60%]" aria-hidden="true">
+            {photo.title || positionLabel}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1" role="toolbar" aria-label={t('lightbox.toolbar', 'Image controls')}>
             <Button
               size="icon"
               variant="ghost"
               onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
               disabled={zoom <= MIN_ZOOM}
-              aria-label="Zoom out"
+              aria-label={t('lightbox.zoom_out', 'Zoom out')}
             >
-              <ZoomOut className="h-5 w-5" />
+              <ZoomOut className="h-5 w-5" aria-hidden="true" />
             </Button>
-            <span className="text-xs w-12 text-center tabular-nums">{Math.round(zoom * 100)}%</span>
+            <span className="text-xs w-12 text-center tabular-nums" aria-live="polite" aria-label={t('lightbox.zoom_level', 'Zoom level')}>
+              {Math.round(zoom * 100)}%
+            </span>
             <Button
               size="icon"
               variant="ghost"
               onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
               disabled={zoom >= MAX_ZOOM}
-              aria-label="Zoom in"
+              aria-label={t('lightbox.zoom_in', 'Zoom in')}
             >
-              <ZoomIn className="h-5 w-5" />
+              <ZoomIn className="h-5 w-5" aria-hidden="true" />
             </Button>
-            <Button size="icon" variant="ghost" onClick={reset} aria-label="Reset zoom">
-              <RotateCcw className="h-5 w-5" />
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={reset}
+              aria-label={t('lightbox.reset', 'Reset zoom')}
+            >
+              <RotateCcw className="h-5 w-5" aria-hidden="true" />
             </Button>
-            <Button size="icon" variant="ghost" onClick={() => onOpenChange(false)} aria-label="Close">
-              <X className="h-5 w-5" />
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              aria-label={t('lightbox.close', 'Close')}
+            >
+              <X className="h-5 w-5" aria-hidden="true" />
             </Button>
           </div>
         </div>
@@ -166,10 +206,12 @@ export default function PhotoLightbox({
           style={{ cursor: zoom > 1 ? (dragState.current ? 'grabbing' : 'grab') : 'zoom-in' }}
         >
           <img
+            ref={imageRef}
             src={photo.media_url}
-            alt={photo.title || 'Photo'}
+            alt={photo.title || t('lightbox.image_alt', 'Enlarged photo')}
             draggable={false}
-            className="max-w-full max-h-full object-contain transition-transform duration-100"
+            tabIndex={0}
+            className="max-w-full max-h-full object-contain transition-transform duration-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             style={{
               transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
               transformOrigin: 'center center',
@@ -184,19 +226,21 @@ export default function PhotoLightbox({
               size="icon"
               variant="ghost"
               onClick={prev}
-              aria-label="Previous"
+              aria-label={t('lightbox.previous', 'Previous photo')}
+              aria-keyshortcuts="ArrowLeft"
               className="absolute left-2 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-background/60 hover:bg-background/80"
             >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-6 w-6" aria-hidden="true" />
             </Button>
             <Button
               size="icon"
               variant="ghost"
               onClick={next}
-              aria-label="Next"
+              aria-label={t('lightbox.next', 'Next photo')}
+              aria-keyshortcuts="ArrowRight"
               className="absolute right-2 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-background/60 hover:bg-background/80"
             >
-              <ChevronRight className="h-6 w-6" />
+              <ChevronRight className="h-6 w-6" aria-hidden="true" />
             </Button>
           </>
         )}
