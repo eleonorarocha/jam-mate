@@ -282,11 +282,17 @@ const PublicProfile = () => {
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Music className="h-3 w-3" />
-                  {profile.instrument || 'Instrumento não especificado'}
+                  {profile.instrument || t('map.popup.no_instrument')}
                 </Badge>
-                <Badge variant="outline">
-                  {skillLevelLabels[profile.skill_level] || profile.skill_level}
-                </Badge>
+                {profile.skill_level ? (
+                  <Badge variant="outline">
+                    {skillLevelLabels[profile.skill_level] || profile.skill_level}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-muted-foreground">
+                    {t('map.popup.no_skill_level')}
+                  </Badge>
+                )}
                 {profile.gender && profile.gender !== 'prefer_not_to_say' && (
                   <Badge variant="outline" className="flex items-center gap-1">
                     <User className="h-3 w-3" />
