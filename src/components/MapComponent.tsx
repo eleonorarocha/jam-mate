@@ -315,7 +315,13 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     return el;
   }, [isCompatibleMatch, isFavorite, highlightedMusicianId, onMusicianSelect, userLocation]);
 
-  const buildClusterMarker = useCallback((count: number, expansionZoom: number, lng: number, lat: number): HTMLDivElement => {
+  const buildClusterMarker = useCallback((
+    count: number,
+    expansionZoom: number,
+    lng: number,
+    lat: number,
+    clusterId: number,
+  ): HTMLDivElement => {
     const el = document.createElement('div');
     el.style.cssText = 'cursor:pointer;transition:transform 0.15s ease;';
     const size = count < 10 ? 36 : count < 50 ? 44 : count < 200 ? 52 : 60;
@@ -325,8 +331,35 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     el.appendChild(circle);
     el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.08)'; });
     el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
-    el.addEventListener('click', () => {
-      if (!map.current) return;
+    el.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if (!map.current || !clusterRef.current) return;
+
+      // Fit the map to the bounding box of the cluster's children so the group
+      // stays visually centered instead of drifting off-screen after re-clustering.
+      try {
+        const leaves = clusterRef.current.getLeaves(clusterId, Infinity);
+        if (leaves.length > 1) {
+          const lngs = leaves.map((l) => l.geometry.coordinates[0]);
+          const lats = leaves.map((l) => l.geometry.coordinates[1]);
+          const west = Math.min(...lngs);
+          const east = Math.max(...lngs);
+          const south = Math.min(...lats);
+          const north = Math.max(...lats);
+          // If all leaves share the (rounded) coordinate, fitBounds would zoom
+          // to the max; fall back to a centered easeTo instead.
+          if (west !== east || south !== north) {
+            map.current.fitBounds(
+              [[west, south], [east, north]],
+              { padding: 80, maxZoom: expansionZoom + 1, duration: 500 },
+            );
+            return;
+          }
+        }
+      } catch {
+        // fall through to easeTo
+      }
+
       map.current.easeTo({
         center: [lng, lat],
         zoom: Math.min(expansionZoom + 0.5, 20),
@@ -356,7 +389,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number; musicianId?: string };
       if (props.cluster) {
         const expansionZoom = clusterRef.current!.getClusterExpansionZoom(props.cluster_id!);
-        const el = buildClusterMarker(props.point_count!, expansionZoom, lng, lat);
+        const el = buildClusterMarker(props.point_count!, expansionZoom, lng, lat, props.cluster_id!);
         const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
           .setLngLat([lng, lat])
           .addTo(map.current!);
