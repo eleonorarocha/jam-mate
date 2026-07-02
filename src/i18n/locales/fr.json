@@ -136,6 +136,12 @@
       "error_desc": "Impossible d'envoyer le message."
     }
   },
+  "public_profile": {
+    "about_me": "À propos de moi",
+    "no_bio": "Ce musicien n'a pas encore ajouté de description.",
+    "photos": "Photos",
+    "no_photos": "Aucune photo disponible pour l'instant."
+  },
   "pages": {
     "brand": "JamMate",
     "index": {

@@ -16,7 +16,8 @@ import {
   User,
   CheckCircle,
   Ban,
-  Heart
+  Heart,
+  Image
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -58,6 +59,14 @@ interface Rating {
   rater_id: string;
 }
 
+interface PhotoItem {
+  id: string;
+  media_url: string;
+  thumbnail_url: string | null;
+  title: string | null;
+  description: string | null;
+}
+
 const genderLabels: Record<string, string> = {
   male: 'Masculino',
   female: 'Feminino',
@@ -82,6 +91,7 @@ const PublicProfile = () => {
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -90,6 +100,7 @@ const PublicProfile = () => {
     if (id) {
       loadProfile();
       loadRatings();
+      loadPhotos();
     }
   }, [id]);
 
@@ -118,6 +129,23 @@ const PublicProfile = () => {
     setProfile({ ...data, phone_verified: s?.phone_verified ?? null, email_verified: s?.email_verified ?? null });
     setIsVerified(s?.phone_verified || s?.email_verified || false);
     setLoading(false);
+  };
+
+  const loadPhotos = async () => {
+    if (!id) return;
+
+    const { data } = await supabase
+      .from('jam_media')
+      .select('id, media_url, thumbnail_url, title, description')
+      .eq('uploader_id', id)
+      .eq('media_type', 'image')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+      .limit(12);
+
+    if (data) {
+      setPhotos(data as PhotoItem[]);
+    }
   };
 
   const loadRatings = async () => {
@@ -302,15 +330,40 @@ const PublicProfile = () => {
               </div>
 
               {/* Bio */}
-              {profile.bio && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="font-semibold mb-2">Sobre</h3>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-2">{t('public_profile.about_me')}</h3>
+                {profile.bio ? (
+                  <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
+                ) : (
+                  <p className="text-muted-foreground italic">{t('public_profile.no_bio')}</p>
+                )}
+              </div>
+
+              {/* Photos */}
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Image className="h-4 w-4" />
+                  {t('public_profile.photos')}
+                </h3>
+                {photos.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {photos.map((photo) => (
+                      <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-muted border">
+                        <img
+                          src={photo.thumbnail_url || photo.media_url}
+                          alt={photo.title || t('public_profile.photos')}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
                   </div>
-                </>
-              )}
+                ) : (
+                  <p className="text-muted-foreground italic">{t('public_profile.no_photos')}</p>
+                )}
+              </div>
 
               {/* Music Snippet */}
               <Separator />
