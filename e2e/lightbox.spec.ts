@@ -8,7 +8,7 @@ test.describe('PhotoLightbox — keyboard & focus (dev harness)', () => {
   });
 
   test('opens on click, focus lands on the image, closes on Escape and returns focus to the thumbnail', async ({ page }) => {
-    const firstThumb = page.getByRole('button', { name: 'Alpha' });
+    const firstThumb = page.getByRole('button', { name: 'Mountain river' });
     await firstThumb.focus();
     await firstThumb.click();
 
@@ -21,7 +21,7 @@ test.describe('PhotoLightbox — keyboard & focus (dev harness)', () => {
 
     // Live region announces the current photo
     const live = dialog.locator('[role="status"][aria-live="polite"]');
-    await expect(live).toContainText(/Alpha/);
+    await expect(live).toContainText(/Mountain river/);
 
     // Escape closes the dialog
     await page.keyboard.press('Escape');
@@ -29,28 +29,28 @@ test.describe('PhotoLightbox — keyboard & focus (dev harness)', () => {
 
     // Focus returns to the originating thumbnail (Radix Dialog behavior)
     const returned = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
-    expect(returned).toBe('Alpha');
+    expect(returned).toBe('Mountain river');
   });
 
   test('ArrowRight / ArrowLeft navigate and update the live region', async ({ page }) => {
-    await page.getByRole('button', { name: 'Alpha' }).click();
+    await page.getByRole('button', { name: 'Mountain river' }).click();
     const dialog = page.getByRole('dialog');
     const live = dialog.locator('[role="status"][aria-live="polite"]');
-    await expect(live).toContainText(/Alpha/);
+    await expect(live).toContainText(/Mountain river/);
 
     await page.keyboard.press('ArrowRight');
     // Second photo has no title, live region falls back to "Photo 2 of 4"
     await expect(live).toContainText(/2\s*(of|\/)\s*4/i);
 
     await page.keyboard.press('ArrowRight');
-    await expect(live).toContainText(/Gamma/);
+    await expect(live).toContainText(/Forest canopy/);
 
     await page.keyboard.press('ArrowLeft');
     await expect(live).toContainText(/2\s*(of|\/)\s*4/i);
   });
 
   test('+ / − / 0 change and reset zoom', async ({ page }) => {
-    await page.getByRole('button', { name: 'Alpha' }).click();
+    await page.getByRole('button', { name: 'Mountain river' }).click();
     const dialog = page.getByRole('dialog');
     const zoomReadout = dialog.locator('[aria-label="Zoom level"]');
 
@@ -70,7 +70,7 @@ test.describe('PhotoLightbox — keyboard & focus (dev harness)', () => {
   });
 
   test('Tab cycles through toolbar buttons without escaping the dialog (focus trap)', async ({ page }) => {
-    await page.getByRole('button', { name: 'Alpha' }).click();
+    await page.getByRole('button', { name: 'Mountain river' }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
