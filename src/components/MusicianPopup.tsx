@@ -20,6 +20,7 @@ interface MusicianPopupProps {
     average_rating: number | null;
     total_ratings: number | null;
     avatar_url: string | null;
+    skill_level?: string;
   };
   distance?: number | null;
   onClose: () => void;
