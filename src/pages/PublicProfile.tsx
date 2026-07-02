@@ -91,6 +91,7 @@ const PublicProfile = () => {
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBooking, setShowBooking] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
