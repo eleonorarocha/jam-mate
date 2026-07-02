@@ -330,15 +330,40 @@ const PublicProfile = () => {
               </div>
 
               {/* Bio */}
-              {profile.bio && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="font-semibold mb-2">Sobre</h3>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-2">{t('public_profile.about_me')}</h3>
+                {profile.bio ? (
+                  <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio}</p>
+                ) : (
+                  <p className="text-muted-foreground italic">{t('public_profile.no_bio')}</p>
+                )}
+              </div>
+
+              {/* Photos */}
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Image className="h-4 w-4" />
+                  {t('public_profile.photos')}
+                </h3>
+                {photos.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {photos.map((photo) => (
+                      <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-muted border">
+                        <img
+                          src={photo.thumbnail_url || photo.media_url}
+                          alt={photo.title || t('public_profile.photos')}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform"
+                          loading="lazy"
+                        />
+                      </div>
+                    ))}
                   </div>
-                </>
-              )}
+                ) : (
+                  <p className="text-muted-foreground italic">{t('public_profile.no_photos')}</p>
+                )}
+              </div>
 
               {/* Music Snippet */}
               <Separator />
