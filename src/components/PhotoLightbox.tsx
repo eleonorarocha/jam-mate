@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback, useRef, MouseEvent, WheelEvent } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useTranslation } from 'react-i18next';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, X } from 'lucide-react';
 
