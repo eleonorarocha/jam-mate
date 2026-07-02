@@ -27,9 +27,10 @@ test.describe('PhotoLightbox — keyboard & focus (dev harness)', () => {
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
 
-    // Focus returns to the originating thumbnail (Radix Dialog behavior)
-    const returned = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
-    expect(returned).toBe('Mountain river');
+    // Focus returns to the originating thumbnail (Radix `onCloseAutoFocus`)
+    await expect
+      .poll(async () => page.evaluate(() => document.activeElement?.getAttribute('aria-label')))
+      .toBe('Mountain river');
   });
 
   test('ArrowRight / ArrowLeft navigate and update the live region', async ({ page }) => {
