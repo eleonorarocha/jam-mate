@@ -37,6 +37,16 @@ export default function PhotoLightbox({
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const dragState = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  // Capture the element that had focus at the moment the lightbox opens,
+  // so we can restore focus to it on close even when the dialog is controlled
+  // externally (no <DialogTrigger> wrapper).
+  useEffect(() => {
+    if (open) {
+      triggerRef.current = document.activeElement as HTMLElement | null;
+    }
+  }, [open]);
 
   const photo = photos[index];
   const positionLabel = photos.length > 0 ? `${index + 1} / ${photos.length}` : '';
