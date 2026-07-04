@@ -457,7 +457,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         markersRef.current.push(marker);
       }
     });
-  }, [buildMusicianMarker, buildClusterMarker]);
+  }, [buildMusicianMarker, buildClusterMarker, t]);
 
   // Filter musicians, build supercluster index, and render
   useEffect(() => {
