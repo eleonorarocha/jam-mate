@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Supercluster from 'supercluster';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
@@ -64,6 +65,35 @@ interface UserPreferences {
 // Approximate coordinates (~1km precision) to protect exact location
 const approximateCoord = (coord: number): number => Math.round(coord * 100) / 100;
 
+// Build HTML for the native Mapbox popup shown when clicking a musician marker
+const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: Record<string, unknown>) => string): string => {
+  const instrument = musician.instrument
+    ? translate(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
+    : translate('map.popup.no_instrument');
+
+  const skillLevel = musician.skill_level
+    ? translate(`map.skill.${musician.skill_level}`, { defaultValue: musician.skill_level })
+    : translate('map.popup.no_skill_level');
+
+  const rating = musician.average_rating != null
+    ? `${musician.average_rating.toFixed(1)} ★`
+    : translate('map.popup.no_rating');
+
+  const location = [musician.city, musician.country].filter(Boolean).join(', ') || translate('map.popup.approx_area');
+
+  return `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:4px;min-width:180px;">
+      <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:#111;">${musician.username}</div>
+      <div style="font-size:12px;color:#444;line-height:1.6;">
+        <div><strong>${translate('map.instrument')}:</strong> ${instrument}</div>
+        <div><strong>${translate('map.level')}:</strong> ${skillLevel}</div>
+        <div><strong>${translate('map.popup.rating')}:</strong> ${rating}</div>
+        <div><strong>${translate('map.popup.approx_area')}:</strong> ${location}</div>
+      </div>
+    </div>
+  `;
+};
+
 // Calculate distance between two points using Haversine formula
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // Earth's radius in km
@@ -78,6 +108,7 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 };
 
 const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange, highlightedMusicianId, onMusicianSelect, isAuthenticated = true, flyTo, onFlyToComplete }: MapComponentProps & { isAuthenticated?: boolean }) => {
+  const { t } = useTranslation();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
@@ -417,13 +448,16 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         if (!musician) return;
         const el = buildMusicianMarker(musician);
         markerElementsRef.current.set(musician.id, el);
+        const popup = new mapboxgl.Popup({ offset: 32, closeButton: true, closeOnClick: true, maxWidth: '260px' })
+          .setHTML(buildMapPopupHTML(musician, t));
         const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([lng, lat])
+          .setPopup(popup)
           .addTo(map.current!);
         markersRef.current.push(marker);
       }
     });
-  }, [buildMusicianMarker, buildClusterMarker]);
+  }, [buildMusicianMarker, buildClusterMarker, t]);
 
   // Filter musicians, build supercluster index, and render
   useEffect(() => {
