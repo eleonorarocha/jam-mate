@@ -65,6 +65,35 @@ interface UserPreferences {
 // Approximate coordinates (~1km precision) to protect exact location
 const approximateCoord = (coord: number): number => Math.round(coord * 100) / 100;
 
+// Build HTML for the native Mapbox popup shown when clicking a musician marker
+const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: Record<string, unknown>) => string): string => {
+  const instrument = musician.instrument
+    ? translate(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
+    : translate('map.popup.no_instrument');
+
+  const skillLevel = musician.skill_level
+    ? translate(`map.skill.${musician.skill_level}`, { defaultValue: musician.skill_level })
+    : translate('map.popup.no_skill_level');
+
+  const rating = musician.average_rating != null
+    ? `${musician.average_rating.toFixed(1)} ★`
+    : translate('map.popup.no_rating');
+
+  const location = [musician.city, musician.country].filter(Boolean).join(', ') || translate('map.popup.approx_area');
+
+  return `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:4px;min-width:180px;">
+      <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:#111;">${musician.username}</div>
+      <div style="font-size:12px;color:#444;line-height:1.6;">
+        <div><strong>${translate('map.instrument')}:</strong> ${instrument}</div>
+        <div><strong>${translate('map.level')}:</strong> ${skillLevel}</div>
+        <div><strong>${translate('map.popup.rating')}:</strong> ${rating}</div>
+        <div><strong>${translate('map.popup.approx_area')}:</strong> ${location}</div>
+      </div>
+    </div>
+  `;
+};
+
 // Calculate distance between two points using Haversine formula
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
   const R = 6371; // Earth's radius in km
