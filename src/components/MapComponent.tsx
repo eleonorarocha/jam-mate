@@ -448,8 +448,11 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         if (!musician) return;
         const el = buildMusicianMarker(musician);
         markerElementsRef.current.set(musician.id, el);
+        const popup = new mapboxgl.Popup({ offset: 32, closeButton: true, closeOnClick: true, maxWidth: '260px' })
+          .setHTML(buildMapPopupHTML(musician, t));
         const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([lng, lat])
+          .setPopup(popup)
           .addTo(map.current!);
         markersRef.current.push(marker);
       }
