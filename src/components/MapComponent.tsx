@@ -667,6 +667,12 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
           isAuthenticated={isAuthenticated}
         />
       )}
+      {bookingMusicianId && (
+        <BookingDialog
+          musicianId={bookingMusicianId}
+          onClose={() => setBookingMusicianId(null)}
+        />
+      )}
     </>
   );
 };
