@@ -69,7 +69,11 @@ interface UserPreferences {
 const approximateCoord = (coord: number): number => Math.round(coord * 100) / 100;
 
 // Build HTML for the native Mapbox popup shown when clicking a musician marker
-const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: Record<string, unknown>) => string): string => {
+const buildMapPopupHTML = (
+  musician: Musician,
+  translate: (key: string, opts?: Record<string, unknown>) => string,
+  opts: { isAuthenticated: boolean; isSelf: boolean },
+): string => {
   const instrument = musician.instrument
     ? translate(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
     : translate('map.popup.no_instrument');
@@ -84,8 +88,28 @@ const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: R
 
   const location = [musician.city, musician.country].filter(Boolean).join(', ') || translate('map.popup.approx_area');
 
+  const btnBase = 'display:block;width:100%;box-sizing:border-box;padding:6px 10px;margin-top:6px;border-radius:6px;font:600 12px/1.2 inherit;cursor:pointer;border:1px solid transparent;text-align:center;';
+  const btnPrimary = `${btnBase}background:hsl(142,76%,36%);color:#fff;`;
+  const btnSecondary = `${btnBase}background:#f3f4f6;color:#111;border-color:rgba(0,0,0,0.08);`;
+  const btnDisabled = `${btnBase}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;`;
+
+  let actions = '';
+  if (!opts.isAuthenticated) {
+    actions = `<button type="button" data-jm-action="auth" style="${btnPrimary}">${translate('map.popup.register_to_contact')}</button>`;
+  } else {
+    const contactBtns = opts.isSelf
+      ? `<button type="button" disabled style="${btnDisabled}">${translate('map.popup.message')}</button>
+         <button type="button" disabled style="${btnDisabled}">${translate('map.popup.schedule')}</button>`
+      : `<button type="button" data-jm-action="message" style="${btnPrimary}">${translate('map.popup.message')}</button>
+         <button type="button" data-jm-action="book" style="${btnSecondary}">${translate('map.popup.schedule')}</button>`;
+    actions = `
+      <button type="button" data-jm-action="profile" style="${btnSecondary}">${translate('map.popup.view_profile')}</button>
+      ${contactBtns}
+    `;
+  }
+
   return `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:4px;min-width:180px;">
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:4px;min-width:200px;">
       <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:#111;">${musician.username}</div>
       <div style="font-size:12px;color:#444;line-height:1.6;">
         <div><strong>${translate('map.instrument')}:</strong> ${instrument}</div>
@@ -93,6 +117,7 @@ const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: R
         <div><strong>${translate('map.popup.rating')}:</strong> ${rating}</div>
         <div><strong>${translate('map.popup.approx_area')}:</strong> ${location}</div>
       </div>
+      <div style="margin-top:8px;">${actions}</div>
     </div>
   `;
 };
