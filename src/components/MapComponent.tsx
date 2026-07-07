@@ -137,12 +137,15 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 
 const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange, highlightedMusicianId, onMusicianSelect, isAuthenticated = true, flyTo, onFlyToComplete }: MapComponentProps & { isAuthenticated?: boolean }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const markerElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
   const [selectedMusicianDistance, setSelectedMusicianDistance] = useState<number | null>(null);
+  const [bookingMusicianId, setBookingMusicianId] = useState<string | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
   const [busyMusicianIds, setBusyMusicianIds] = useState<Set<string>>(new Set());
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
