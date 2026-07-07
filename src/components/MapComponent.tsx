@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Supercluster from 'supercluster';
@@ -7,7 +8,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useToast } from '@/hooks/use-toast';
 import MusicianPopup from './MusicianPopup';
+import BookingDialog from './BookingDialog';
 import { MapFiltersState } from './MapFilters';
 
 interface ExtendedFilters extends MapFiltersState {
@@ -66,7 +69,11 @@ interface UserPreferences {
 const approximateCoord = (coord: number): number => Math.round(coord * 100) / 100;
 
 // Build HTML for the native Mapbox popup shown when clicking a musician marker
-const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: Record<string, unknown>) => string): string => {
+const buildMapPopupHTML = (
+  musician: Musician,
+  translate: (key: string, opts?: Record<string, unknown>) => string,
+  opts: { isAuthenticated: boolean; isSelf: boolean },
+): string => {
   const instrument = musician.instrument
     ? translate(`map.instruments.${musician.instrument}`, { defaultValue: musician.instrument })
     : translate('map.popup.no_instrument');
@@ -81,8 +88,28 @@ const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: R
 
   const location = [musician.city, musician.country].filter(Boolean).join(', ') || translate('map.popup.approx_area');
 
+  const btnBase = 'display:block;width:100%;box-sizing:border-box;padding:6px 10px;margin-top:6px;border-radius:6px;font:600 12px/1.2 inherit;cursor:pointer;border:1px solid transparent;text-align:center;';
+  const btnPrimary = `${btnBase}background:hsl(142,76%,36%);color:#fff;`;
+  const btnSecondary = `${btnBase}background:#f3f4f6;color:#111;border-color:rgba(0,0,0,0.08);`;
+  const btnDisabled = `${btnBase}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;`;
+
+  let actions = '';
+  if (!opts.isAuthenticated) {
+    actions = `<button type="button" data-jm-action="auth" style="${btnPrimary}">${translate('map.popup.register_to_contact')}</button>`;
+  } else {
+    const contactBtns = opts.isSelf
+      ? `<button type="button" disabled style="${btnDisabled}">${translate('map.popup.message')}</button>
+         <button type="button" disabled style="${btnDisabled}">${translate('map.popup.schedule')}</button>`
+      : `<button type="button" data-jm-action="message" style="${btnPrimary}">${translate('map.popup.message')}</button>
+         <button type="button" data-jm-action="book" style="${btnSecondary}">${translate('map.popup.schedule')}</button>`;
+    actions = `
+      <button type="button" data-jm-action="profile" style="${btnSecondary}">${translate('map.popup.view_profile')}</button>
+      ${contactBtns}
+    `;
+  }
+
   return `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:4px;min-width:180px;">
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:4px;min-width:200px;">
       <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:#111;">${musician.username}</div>
       <div style="font-size:12px;color:#444;line-height:1.6;">
         <div><strong>${translate('map.instrument')}:</strong> ${instrument}</div>
@@ -90,6 +117,7 @@ const buildMapPopupHTML = (musician: Musician, translate: (key: string, opts?: R
         <div><strong>${translate('map.popup.rating')}:</strong> ${rating}</div>
         <div><strong>${translate('map.popup.approx_area')}:</strong> ${location}</div>
       </div>
+      <div style="margin-top:8px;">${actions}</div>
     </div>
   `;
 };
@@ -109,12 +137,15 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
 
 const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange, highlightedMusicianId, onMusicianSelect, isAuthenticated = true, flyTo, onFlyToComplete }: MapComponentProps & { isAuthenticated?: boolean }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const markerElementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedMusician, setSelectedMusician] = useState<Musician | null>(null);
   const [selectedMusicianDistance, setSelectedMusicianDistance] = useState<number | null>(null);
+  const [bookingMusicianId, setBookingMusicianId] = useState<string | null>(null);
   const [musicians, setMusicians] = useState<Musician[]>([]);
   const [busyMusicianIds, setBusyMusicianIds] = useState<Set<string>>(new Set());
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
@@ -448,8 +479,57 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         if (!musician) return;
         const el = buildMusicianMarker(musician);
         markerElementsRef.current.set(musician.id, el);
+        const isSelf = !!user && user.id === musician.id;
         const popup = new mapboxgl.Popup({ offset: 32, closeButton: true, closeOnClick: true, maxWidth: '260px' })
-          .setHTML(buildMapPopupHTML(musician, t));
+          .setHTML(buildMapPopupHTML(musician, t, { isAuthenticated, isSelf }));
+
+        popup.on('open', () => {
+          const root = popup.getElement();
+          if (!root) return;
+          root.querySelectorAll<HTMLButtonElement>('[data-jm-action]').forEach((btn) => {
+            btn.addEventListener('click', async (ev) => {
+              ev.stopPropagation();
+              const action = btn.getAttribute('data-jm-action');
+              if (action === 'auth') {
+                navigate('/auth');
+                return;
+              }
+              if (action === 'profile') {
+                navigate(`/profile/${musician.id}`);
+                popup.remove();
+                return;
+              }
+              if (action === 'book') {
+                setBookingMusicianId(musician.id);
+                popup.remove();
+                return;
+              }
+              if (action === 'message' && user) {
+                btn.disabled = true;
+                const { error } = await supabase.from('messages').insert({
+                  sender_id: user.id,
+                  receiver_id: musician.id,
+                  content: t('map.popup.default_message'),
+                });
+                if (error) {
+                  toast({
+                    title: t('map.popup.error_title'),
+                    description: t('map.popup.error_desc'),
+                    variant: 'destructive',
+                  });
+                  btn.disabled = false;
+                } else {
+                  toast({
+                    title: t('map.popup.message_sent_title'),
+                    description: t('map.popup.message_sent_desc'),
+                  });
+                  popup.remove();
+                }
+              }
+            });
+          });
+        });
+
         const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([lng, lat])
           .setPopup(popup)
@@ -457,7 +537,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         markersRef.current.push(marker);
       }
     });
-  }, [buildMusicianMarker, buildClusterMarker, t]);
+  }, [buildMusicianMarker, buildClusterMarker, t, isAuthenticated, user, navigate, toast]);
 
   // Filter musicians, build supercluster index, and render
   useEffect(() => {
@@ -585,6 +665,12 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
           distance={selectedMusicianDistance}
           onClose={() => setSelectedMusician(null)}
           isAuthenticated={isAuthenticated}
+        />
+      )}
+      {bookingMusicianId && (
+        <BookingDialog
+          musicianId={bookingMusicianId}
+          onClose={() => setBookingMusicianId(null)}
         />
       )}
     </>
