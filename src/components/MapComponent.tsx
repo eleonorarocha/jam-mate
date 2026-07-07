@@ -479,8 +479,57 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         if (!musician) return;
         const el = buildMusicianMarker(musician);
         markerElementsRef.current.set(musician.id, el);
+        const isSelf = !!user && user.id === musician.id;
         const popup = new mapboxgl.Popup({ offset: 32, closeButton: true, closeOnClick: true, maxWidth: '260px' })
-          .setHTML(buildMapPopupHTML(musician, t));
+          .setHTML(buildMapPopupHTML(musician, t, { isAuthenticated, isSelf }));
+
+        popup.on('open', () => {
+          const root = popup.getElement();
+          if (!root) return;
+          root.querySelectorAll<HTMLButtonElement>('[data-jm-action]').forEach((btn) => {
+            btn.addEventListener('click', async (ev) => {
+              ev.stopPropagation();
+              const action = btn.getAttribute('data-jm-action');
+              if (action === 'auth') {
+                navigate('/auth');
+                return;
+              }
+              if (action === 'profile') {
+                navigate(`/profile/${musician.id}`);
+                popup.remove();
+                return;
+              }
+              if (action === 'book') {
+                setBookingMusicianId(musician.id);
+                popup.remove();
+                return;
+              }
+              if (action === 'message' && user) {
+                btn.disabled = true;
+                const { error } = await supabase.from('messages').insert({
+                  sender_id: user.id,
+                  receiver_id: musician.id,
+                  content: t('map.popup.default_message'),
+                });
+                if (error) {
+                  toast({
+                    title: t('map.popup.error_title'),
+                    description: t('map.popup.error_desc'),
+                    variant: 'destructive',
+                  });
+                  btn.disabled = false;
+                } else {
+                  toast({
+                    title: t('map.popup.message_sent_title'),
+                    description: t('map.popup.message_sent_desc'),
+                  });
+                  popup.remove();
+                }
+              }
+            });
+          });
+        });
+
         const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([lng, lat])
           .setPopup(popup)
@@ -488,7 +537,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         markersRef.current.push(marker);
       }
     });
-  }, [buildMusicianMarker, buildClusterMarker, t]);
+  }, [buildMusicianMarker, buildClusterMarker, t, isAuthenticated, user, navigate, toast]);
 
   // Filter musicians, build supercluster index, and render
   useEffect(() => {
