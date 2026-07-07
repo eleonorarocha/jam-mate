@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Supercluster from 'supercluster';
@@ -7,7 +8,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useToast } from '@/hooks/use-toast';
 import MusicianPopup from './MusicianPopup';
+import BookingDialog from './BookingDialog';
 import { MapFiltersState } from './MapFilters';
 
 interface ExtendedFilters extends MapFiltersState {
