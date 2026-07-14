@@ -54,6 +54,36 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [bookingToReject, setBookingToReject] = useState<Booking | null>(null);
   const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
   const [bookingToReschedule, setBookingToReschedule] = useState<Booking | null>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
+
+  const handleCancelBooking = async () => {
+    if (!user || !bookingToCancel) return;
+    setUpdatingBookingId(bookingToCancel.id);
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', bookingToCancel.id);
+      if (error) throw error;
+
+      toast({
+        title: 'Reserva cancelada',
+        description: 'A outra parte vai ser notificada.',
+      });
+
+      // Optimistic removal; realtime will confirm.
+      setBookings((prev) => prev.filter((b) => b.id !== bookingToCancel.id));
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message ?? 'Não foi possível cancelar.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingBookingId(null);
+      setBookingToCancel(null);
+    }
+  };
 
   const handleUpdateBookingStatus = async (booking: Booking, newStatus: 'accepted' | 'rejected', rejectionReason?: string) => {
     if (!user) return;
