@@ -40,16 +40,29 @@ const BookingDialog = ({ musicianId, onClose }: BookingDialogProps) => {
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [musician, setMusician] = useState<MusicianInfo | null>(null);
+  const [busySlots, setBusySlots] = useState<Array<{ start: Date; end: Date }>>([]);
+  const [busyLoading, setBusyLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('username, first_name, instrument, avatar_url')
-        .eq('id', musicianId)
-        .maybeSingle();
-      if (!cancelled) setMusician(data as MusicianInfo | null);
+      const [{ data: profile }, { data: slots }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('username, first_name, instrument, avatar_url')
+          .eq('id', musicianId)
+          .maybeSingle(),
+        supabase.rpc('get_musician_busy_slots', { _musician_id: musicianId }),
+      ]);
+      if (cancelled) return;
+      setMusician(profile as MusicianInfo | null);
+      const mapped = (slots ?? []).map((s: any) => {
+        const start = new Date(s.scheduled_date);
+        const end = new Date(start.getTime() + (s.duration_hours ?? 0) * 3600_000);
+        return { start, end };
+      });
+      setBusySlots(mapped);
+      setBusyLoading(false);
     })();
     return () => { cancelled = true; };
   }, [musicianId]);
@@ -67,7 +80,48 @@ const BookingDialog = ({ musicianId, onClose }: BookingDialogProps) => {
 
   const scheduled = buildScheduledDate();
   const isPast = scheduled ? scheduled.getTime() <= Date.now() : false;
-  const canReview = !!scheduled && !isPast && parseInt(duration, 10) > 0;
+
+  // A day is fully blocked when 24h are covered by busy slots — rare, so we
+  // just mark a day as unavailable when there is at least one busy slot AND
+  // every hour between 8h and 24h is already occupied.
+  const isDayFullyBooked = (d: Date) => {
+    const dayStart = new Date(d); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(d); dayEnd.setHours(23, 59, 59, 999);
+    const daySlots = busySlots.filter((s) => s.end > dayStart && s.start < dayEnd);
+    if (daySlots.length === 0) return false;
+    // Consider blocked if any slot covers the typical evening (18h-23h) fully
+    let covered = 0;
+    for (let h = 8; h < 24; h++) {
+      const hourStart = new Date(d); hourStart.setHours(h, 0, 0, 0);
+      const hourEnd = new Date(hourStart.getTime() + 3600_000);
+      if (daySlots.some((s) => s.start < hourEnd && s.end > hourStart)) covered++;
+    }
+    return covered >= 16;
+  };
+
+  const durationHours = parseInt(duration, 10);
+  const requestedEnd = scheduled
+    ? new Date(scheduled.getTime() + (Number.isNaN(durationHours) ? 0 : durationHours) * 3600_000)
+    : null;
+
+  const conflictingSlot = scheduled && requestedEnd
+    ? busySlots.find((s) => s.start < requestedEnd && s.end > scheduled)
+    : null;
+
+  const hasConflict = !!conflictingSlot;
+
+  const canReview = !!scheduled && !isPast && durationHours > 0 && !hasConflict && !busyLoading;
+
+  const sameDayBusy = date
+    ? busySlots
+        .filter((s) => {
+          const sd = new Date(s.start); sd.setHours(0, 0, 0, 0);
+          const dd = new Date(date); dd.setHours(0, 0, 0, 0);
+          return sd.getTime() === dd.getTime();
+        })
+        .sort((a, b) => a.start.getTime() - b.start.getTime())
+    : [];
+
 
   const handleGoReview = () => {
     if (!canReview) return;
@@ -151,7 +205,9 @@ const BookingDialog = ({ musicianId, onClose }: BookingDialogProps) => {
                       mode="single"
                       selected={date}
                       onSelect={setDate}
-                      disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                      disabled={(d) =>
+                        d < new Date(new Date().setHours(0, 0, 0, 0)) || isDayFullyBooked(d)
+                      }
                       initialFocus
                       className={cn('p-3 pointer-events-auto')}
                     />
@@ -201,10 +257,36 @@ const BookingDialog = ({ musicianId, onClose }: BookingDialogProps) => {
                 <p className="text-xs text-muted-foreground text-right">{message.length}/500</p>
               </div>
 
+              {date && sameDayBusy.length > 0 && (
+                <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs space-y-1">
+                  <p className="font-medium text-amber-700 dark:text-amber-400">
+                    {musicianName} já tem {sameDayBusy.length} sessão{sameDayBusy.length > 1 ? 'ões' : ''} neste dia:
+                  </p>
+                  <ul className="text-muted-foreground space-y-0.5">
+                    {sameDayBusy.map((s, i) => (
+                      <li key={i}>
+                        • {format(s.start, 'HH:mm', { locale: pt })} – {format(s.end, 'HH:mm', { locale: pt })}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {isPast && date && (
                 <p className="text-sm text-destructive">A data/hora escolhida já passou.</p>
               )}
+
+              {hasConflict && !isPast && (
+                <p className="text-sm text-destructive">
+                  Este horário choca com uma reserva existente
+                  {conflictingSlot
+                    ? ` (${format(conflictingSlot.start, 'HH:mm')}–${format(conflictingSlot.end, 'HH:mm')})`
+                    : ''}
+                  . Escolha outra hora.
+                </p>
+              )}
             </div>
+
 
             <DialogFooter className="gap-2 sm:gap-2">
               <Button variant="ghost" onClick={onClose}>Cancelar</Button>

@@ -757,6 +757,13 @@ export type Database = {
         Args: { _profile_id: string; _viewer_id: string }
         Returns: boolean
       }
+      get_musician_busy_slots: {
+        Args: { _musician_id: string }
+        Returns: {
+          duration_hours: number
+          scheduled_date: string
+        }[]
+      }
       get_profile_sensitive: {
         Args: { _profile_id: string }
         Returns: {
