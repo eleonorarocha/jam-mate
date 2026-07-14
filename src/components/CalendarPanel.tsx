@@ -454,10 +454,17 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   <div className="space-y-4">
                     {bookingsForSelectedDate.map((booking) => {
                       const isPending = booking.status === 'pending';
+                      const isAccepted = booking.status === 'accepted';
                       const isRejected = booking.status === 'rejected';
                       const isReceivedRequest = isPending && booking.musician_id === user?.id;
                       const canReschedule = isRejected && booking.requester_id === user?.id;
-                      
+                      const canCancel =
+                        (isPending || isAccepted) &&
+                        (booking.requester_id === user?.id || booking.musician_id === user?.id);
+                      const cancelLabel = isPending && booking.requester_id === user?.id
+                        ? 'Cancelar pedido'
+                        : 'Cancelar reserva';
+
                       return (
                         <Card key={booking.id} className="p-4">
                           <div className="space-y-3">
@@ -522,6 +529,20 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 >
                                   <RefreshCw className="h-4 w-4 mr-1" />
                                   Reagendar
+                                </Button>
+                              </div>
+                            )}
+                            {canCancel && !isReceivedRequest && (
+                              <div className="pt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full text-destructive hover:text-destructive"
+                                  disabled={updatingBookingId === booking.id}
+                                  onClick={() => setBookingToCancel(booking)}
+                                >
+                                  <Ban className="h-4 w-4 mr-1" />
+                                  {cancelLabel}
                                 </Button>
                               </div>
                             )}
