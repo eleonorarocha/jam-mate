@@ -178,24 +178,29 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
 
     fetchBookings();
 
-    const channel = supabase
-      .channel('bookings-changes')
+    // Two channels: postgres_changes filters are single-condition (AND), so
+    // subscribe once per column we care about. RLS still limits payloads.
+    const asRequester = supabase
+      .channel(`bookings-req-${user.id}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bookings',
-          filter: `requester_id=eq.${user.id},musician_id=eq.${user.id}`,
-        },
-        () => {
-          fetchBookings();
-        }
+        { event: '*', schema: 'public', table: 'bookings', filter: `requester_id=eq.${user.id}` },
+        () => fetchBookings()
+      )
+      .subscribe();
+
+    const asMusician = supabase
+      .channel(`bookings-mus-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings', filter: `musician_id=eq.${user.id}` },
+        () => fetchBookings()
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(asRequester);
+      supabase.removeChannel(asMusician);
     };
   }, [user]);
 
