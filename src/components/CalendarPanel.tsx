@@ -3,7 +3,17 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { X, Clock, User, Check, XCircle, RefreshCw } from 'lucide-react';
+import { X, Clock, User, Check, XCircle, RefreshCw, Ban } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,6 +54,36 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [bookingToReject, setBookingToReject] = useState<Booking | null>(null);
   const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
   const [bookingToReschedule, setBookingToReschedule] = useState<Booking | null>(null);
+  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
+
+  const handleCancelBooking = async () => {
+    if (!user || !bookingToCancel) return;
+    setUpdatingBookingId(bookingToCancel.id);
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', bookingToCancel.id);
+      if (error) throw error;
+
+      toast({
+        title: 'Reserva cancelada',
+        description: 'A outra parte vai ser notificada.',
+      });
+
+      // Optimistic removal; realtime will confirm.
+      setBookings((prev) => prev.filter((b) => b.id !== bookingToCancel.id));
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message ?? 'Não foi possível cancelar.',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingBookingId(null);
+      setBookingToCancel(null);
+    }
+  };
 
   const handleUpdateBookingStatus = async (booking: Booking, newStatus: 'accepted' | 'rejected', rejectionReason?: string) => {
     if (!user) return;
@@ -138,24 +178,29 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
 
     fetchBookings();
 
-    const channel = supabase
-      .channel('bookings-changes')
+    // Two channels: postgres_changes filters are single-condition (AND), so
+    // subscribe once per column we care about. RLS still limits payloads.
+    const asRequester = supabase
+      .channel(`bookings-req-${user.id}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'bookings',
-          filter: `requester_id=eq.${user.id},musician_id=eq.${user.id}`,
-        },
-        () => {
-          fetchBookings();
-        }
+        { event: '*', schema: 'public', table: 'bookings', filter: `requester_id=eq.${user.id}` },
+        () => fetchBookings()
+      )
+      .subscribe();
+
+    const asMusician = supabase
+      .channel(`bookings-mus-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings', filter: `musician_id=eq.${user.id}` },
+        () => fetchBookings()
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(asRequester);
+      supabase.removeChannel(asMusician);
     };
   }, [user]);
 
@@ -236,10 +281,17 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   <div className="space-y-4">
                     {bookingsForSelectedDate.map((booking) => {
                       const isPending = booking.status === 'pending';
+                      const isAccepted = booking.status === 'accepted';
                       const isRejected = booking.status === 'rejected';
                       const isReceivedRequest = isPending && booking.musician_id === user?.id;
                       const canReschedule = isRejected && booking.requester_id === user?.id;
-                      
+                      const canCancel =
+                        (isPending || isAccepted) &&
+                        (booking.requester_id === user?.id || booking.musician_id === user?.id);
+                      const cancelLabel = isPending && booking.requester_id === user?.id
+                        ? 'Cancelar pedido'
+                        : 'Cancelar reserva';
+
                       return (
                         <Card key={booking.id} className="p-4">
                           <div className="space-y-3">
@@ -307,6 +359,20 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 </Button>
                               </div>
                             )}
+                            {canCancel && !isReceivedRequest && (
+                              <div className="pt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full text-destructive hover:text-destructive"
+                                  disabled={updatingBookingId === booking.id}
+                                  onClick={() => setBookingToCancel(booking)}
+                                >
+                                  <Ban className="h-4 w-4 mr-1" />
+                                  {cancelLabel}
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </Card>
                       );
@@ -337,6 +403,29 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
             onSuccess={handleRescheduleSuccess}
           />
         )}
+
+        <AlertDialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {bookingToCancel?.status === 'accepted' ? 'Cancelar reserva?' : 'Cancelar pedido?'}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. A outra parte vai receber uma notificação.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={updatingBookingId !== null}>Manter</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleCancelBooking}
+                disabled={updatingBookingId !== null}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Sim, cancelar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </Card>
     );
   }
@@ -388,10 +477,17 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   <div className="space-y-4">
                     {bookingsForSelectedDate.map((booking) => {
                       const isPending = booking.status === 'pending';
+                      const isAccepted = booking.status === 'accepted';
                       const isRejected = booking.status === 'rejected';
                       const isReceivedRequest = isPending && booking.musician_id === user?.id;
                       const canReschedule = isRejected && booking.requester_id === user?.id;
-                      
+                      const canCancel =
+                        (isPending || isAccepted) &&
+                        (booking.requester_id === user?.id || booking.musician_id === user?.id);
+                      const cancelLabel = isPending && booking.requester_id === user?.id
+                        ? 'Cancelar pedido'
+                        : 'Cancelar reserva';
+
                       return (
                         <Card key={booking.id} className="p-4">
                           <div className="space-y-3">
@@ -459,6 +555,20 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 </Button>
                               </div>
                             )}
+                            {canCancel && !isReceivedRequest && (
+                              <div className="pt-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full text-destructive hover:text-destructive"
+                                  disabled={updatingBookingId === booking.id}
+                                  onClick={() => setBookingToCancel(booking)}
+                                >
+                                  <Ban className="h-4 w-4 mr-1" />
+                                  {cancelLabel}
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </Card>
                       );
@@ -490,6 +600,29 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           onSuccess={handleRescheduleSuccess}
         />
       )}
+
+      <AlertDialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bookingToCancel?.status === 'accepted' ? 'Cancelar reserva?' : 'Cancelar pedido?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. A outra parte vai receber uma notificação.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updatingBookingId !== null}>Manter</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelBooking}
+              disabled={updatingBookingId !== null}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Sim, cancelar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
