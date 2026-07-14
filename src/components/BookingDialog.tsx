@@ -257,10 +257,36 @@ const BookingDialog = ({ musicianId, onClose }: BookingDialogProps) => {
                 <p className="text-xs text-muted-foreground text-right">{message.length}/500</p>
               </div>
 
+              {date && sameDayBusy.length > 0 && (
+                <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs space-y-1">
+                  <p className="font-medium text-amber-700 dark:text-amber-400">
+                    {musicianName} já tem {sameDayBusy.length} sessão{sameDayBusy.length > 1 ? 'ões' : ''} neste dia:
+                  </p>
+                  <ul className="text-muted-foreground space-y-0.5">
+                    {sameDayBusy.map((s, i) => (
+                      <li key={i}>
+                        • {format(s.start, 'HH:mm', { locale: pt })} – {format(s.end, 'HH:mm', { locale: pt })}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {isPast && date && (
                 <p className="text-sm text-destructive">A data/hora escolhida já passou.</p>
               )}
+
+              {hasConflict && !isPast && (
+                <p className="text-sm text-destructive">
+                  Este horário choca com uma reserva existente
+                  {conflictingSlot
+                    ? ` (${format(conflictingSlot.start, 'HH:mm')}–${format(conflictingSlot.end, 'HH:mm')})`
+                    : ''}
+                  . Escolha outra hora.
+                </p>
+              )}
             </div>
+
 
             <DialogFooter className="gap-2 sm:gap-2">
               <Button variant="ghost" onClick={onClose}>Cancelar</Button>
