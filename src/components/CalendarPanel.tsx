@@ -23,6 +23,7 @@ import { pt } from 'date-fns/locale';
 import RejectBookingDialog from './RejectBookingDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
 import CancelBookingDialog from './CancelBookingDialog';
+import BookingHistory from './BookingHistory';
 
 interface CalendarPanelProps {
   onClose: () => void;
@@ -394,6 +395,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 </Button>
                               </div>
                             )}
+                            <BookingHistory bookingId={booking.id} />
                           </div>
                         </Card>
                       );
@@ -585,6 +587,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 </Button>
                               </div>
                             )}
+                            <BookingHistory bookingId={booking.id} />
                           </div>
                         </Card>
                       );

@@ -35,6 +35,41 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_events: {
+        Row: {
+          actor_id: string | null
+          booking_id: string
+          created_at: string
+          event_type: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          booking_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          booking_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_events_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           cancellation_reason: string | null
