@@ -334,6 +334,16 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 {booking.message}
                               </p>
                             )}
+                            {booking.status === 'cancelled' && (
+                              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
+                                <p className="text-xs font-medium text-destructive">
+                                  Motivo do cancelamento
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {booking.cancellation_reason?.trim() || 'Sem motivo indicado.'}
+                                </p>
+                              </div>
+                            )}
                             {isReceivedRequest && (
                               <div className="flex gap-2 pt-2">
                                 <Button
