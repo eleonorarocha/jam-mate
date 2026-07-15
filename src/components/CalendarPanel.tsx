@@ -394,6 +394,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 </Button>
                               </div>
                             )}
+                            <BookingHistory bookingId={booking.id} />
                           </div>
                         </Card>
                       );
