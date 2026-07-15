@@ -22,6 +22,7 @@ import { format, isSameDay, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import RejectBookingDialog from './RejectBookingDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
+import CancelBookingDialog from './CancelBookingDialog';
 
 interface CalendarPanelProps {
   onClose: () => void;
