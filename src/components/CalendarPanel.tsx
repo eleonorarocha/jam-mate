@@ -35,6 +35,7 @@ interface Booking {
   duration_hours: number;
   status: string;
   message: string | null;
+  cancellation_reason: string | null;
   musician_id: string;
   requester_id: string;
   profiles: {
