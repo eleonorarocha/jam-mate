@@ -58,13 +58,16 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [bookingToReschedule, setBookingToReschedule] = useState<Booking | null>(null);
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
 
-  const handleCancelBooking = async () => {
+  const handleCancelBooking = async (reason: string) => {
     if (!user || !bookingToCancel) return;
     setUpdatingBookingId(bookingToCancel.id);
     try {
       const { error } = await supabase
         .from('bookings')
-        .update({ status: 'cancelled' })
+        .update({
+          status: 'cancelled',
+          cancellation_reason: reason || null,
+        } as any)
         .eq('id', bookingToCancel.id);
       if (error) throw error;
 
@@ -73,8 +76,14 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         description: 'A outra parte vai ser notificada.',
       });
 
-      // Optimistic removal; realtime will confirm.
-      setBookings((prev) => prev.filter((b) => b.id !== bookingToCancel.id));
+      // Optimistic update; realtime will confirm.
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === bookingToCancel.id
+            ? { ...b, status: 'cancelled', cancellation_reason: reason || null }
+            : b
+        )
+      );
     } catch (error: any) {
       toast({
         title: 'Erro',
