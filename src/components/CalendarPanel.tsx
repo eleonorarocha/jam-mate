@@ -178,7 +178,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           profiles!bookings_musician_id_fkey(username, full_name, instrument)
         `)
         .or(`requester_id.eq.${user.id},musician_id.eq.${user.id}`)
-        .in('status', ['pending', 'accepted', 'rejected'])
+        .in('status', ['pending', 'accepted', 'rejected', 'cancelled'])
         .order('scheduled_date', { ascending: true });
 
       if (!error && data) {
