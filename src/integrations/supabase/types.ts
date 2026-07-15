@@ -37,6 +37,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          cancellation_reason: string | null
           created_at: string
           duration_hours: number
           id: string
@@ -49,6 +50,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cancellation_reason?: string | null
           created_at?: string
           duration_hours?: number
           id?: string
@@ -61,6 +63,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cancellation_reason?: string | null
           created_at?: string
           duration_hours?: number
           id?: string

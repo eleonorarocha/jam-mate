@@ -22,6 +22,7 @@ import { format, isSameDay, parseISO } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import RejectBookingDialog from './RejectBookingDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
+import CancelBookingDialog from './CancelBookingDialog';
 
 interface CalendarPanelProps {
   onClose: () => void;
@@ -34,6 +35,7 @@ interface Booking {
   duration_hours: number;
   status: string;
   message: string | null;
+  cancellation_reason: string | null;
   musician_id: string;
   requester_id: string;
   profiles: {
@@ -56,13 +58,16 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [bookingToReschedule, setBookingToReschedule] = useState<Booking | null>(null);
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
 
-  const handleCancelBooking = async () => {
+  const handleCancelBooking = async (reason: string) => {
     if (!user || !bookingToCancel) return;
     setUpdatingBookingId(bookingToCancel.id);
     try {
       const { error } = await supabase
         .from('bookings')
-        .update({ status: 'cancelled' })
+        .update({
+          status: 'cancelled',
+          cancellation_reason: reason || null,
+        } as any)
         .eq('id', bookingToCancel.id);
       if (error) throw error;
 
@@ -71,8 +76,14 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         description: 'A outra parte vai ser notificada.',
       });
 
-      // Optimistic removal; realtime will confirm.
-      setBookings((prev) => prev.filter((b) => b.id !== bookingToCancel.id));
+      // Optimistic update; realtime will confirm.
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === bookingToCancel.id
+            ? { ...b, status: 'cancelled', cancellation_reason: reason || null }
+            : b
+        )
+      );
     } catch (error: any) {
       toast({
         title: 'Erro',
@@ -167,7 +178,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           profiles!bookings_musician_id_fkey(username, full_name, instrument)
         `)
         .or(`requester_id.eq.${user.id},musician_id.eq.${user.id}`)
-        .in('status', ['pending', 'accepted', 'rejected'])
+        .in('status', ['pending', 'accepted', 'rejected', 'cancelled'])
         .order('scheduled_date', { ascending: true });
 
       if (!error && data) {
@@ -323,6 +334,16 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 {booking.message}
                               </p>
                             )}
+                            {booking.status === 'cancelled' && (
+                              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
+                                <p className="text-xs font-medium text-destructive">
+                                  Motivo do cancelamento
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {booking.cancellation_reason?.trim() || 'Sem motivo indicado.'}
+                                </p>
+                              </div>
+                            )}
                             {isReceivedRequest && (
                               <div className="flex gap-2 pt-2">
                                 <Button
@@ -404,28 +425,13 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           />
         )}
 
-        <AlertDialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {bookingToCancel?.status === 'accepted' ? 'Cancelar reserva?' : 'Cancelar pedido?'}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta ação não pode ser desfeita. A outra parte vai receber uma notificação.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={updatingBookingId !== null}>Manter</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleCancelBooking}
-                disabled={updatingBookingId !== null}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Sim, cancelar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <CancelBookingDialog
+          open={!!bookingToCancel}
+          onOpenChange={(open) => !open && setBookingToCancel(null)}
+          onConfirm={handleCancelBooking}
+          isLoading={updatingBookingId !== null}
+          isAccepted={bookingToCancel?.status === 'accepted'}
+        />
       </Card>
     );
   }
@@ -519,6 +525,16 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                                 {booking.message}
                               </p>
                             )}
+                            {booking.status === 'cancelled' && (
+                              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
+                                <p className="text-xs font-medium text-destructive">
+                                  Motivo do cancelamento
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {booking.cancellation_reason?.trim() || 'Sem motivo indicado.'}
+                                </p>
+                              </div>
+                            )}
                             {isReceivedRequest && (
                               <div className="flex gap-2 pt-2">
                                 <Button
@@ -601,28 +617,13 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         />
       )}
 
-      <AlertDialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {bookingToCancel?.status === 'accepted' ? 'Cancelar reserva?' : 'Cancelar pedido?'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. A outra parte vai receber uma notificação.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={updatingBookingId !== null}>Manter</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleCancelBooking}
-              disabled={updatingBookingId !== null}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Sim, cancelar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CancelBookingDialog
+        open={!!bookingToCancel}
+        onOpenChange={(open) => !open && setBookingToCancel(null)}
+        onConfirm={handleCancelBooking}
+        isLoading={updatingBookingId !== null}
+        isAccepted={bookingToCancel?.status === 'accepted'}
+      />
     </div>
   );
 };
