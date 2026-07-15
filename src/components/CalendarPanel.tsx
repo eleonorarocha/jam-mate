@@ -597,28 +597,13 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         />
       )}
 
-      <AlertDialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {bookingToCancel?.status === 'accepted' ? 'Cancelar reserva?' : 'Cancelar pedido?'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação não pode ser desfeita. A outra parte vai receber uma notificação.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={updatingBookingId !== null}>Manter</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleCancelBooking}
-              disabled={updatingBookingId !== null}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Sim, cancelar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CancelBookingDialog
+        open={!!bookingToCancel}
+        onOpenChange={(open) => !open && setBookingToCancel(null)}
+        onConfirm={handleCancelBooking}
+        isLoading={updatingBookingId !== null}
+        isAccepted={bookingToCancel?.status === 'accepted'}
+      />
     </div>
   );
 };
