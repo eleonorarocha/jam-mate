@@ -117,13 +117,21 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
               className: 'text-muted-foreground',
             };
             const Icon = meta.Icon;
+            const date = new Date(e.created_at);
+            const dateLabel = formatters.date.format(date);
+            const timeLabel = formatters.time.format(date);
+            const fullLabel = formatters.full.format(date);
             return (
               <li key={e.id} className="flex gap-2 text-xs">
                 <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${meta.className}`} />
                 <div className="flex-1">
                   <p className="font-medium">{meta.label}</p>
-                  <p className="text-muted-foreground">
-                    {format(parseISO(e.created_at), "d MMM yyyy 'às' HH:mm", { locale: pt })}
+                  <p className="text-muted-foreground flex flex-wrap gap-x-2">
+                    <time dateTime={e.created_at} title={fullLabel}>
+                      <span className="font-medium text-foreground/80">{dateLabel}</span>
+                      <span className="mx-1" aria-hidden="true">·</span>
+                      <span>{timeLabel}</span>
+                    </time>
                   </p>
                   {e.reason?.trim() && (
                     <p className="text-muted-foreground italic mt-0.5">"{e.reason}"</p>
