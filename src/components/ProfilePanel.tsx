@@ -358,6 +358,36 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
         </div>
       </motion.div>
 
+      {/* Preferences Section — Time Zone */}
+      <motion.div variants={itemVariants}>
+        <SectionTitle icon={<Clock className="w-4 h-4" />} title="Preferências" />
+        <div className="space-y-4 mt-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="time_zone" className="text-xs font-medium">Fuso horário</Label>
+            <Select
+              value={profile.time_zone}
+              onValueChange={(value) => setProfile({ ...profile, time_zone: value })}
+            >
+              <SelectTrigger id="time_zone" className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {TIME_ZONE_OPTIONS.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Aplicado ao histórico de bookings e às horas do calendário.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+
+
       {/* Save Button */}
       <motion.div variants={itemVariants}>
         <Button
