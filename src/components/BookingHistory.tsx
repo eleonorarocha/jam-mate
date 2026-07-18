@@ -125,7 +125,8 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
             const dateLabel = formatters.date.format(date);
             const timeLabel = formatters.time.format(date);
             const fullLabel = formatters.full.format(date);
-            const offsetLabel = formatters.offset.format(date).replace(/^[0-9/\-.\s]+/g, '').trim();
+            const offsetPart = formatters.offset.formatToParts(date).find((p) => p.type === 'timeZoneName');
+            const offsetLabel = offsetPart?.value ?? '';
             return (
               <li key={e.id} className="flex gap-2 text-xs">
                 <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${meta.className}`} />
