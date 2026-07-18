@@ -24,6 +24,23 @@ import RejectBookingDialog from './RejectBookingDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
 import CancelBookingDialog from './CancelBookingDialog';
 import BookingHistory from './BookingHistory';
+import { useUserTimeZone } from '@/hooks/useUserTimeZone';
+
+const formatBookingTime = (iso: string, timeZone: string) => {
+  const d = parseISO(iso);
+  const time = new Intl.DateTimeFormat('pt-PT', {
+    timeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(d);
+  const offsetPart = new Intl.DateTimeFormat('pt-PT', {
+    timeZone,
+    timeZoneName: 'shortOffset',
+  })
+    .formatToParts(d)
+    .find((p) => p.type === 'timeZoneName');
+  return { time, offset: offsetPart?.value ?? '' };
+};
 
 interface CalendarPanelProps {
   onClose: () => void;
