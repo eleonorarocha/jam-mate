@@ -53,6 +53,10 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
         dateStyle: 'full',
         timeStyle: 'long',
       }),
+      offset: new Intl.DateTimeFormat(locale, {
+        timeZone: userTimeZone,
+        timeZoneName: 'shortOffset',
+      }),
     };
   }, [i18n.language]);
 
