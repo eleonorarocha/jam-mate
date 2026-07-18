@@ -65,6 +65,7 @@ interface Booking {
 
 const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const { user } = useAuth();
+  const { timeZone } = useUserTimeZone();
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -343,8 +344,10 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <Clock className="h-4 w-4" />
                               <span>
-                                {format(parseISO(booking.scheduled_date), 'HH:mm')} -{' '}
-                                {booking.duration_hours}h
+                                {(() => {
+                                  const t = formatBookingTime(booking.scheduled_date, timeZone);
+                                  return `${t.time} ${t.offset} · ${booking.duration_hours}h`;
+                                })()}
                               </span>
                             </div>
                             {booking.message && (
