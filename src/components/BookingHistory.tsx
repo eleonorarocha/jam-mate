@@ -30,8 +30,31 @@ const EVENT_META: Record<string, { label: string; Icon: any; className: string }
 };
 
 const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
+  const { i18n } = useTranslation();
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [open, setOpen] = useState(false);
+
+  const formatters = useMemo(() => {
+    const locale = i18n.language || 'pt-PT';
+    return {
+      date: new Intl.DateTimeFormat(locale, {
+        timeZone: userTimeZone,
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      time: new Intl.DateTimeFormat(locale, {
+        timeZone: userTimeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      full: new Intl.DateTimeFormat(locale, {
+        timeZone: userTimeZone,
+        dateStyle: 'full',
+        timeStyle: 'long',
+      }),
+    };
+  }, [i18n.language]);
 
   useEffect(() => {
     let active = true;
