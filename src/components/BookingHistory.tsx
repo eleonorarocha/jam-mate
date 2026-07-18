@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { format, parseISO } from 'date-fns';
-import { pt } from 'date-fns/locale';
 import { Check, XCircle, Ban, Send, RefreshCw, Circle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
+
+const userTimeZone =
+  (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
 
 interface BookingEvent {
   id: string;
@@ -28,8 +30,31 @@ const EVENT_META: Record<string, { label: string; Icon: any; className: string }
 };
 
 const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
+  const { i18n } = useTranslation();
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [open, setOpen] = useState(false);
+
+  const formatters = useMemo(() => {
+    const locale = i18n.language || 'pt-PT';
+    return {
+      date: new Intl.DateTimeFormat(locale, {
+        timeZone: userTimeZone,
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      time: new Intl.DateTimeFormat(locale, {
+        timeZone: userTimeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      full: new Intl.DateTimeFormat(locale, {
+        timeZone: userTimeZone,
+        dateStyle: 'full',
+        timeStyle: 'long',
+      }),
+    };
+  }, [i18n.language]);
 
   useEffect(() => {
     let active = true;
@@ -92,13 +117,21 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
               className: 'text-muted-foreground',
             };
             const Icon = meta.Icon;
+            const date = new Date(e.created_at);
+            const dateLabel = formatters.date.format(date);
+            const timeLabel = formatters.time.format(date);
+            const fullLabel = formatters.full.format(date);
             return (
               <li key={e.id} className="flex gap-2 text-xs">
                 <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${meta.className}`} />
                 <div className="flex-1">
                   <p className="font-medium">{meta.label}</p>
-                  <p className="text-muted-foreground">
-                    {format(parseISO(e.created_at), "d MMM yyyy 'às' HH:mm", { locale: pt })}
+                  <p className="text-muted-foreground flex flex-wrap gap-x-2">
+                    <time dateTime={e.created_at} title={fullLabel}>
+                      <span className="font-medium text-foreground/80">{dateLabel}</span>
+                      <span className="mx-1" aria-hidden="true">·</span>
+                      <span>{timeLabel}</span>
+                    </time>
                   </p>
                   {e.reason?.trim() && (
                     <p className="text-muted-foreground italic mt-0.5">"{e.reason}"</p>
