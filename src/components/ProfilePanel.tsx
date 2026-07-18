@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, CheckCircle, AlertCircle, Camera, Music, MapPin, Shield, Loader2, Music2 } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, Camera, Music, MapPin, Shield, Loader2, Music2, Clock } from 'lucide-react';
 import AvatarCropper from '@/components/AvatarCropper';
 import MusicSnippetSection from '@/components/MusicSnippetSection';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { AUTO_TZ, TIME_ZONE_OPTIONS, setUserTimeZonePref } from '@/hooks/useUserTimeZone';
 
 interface ProfilePanelProps {
   onClose: () => void;
@@ -39,6 +40,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
     email_verified: false,
     gender: '' as 'male' | 'female' | '',
     avatar_url: '' as string | null,
+    time_zone: AUTO_TZ as string,
   });
 
   useEffect(() => {
@@ -49,7 +51,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
-      .select('username, first_name, bio, instrument, skill_level, city, country, gender, avatar_url')
+      .select('username, first_name, bio, instrument, skill_level, city, country, gender, avatar_url, time_zone')
       .eq('id', user.id)
       .single();
     const { data: sensitive } = await supabase.rpc('get_profile_sensitive', { _profile_id: user.id });
@@ -69,7 +71,9 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
         email_verified: s?.email_verified || false,
         gender: data.gender || '',
         avatar_url: data.avatar_url || null,
+        time_zone: (data as any).time_zone || AUTO_TZ,
       });
+      setUserTimeZonePref((data as any).time_zone || null);
     }
   };
 
@@ -103,10 +107,12 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           country: profile.country,
           phone: profile.phone,
           gender: profile.gender || null,
-        })
+          time_zone: profile.time_zone === AUTO_TZ ? null : profile.time_zone,
+        } as any)
         .eq('id', user.id);
 
       if (error) throw error;
+      setUserTimeZonePref(profile.time_zone === AUTO_TZ ? null : profile.time_zone);
       toast({ title: 'Perfil atualizado!', description: 'As suas alterações foram guardadas.' });
     } catch (error: any) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });
@@ -351,6 +357,36 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           </div>
         </div>
       </motion.div>
+
+      {/* Preferences Section — Time Zone */}
+      <motion.div variants={itemVariants}>
+        <SectionTitle icon={<Clock className="w-4 h-4" />} title="Preferências" />
+        <div className="space-y-4 mt-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="time_zone" className="text-xs font-medium">Fuso horário</Label>
+            <Select
+              value={profile.time_zone}
+              onValueChange={(value) => setProfile({ ...profile, time_zone: value })}
+            >
+              <SelectTrigger id="time_zone" className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
+                {TIME_ZONE_OPTIONS.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Aplicado ao histórico de bookings e às horas do calendário.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+
 
       {/* Save Button */}
       <motion.div variants={itemVariants}>

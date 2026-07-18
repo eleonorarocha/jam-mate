@@ -434,6 +434,7 @@ export type Database = {
           preferred_instruments: string[] | null
           preferred_skill_levels: string[] | null
           skill_level: Database["public"]["Enums"]["skill_level"]
+          time_zone: string | null
           total_ratings: number | null
           updated_at: string
           username: string
@@ -464,6 +465,7 @@ export type Database = {
           preferred_instruments?: string[] | null
           preferred_skill_levels?: string[] | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
+          time_zone?: string | null
           total_ratings?: number | null
           updated_at?: string
           username: string
@@ -494,6 +496,7 @@ export type Database = {
           preferred_instruments?: string[] | null
           preferred_skill_levels?: string[] | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
+          time_zone?: string | null
           total_ratings?: number | null
           updated_at?: string
           username?: string

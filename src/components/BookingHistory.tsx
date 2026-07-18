@@ -3,9 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Check, XCircle, Ban, Send, RefreshCw, Circle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
-
-const userTimeZone =
-  (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
+import { useUserTimeZone } from '@/hooks/useUserTimeZone';
 
 interface BookingEvent {
   id: string;
@@ -31,6 +29,7 @@ const EVENT_META: Record<string, { label: string; Icon: any; className: string }
 
 const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
   const { i18n } = useTranslation();
+  const { timeZone: userTimeZone } = useUserTimeZone();
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -58,7 +57,7 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
         timeZoneName: 'shortOffset',
       }),
     };
-  }, [i18n.language]);
+  }, [i18n.language, userTimeZone]);
 
   useEffect(() => {
     let active = true;
