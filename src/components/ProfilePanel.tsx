@@ -442,4 +442,29 @@ const SectionTitle = ({ icon, title }: { icon: React.ReactNode; title: string })
   </div>
 );
 
+const DualTimeToggle = ({ selectedTz }: { selectedTz: string }) => {
+  const { showLocalTime, setShowLocalTime, localTimeZone } = useUserTimeZone();
+  const isAuto = selectedTz === AUTO_TZ;
+  return (
+    <div className="flex items-start justify-between gap-3 p-3 rounded-lg bg-secondary/40 border border-border">
+      <div className="flex-1 min-w-0">
+        <Label htmlFor="show-local-time" className="text-xs font-medium cursor-pointer">
+          Mostrar também hora local
+        </Label>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {isAuto
+            ? `O fuso selecionado já é o local (${localTimeZone}).`
+            : `Exibe as horas no fuso escolhido e em paralelo no local (${localTimeZone}).`}
+        </p>
+      </div>
+      <Switch
+        id="show-local-time"
+        checked={showLocalTime}
+        onCheckedChange={setShowLocalTime}
+        disabled={isAuto}
+      />
+    </div>
+  );
+};
+
 export default ProfilePanel;
