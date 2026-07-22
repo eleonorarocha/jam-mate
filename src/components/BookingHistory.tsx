@@ -29,35 +29,24 @@ const EVENT_META: Record<string, { label: string; Icon: any; className: string }
 
 const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
   const { i18n } = useTranslation();
-  const { timeZone: userTimeZone } = useUserTimeZone();
+  const { timeZone: userTimeZone, localTimeZone, showLocalTime, preference } = useUserTimeZone();
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [open, setOpen] = useState(false);
 
-  const formatters = useMemo(() => {
+  const showDual = showLocalTime && userTimeZone !== localTimeZone;
+
+  const makeFormatters = (tz: string) => {
     const locale = i18n.language || 'pt-PT';
     return {
-      date: new Intl.DateTimeFormat(locale, {
-        timeZone: userTimeZone,
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }),
-      time: new Intl.DateTimeFormat(locale, {
-        timeZone: userTimeZone,
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      full: new Intl.DateTimeFormat(locale, {
-        timeZone: userTimeZone,
-        dateStyle: 'full',
-        timeStyle: 'long',
-      }),
-      offset: new Intl.DateTimeFormat(locale, {
-        timeZone: userTimeZone,
-        timeZoneName: 'shortOffset',
-      }),
+      date: new Intl.DateTimeFormat(locale, { timeZone: tz, day: '2-digit', month: 'short', year: 'numeric' }),
+      time: new Intl.DateTimeFormat(locale, { timeZone: tz, hour: '2-digit', minute: '2-digit' }),
+      full: new Intl.DateTimeFormat(locale, { timeZone: tz, dateStyle: 'full', timeStyle: 'long' }),
+      offset: new Intl.DateTimeFormat(locale, { timeZone: tz, timeZoneName: 'shortOffset' }),
     };
-  }, [i18n.language, userTimeZone]);
+  };
+
+  const formatters = useMemo(() => makeFormatters(userTimeZone), [i18n.language, userTimeZone]);
+  const localFormatters = useMemo(() => makeFormatters(localTimeZone), [i18n.language, localTimeZone]);
 
   useEffect(() => {
     let active = true;
