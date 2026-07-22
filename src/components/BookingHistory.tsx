@@ -115,6 +115,11 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
             const fullLabel = formatters.full.format(date);
             const offsetPart = formatters.offset.formatToParts(date).find((p) => p.type === 'timeZoneName');
             const offsetLabel = offsetPart?.value ?? '';
+            const localTime = showDual ? localFormatters.time.format(date) : '';
+            const localOffsetPart = showDual
+              ? localFormatters.offset.formatToParts(date).find((p) => p.type === 'timeZoneName')
+              : undefined;
+            const localOffsetLabel = localOffsetPart?.value ?? '';
             return (
               <li key={e.id} className="flex gap-2 text-xs">
                 <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${meta.className}`} />
@@ -129,6 +134,11 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
                       <span className="font-medium text-foreground/70">{offsetLabel}</span>
                     </time>
                   </p>
+                  {showDual && (
+                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">
+                      <span className="opacity-70">Local:</span> {localTime} · {localOffsetLabel}
+                    </p>
+                  )}
                   {e.reason?.trim() && (
                     <p className="text-muted-foreground italic mt-0.5">"{e.reason}"</p>
                   )}
