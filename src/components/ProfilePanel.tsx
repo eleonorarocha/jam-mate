@@ -384,6 +384,8 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
               Aplicado ao histórico de bookings e às horas do calendário.
             </p>
           </div>
+
+          <DualTimeToggle selectedTz={profile.time_zone} />
         </div>
       </motion.div>
 
