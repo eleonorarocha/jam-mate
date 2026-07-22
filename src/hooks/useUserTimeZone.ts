@@ -6,6 +6,9 @@ const browserTz =
   (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC';
 
 export const AUTO_TZ = 'auto';
+export const LOCAL_TZ = browserTz;
+
+const SHOW_LOCAL_KEY = 'jm.showLocalTime';
 
 export const TIME_ZONE_OPTIONS: { value: string; label: string }[] = [
   { value: AUTO_TZ, label: `Local (auto · ${browserTz})` },
@@ -31,22 +34,48 @@ export const resolveTimeZone = (pref: string | null | undefined): string => {
 };
 
 let cachedPref: string | null | undefined;
-const listeners = new Set<(tz: string | null | undefined) => void>();
+const prefListeners = new Set<(tz: string | null | undefined) => void>();
 
 export const setUserTimeZonePref = (pref: string | null | undefined) => {
   cachedPref = pref;
-  listeners.forEach((l) => l(pref));
+  prefListeners.forEach((l) => l(pref));
 };
 
-export function useUserTimeZone(): { timeZone: string; preference: string } {
+const readShowLocal = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return window.localStorage.getItem(SHOW_LOCAL_KEY) === '1';
+};
+
+let cachedShowLocal: boolean = readShowLocal();
+const showLocalListeners = new Set<(v: boolean) => void>();
+
+export const setShowLocalTimePref = (value: boolean) => {
+  cachedShowLocal = value;
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(SHOW_LOCAL_KEY, value ? '1' : '0');
+  }
+  showLocalListeners.forEach((l) => l(value));
+};
+
+export function useUserTimeZone(): {
+  timeZone: string;
+  preference: string;
+  localTimeZone: string;
+  showLocalTime: boolean;
+  setShowLocalTime: (v: boolean) => void;
+} {
   const { user } = useAuth();
   const [pref, setPref] = useState<string | null | undefined>(cachedPref);
+  const [showLocal, setShowLocal] = useState<boolean>(cachedShowLocal);
 
   useEffect(() => {
     const listener = (v: string | null | undefined) => setPref(v);
-    listeners.add(listener);
+    prefListeners.add(listener);
+    const slListener = (v: boolean) => setShowLocal(v);
+    showLocalListeners.add(slListener);
     return () => {
-      listeners.delete(listener);
+      prefListeners.delete(listener);
+      showLocalListeners.delete(slListener);
     };
   }, []);
 
@@ -73,5 +102,8 @@ export function useUserTimeZone(): { timeZone: string; preference: string } {
   return {
     timeZone: resolveTimeZone(pref),
     preference: pref ?? AUTO_TZ,
+    localTimeZone: browserTz,
+    showLocalTime: showLocal,
+    setShowLocalTime: setShowLocalTimePref,
   };
 }

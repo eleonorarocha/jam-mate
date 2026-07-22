@@ -65,7 +65,8 @@ interface Booking {
 
 const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const { user } = useAuth();
-  const { timeZone } = useUserTimeZone();
+  const { timeZone, localTimeZone, showLocalTime } = useUserTimeZone();
+  const showDualTime = showLocalTime && timeZone !== localTimeZone;
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -346,7 +347,13 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                               <span>
                                 {(() => {
                                   const t = formatBookingTime(booking.scheduled_date, timeZone);
-                                  return `${t.time} ${t.offset} · ${booking.duration_hours}h`;
+                                  const parts = [`${t.time} ${t.offset}`];
+                                  if (showDualTime) {
+                                    const l = formatBookingTime(booking.scheduled_date, localTimeZone);
+                                    parts.push(`(local: ${l.time} ${l.offset})`);
+                                  }
+                                  parts.push(`${booking.duration_hours}h`);
+                                  return parts.join(' · ');
                                 })()}
                               </span>
                             </div>
@@ -540,7 +547,13 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                               <span>
                                 {(() => {
                                   const t = formatBookingTime(booking.scheduled_date, timeZone);
-                                  return `${t.time} ${t.offset} · ${booking.duration_hours}h`;
+                                  const parts = [`${t.time} ${t.offset}`];
+                                  if (showDualTime) {
+                                    const l = formatBookingTime(booking.scheduled_date, localTimeZone);
+                                    parts.push(`(local: ${l.time} ${l.offset})`);
+                                  }
+                                  parts.push(`${booking.duration_hours}h`);
+                                  return parts.join(' · ');
                                 })()}
                               </span>
                             </div>
