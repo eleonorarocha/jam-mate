@@ -115,18 +115,21 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
             const fullLabel = formatters.full.format(date);
             const offsetPart = formatters.offset.formatToParts(date).find((p) => p.type === 'timeZoneName');
             const offsetLabel = offsetPart?.value ?? '';
-            const localTime = showDual ? localFormatters.time.format(date) : '';
-            const localOffsetPart = showDual
-              ? localFormatters.offset.formatToParts(date).find((p) => p.type === 'timeZoneName')
-              : undefined;
-            const localOffsetLabel = localOffsetPart?.value ?? '';
+            const localFull = localFormatters.full.format(date);
+            const localTime = localFormatters.time.format(date);
+            const localOffsetLabel =
+              localFormatters.offset.formatToParts(date).find((p) => p.type === 'timeZoneName')?.value ?? '';
+            const sameZone = userTimeZone === localTimeZone;
+            const tooltip = sameZone
+              ? `${fullLabel} (${offsetLabel})`
+              : `Selecionado (${userTimeZone}): ${fullLabel} — ${offsetLabel}\nLocal (${localTimeZone}): ${localFull} — ${localOffsetLabel}`;
             return (
               <li key={e.id} className="flex gap-2 text-xs">
                 <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${meta.className}`} />
                 <div className="flex-1">
                   <p className="font-medium">{meta.label}</p>
                   <p className="text-muted-foreground flex flex-wrap gap-x-2">
-                    <time dateTime={e.created_at} title={`${fullLabel} (${offsetLabel})`}>
+                    <time dateTime={e.created_at} title={tooltip}>
                       <span className="font-medium text-foreground/80">{dateLabel}</span>
                       <span className="mx-1" aria-hidden="true">·</span>
                       <span>{timeLabel}</span>
