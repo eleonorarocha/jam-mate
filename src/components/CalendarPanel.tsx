@@ -65,7 +65,8 @@ interface Booking {
 
 const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const { user } = useAuth();
-  const { timeZone } = useUserTimeZone();
+  const { timeZone, localTimeZone, showLocalTime } = useUserTimeZone();
+  const showDualTime = showLocalTime && timeZone !== localTimeZone;
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [bookings, setBookings] = useState<Booking[]>([]);
