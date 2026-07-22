@@ -12,7 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
-import { AUTO_TZ, TIME_ZONE_OPTIONS, setUserTimeZonePref } from '@/hooks/useUserTimeZone';
+import { AUTO_TZ, TIME_ZONE_OPTIONS, setUserTimeZonePref, useUserTimeZone, LOCAL_TZ } from '@/hooks/useUserTimeZone';
+import { Switch } from '@/components/ui/switch';
 
 interface ProfilePanelProps {
   onClose: () => void;
