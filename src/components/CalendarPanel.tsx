@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { X, Clock, User, Check, XCircle, RefreshCw, Ban } from 'lucide-react';
+import { X, Clock, User, Check, XCircle, RefreshCw, Ban, Copy } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,6 +77,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
   const [bookingToReschedule, setBookingToReschedule] = useState<Booking | null>(null);
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
+  const [copiedBookingId, setCopiedBookingId] = useState<string | null>(null);
 
   const handleCancelBooking = async (reason: string) => {
     if (!user || !bookingToCancel) return;
@@ -187,6 +188,43 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
     setBookingToReschedule(null);
   };
 
+  const buildTimeTooltip = (iso: string) => {
+    const d = parseISO(iso);
+    const makeFull = (tz: string) =>
+      new Intl.DateTimeFormat('pt-PT', {
+        timeZone: tz,
+        dateStyle: 'full',
+        timeStyle: 'long',
+      }).format(d);
+    const makeOffset = (tz: string) =>
+      new Intl.DateTimeFormat('pt-PT', { timeZone: tz, timeZoneName: 'shortOffset' })
+        .formatToParts(d)
+        .find((p) => p.type === 'timeZoneName')?.value ?? '';
+
+    const selectedFull = `${makeFull(timeZone)} (${makeOffset(timeZone)})`;
+    if (timeZone === localTimeZone) return selectedFull;
+    const localFull = `${makeFull(localTimeZone)} (${makeOffset(localTimeZone)})`;
+    return `Selecionado (${timeZone}): ${selectedFull}\nLocal (${localTimeZone}): ${localFull}`;
+  };
+
+  const handleCopyTime = async (text: string, bookingId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedBookingId(bookingId);
+      toast({
+        title: 'Copiado',
+        description: 'Data e hora copiadas para a área de transferência.',
+      });
+      setTimeout(() => setCopiedBookingId((prev) => (prev === bookingId ? null : prev)), 2000);
+    } catch {
+      toast({
+        title: 'Erro ao copiar',
+        description: 'Não foi possível aceder à área de transferência.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   useEffect(() => {
     if (!user) return;
 
@@ -271,6 +309,127 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
     }
   };
 
+  const BookingCard = ({ booking }: { booking: Booking }) => {
+    const isPending = booking.status === 'pending';
+    const isAccepted = booking.status === 'accepted';
+    const isRejected = booking.status === 'rejected';
+    const isReceivedRequest = isPending && booking.musician_id === user?.id;
+    const canReschedule = isRejected && booking.requester_id === user?.id;
+    const canCancel =
+      (isPending || isAccepted) &&
+      (booking.requester_id === user?.id || booking.musician_id === user?.id);
+    const cancelLabel = isPending && booking.requester_id === user?.id ? 'Cancelar pedido' : 'Cancelar reserva';
+
+    const t = formatBookingTime(booking.scheduled_date, timeZone);
+    const timeTooltip = buildTimeTooltip(booking.scheduled_date);
+    const timeParts = [`${t.time} ${t.offset}`];
+    if (showDualTime) {
+      const l = formatBookingTime(booking.scheduled_date, localTimeZone);
+      timeParts.push(`(local: ${l.time} ${l.offset})`);
+    }
+    timeParts.push(`${booking.duration_hours}h`);
+
+    return (
+      <Card key={booking.id} className="p-4">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="font-medium">{booking.profiles.full_name || booking.profiles.username}</p>
+                <p className="text-sm text-muted-foreground">{booking.profiles.instrument}</p>
+              </div>
+            </div>
+            <Badge className={getStatusColor(booking.status)}>{getStatusLabel(booking.status)}</Badge>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4" />
+            <time dateTime={booking.scheduled_date} title={timeTooltip}>
+              {timeParts.join(' · ')}
+            </time>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+              aria-label="Copiar data e hora completas"
+              title="Copiar data e hora completas"
+              onClick={() => handleCopyTime(timeTooltip, booking.id)}
+            >
+              {copiedBookingId === booking.id ? (
+                <Check className="h-3 w-3 text-green-600" />
+              ) : (
+                <Copy className="h-3 w-3" />
+              )}
+            </Button>
+          </div>
+          {booking.message && (
+            <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">{booking.message}</p>
+          )}
+          {booking.status === 'cancelled' && (
+            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
+              <p className="text-xs font-medium text-destructive">Motivo do cancelamento</p>
+              <p className="text-sm text-muted-foreground">
+                {booking.cancellation_reason?.trim() || 'Sem motivo indicado.'}
+              </p>
+            </div>
+          )}
+          {isReceivedRequest && (
+            <div className="flex gap-2 pt-2">
+              <Button
+                size="sm"
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={updatingBookingId === booking.id}
+                onClick={() => handleUpdateBookingStatus(booking, 'accepted')}
+              >
+                <Check className="h-4 w-4 mr-1" />
+                Aceitar
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="flex-1"
+                disabled={updatingBookingId === booking.id}
+                onClick={() => handleRejectClick(booking)}
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                Recusar
+              </Button>
+            </div>
+          )}
+          {canReschedule && (
+            <div className="pt-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleRescheduleClick(booking)}
+              >
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Reagendar
+              </Button>
+            </div>
+          )}
+          {canCancel && !isReceivedRequest && (
+            <div className="pt-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full text-destructive hover:text-destructive"
+                disabled={updatingBookingId === booking.id}
+                onClick={() => setBookingToCancel(booking)}
+              >
+                <Ban className="h-4 w-4 mr-1" />
+                {cancelLabel}
+              </Button>
+            </div>
+          )}
+          <BookingHistory bookingId={booking.id} />
+        </div>
+      </Card>
+    );
+  };
+
   if (embedded) {
     return (
       <Card className="w-full">
@@ -310,123 +469,9 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {bookingsForSelectedDate.map((booking) => {
-                      const isPending = booking.status === 'pending';
-                      const isAccepted = booking.status === 'accepted';
-                      const isRejected = booking.status === 'rejected';
-                      const isReceivedRequest = isPending && booking.musician_id === user?.id;
-                      const canReschedule = isRejected && booking.requester_id === user?.id;
-                      const canCancel =
-                        (isPending || isAccepted) &&
-                        (booking.requester_id === user?.id || booking.musician_id === user?.id);
-                      const cancelLabel = isPending && booking.requester_id === user?.id
-                        ? 'Cancelar pedido'
-                        : 'Cancelar reserva';
-
-                      return (
-                        <Card key={booking.id} className="p-4">
-                          <div className="space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-muted-foreground" />
-                                <div>
-                                  <p className="font-medium">
-                                    {booking.profiles.full_name || booking.profiles.username}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {booking.profiles.instrument}
-                                  </p>
-                                </div>
-                              </div>
-                              <Badge className={getStatusColor(booking.status)}>
-                                {getStatusLabel(booking.status)}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              <span>
-                                {(() => {
-                                  const t = formatBookingTime(booking.scheduled_date, timeZone);
-                                  const parts = [`${t.time} ${t.offset}`];
-                                  if (showDualTime) {
-                                    const l = formatBookingTime(booking.scheduled_date, localTimeZone);
-                                    parts.push(`(local: ${l.time} ${l.offset})`);
-                                  }
-                                  parts.push(`${booking.duration_hours}h`);
-                                  return parts.join(' · ');
-                                })()}
-                              </span>
-                            </div>
-                            {booking.message && (
-                              <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">
-                                {booking.message}
-                              </p>
-                            )}
-                            {booking.status === 'cancelled' && (
-                              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
-                                <p className="text-xs font-medium text-destructive">
-                                  Motivo do cancelamento
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {booking.cancellation_reason?.trim() || 'Sem motivo indicado.'}
-                                </p>
-                              </div>
-                            )}
-                            {isReceivedRequest && (
-                              <div className="flex gap-2 pt-2">
-                                <Button
-                                  size="sm"
-                                  className="flex-1 bg-green-600 hover:bg-green-700"
-                                  disabled={updatingBookingId === booking.id}
-                                  onClick={() => handleUpdateBookingStatus(booking, 'accepted')}
-                                >
-                                  <Check className="h-4 w-4 mr-1" />
-                                  Aceitar
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  className="flex-1"
-                                  disabled={updatingBookingId === booking.id}
-                                  onClick={() => handleRejectClick(booking)}
-                                >
-                                  <XCircle className="h-4 w-4 mr-1" />
-                                  Recusar
-                                </Button>
-                              </div>
-                            )}
-                            {canReschedule && (
-                              <div className="pt-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="w-full"
-                                  onClick={() => handleRescheduleClick(booking)}
-                                >
-                                  <RefreshCw className="h-4 w-4 mr-1" />
-                                  Reagendar
-                                </Button>
-                              </div>
-                            )}
-                            {canCancel && !isReceivedRequest && (
-                              <div className="pt-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="w-full text-destructive hover:text-destructive"
-                                  disabled={updatingBookingId === booking.id}
-                                  onClick={() => setBookingToCancel(booking)}
-                                >
-                                  <Ban className="h-4 w-4 mr-1" />
-                                  {cancelLabel}
-                                </Button>
-                              </div>
-                            )}
-                            <BookingHistory bookingId={booking.id} />
-                          </div>
-                        </Card>
-                      );
-                    })}
+                    {bookingsForSelectedDate.map((booking) => (
+                      <BookingCard key={booking.id} booking={booking} />
+                    ))}
                   </div>
                 )}
               </ScrollArea>
@@ -510,123 +555,9 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {bookingsForSelectedDate.map((booking) => {
-                      const isPending = booking.status === 'pending';
-                      const isAccepted = booking.status === 'accepted';
-                      const isRejected = booking.status === 'rejected';
-                      const isReceivedRequest = isPending && booking.musician_id === user?.id;
-                      const canReschedule = isRejected && booking.requester_id === user?.id;
-                      const canCancel =
-                        (isPending || isAccepted) &&
-                        (booking.requester_id === user?.id || booking.musician_id === user?.id);
-                      const cancelLabel = isPending && booking.requester_id === user?.id
-                        ? 'Cancelar pedido'
-                        : 'Cancelar reserva';
-
-                      return (
-                        <Card key={booking.id} className="p-4">
-                          <div className="space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-muted-foreground" />
-                                <div>
-                                  <p className="font-medium">
-                                    {booking.profiles.full_name || booking.profiles.username}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {booking.profiles.instrument}
-                                  </p>
-                                </div>
-                              </div>
-                              <Badge className={getStatusColor(booking.status)}>
-                                {getStatusLabel(booking.status)}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4" />
-                              <span>
-                                {(() => {
-                                  const t = formatBookingTime(booking.scheduled_date, timeZone);
-                                  const parts = [`${t.time} ${t.offset}`];
-                                  if (showDualTime) {
-                                    const l = formatBookingTime(booking.scheduled_date, localTimeZone);
-                                    parts.push(`(local: ${l.time} ${l.offset})`);
-                                  }
-                                  parts.push(`${booking.duration_hours}h`);
-                                  return parts.join(' · ');
-                                })()}
-                              </span>
-                            </div>
-                            {booking.message && (
-                              <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">
-                                {booking.message}
-                              </p>
-                            )}
-                            {booking.status === 'cancelled' && (
-                              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-2 space-y-1">
-                                <p className="text-xs font-medium text-destructive">
-                                  Motivo do cancelamento
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {booking.cancellation_reason?.trim() || 'Sem motivo indicado.'}
-                                </p>
-                              </div>
-                            )}
-                            {isReceivedRequest && (
-                              <div className="flex gap-2 pt-2">
-                                <Button
-                                  size="sm"
-                                  className="flex-1 bg-green-600 hover:bg-green-700"
-                                  disabled={updatingBookingId === booking.id}
-                                  onClick={() => handleUpdateBookingStatus(booking, 'accepted')}
-                                >
-                                  <Check className="h-4 w-4 mr-1" />
-                                  Aceitar
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  className="flex-1"
-                                  disabled={updatingBookingId === booking.id}
-                                  onClick={() => handleRejectClick(booking)}
-                                >
-                                  <XCircle className="h-4 w-4 mr-1" />
-                                  Recusar
-                                </Button>
-                              </div>
-                            )}
-                            {canReschedule && (
-                              <div className="pt-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="w-full"
-                                  onClick={() => handleRescheduleClick(booking)}
-                                >
-                                  <RefreshCw className="h-4 w-4 mr-1" />
-                                  Reagendar
-                                </Button>
-                              </div>
-                            )}
-                            {canCancel && !isReceivedRequest && (
-                              <div className="pt-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="w-full text-destructive hover:text-destructive"
-                                  disabled={updatingBookingId === booking.id}
-                                  onClick={() => setBookingToCancel(booking)}
-                                >
-                                  <Ban className="h-4 w-4 mr-1" />
-                                  {cancelLabel}
-                                </Button>
-                              </div>
-                            )}
-                            <BookingHistory bookingId={booking.id} />
-                          </div>
-                        </Card>
-                      );
-                    })}
+                    {bookingsForSelectedDate.map((booking) => (
+                      <BookingCard key={booking.id} booking={booking} />
+                    ))}
                   </div>
                 )}
               </ScrollArea>
