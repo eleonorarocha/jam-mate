@@ -31,10 +31,28 @@ const EVENT_META: Record<string, { label: string; Icon: any; className: string }
 const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
   const { i18n } = useTranslation();
   const { toast } = useToast();
-  const { timeZone: userTimeZone, localTimeZone, showLocalTime, preference } = useUserTimeZone();
+  const { timeZone: userTimeZone, localTimeZone, showLocalTime } = useUserTimeZone();
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [open, setOpen] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      toast({
+        title: 'Copiado',
+        description: 'Data e hora copiadas para a área de transferência.',
+      });
+      setTimeout(() => setCopiedId((prev) => (prev === id ? null : prev)), 2000);
+    } catch {
+      toast({
+        title: 'Erro ao copiar',
+        description: 'Não foi possível aceder à área de transferência.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const showDual = showLocalTime && userTimeZone !== localTimeZone;
 
