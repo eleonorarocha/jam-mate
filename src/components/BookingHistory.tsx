@@ -149,7 +149,7 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
                 <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${meta.className}`} />
                 <div className="flex-1">
                   <p className="font-medium">{meta.label}</p>
-                  <p className="text-muted-foreground flex flex-wrap gap-x-2">
+                  <p className="text-muted-foreground flex flex-wrap gap-x-2 items-center">
                     <time dateTime={e.created_at} title={tooltip}>
                       <span className="font-medium text-foreground/80">{dateLabel}</span>
                       <span className="mx-1" aria-hidden="true">·</span>
@@ -157,6 +157,21 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
                       <span className="mx-1" aria-hidden="true">·</span>
                       <span className="font-medium text-foreground/70">{offsetLabel}</span>
                     </time>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+                      aria-label="Copiar data e hora completas"
+                      title="Copiar data e hora completas"
+                      onClick={() => handleCopy(tooltip, e.id)}
+                    >
+                      {copiedId === e.id ? (
+                        <Check className="h-3 w-3 text-green-600" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </Button>
                   </p>
                   {showDual && (
                     <p className="text-[11px] text-muted-foreground/80 mt-0.5">
