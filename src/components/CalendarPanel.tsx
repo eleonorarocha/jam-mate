@@ -77,6 +77,7 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
   const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
   const [bookingToReschedule, setBookingToReschedule] = useState<Booking | null>(null);
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
+  const [copiedBookingId, setCopiedBookingId] = useState<string | null>(null);
 
   const handleCancelBooking = async (reason: string) => {
     if (!user || !bookingToCancel) return;
