@@ -41,9 +41,11 @@ const EVENT_META: Record<string, { label: string; Icon: any; className: string }
 
 const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
   const { i18n } = useTranslation();
+  const { toast } = useToast();
   const { timeZone: userTimeZone, localTimeZone, showLocalTime, preference } = useUserTimeZone();
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [open, setOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const showDual = showLocalTime && userTimeZone !== localTimeZone;
 
