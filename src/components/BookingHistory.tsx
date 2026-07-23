@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Check, XCircle, Ban, Send, RefreshCw, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, XCircle, Ban, Send, RefreshCw, Circle, ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { useUserTimeZone } from '@/hooks/useUserTimeZone';
+import { useToast } from '@/hooks/use-toast';
 
 interface BookingEvent {
   id: string;
@@ -29,9 +30,29 @@ const EVENT_META: Record<string, { label: string; Icon: any; className: string }
 
 const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
   const { i18n } = useTranslation();
-  const { timeZone: userTimeZone, localTimeZone, showLocalTime, preference } = useUserTimeZone();
+  const { toast } = useToast();
+  const { timeZone: userTimeZone, localTimeZone, showLocalTime } = useUserTimeZone();
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [open, setOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = async (text: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      toast({
+        title: 'Copiado',
+        description: 'Data e hora copiadas para a área de transferência.',
+      });
+      setTimeout(() => setCopiedId((prev) => (prev === id ? null : prev)), 2000);
+    } catch {
+      toast({
+        title: 'Erro ao copiar',
+        description: 'Não foi possível aceder à área de transferência.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const showDual = showLocalTime && userTimeZone !== localTimeZone;
 
@@ -128,7 +149,7 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
                 <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${meta.className}`} />
                 <div className="flex-1">
                   <p className="font-medium">{meta.label}</p>
-                  <p className="text-muted-foreground flex flex-wrap gap-x-2">
+                  <p className="text-muted-foreground flex flex-wrap gap-x-2 items-center">
                     <time dateTime={e.created_at} title={tooltip}>
                       <span className="font-medium text-foreground/80">{dateLabel}</span>
                       <span className="mx-1" aria-hidden="true">·</span>
@@ -136,6 +157,21 @@ const BookingHistory = ({ bookingId }: BookingHistoryProps) => {
                       <span className="mx-1" aria-hidden="true">·</span>
                       <span className="font-medium text-foreground/70">{offsetLabel}</span>
                     </time>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+                      aria-label="Copiar data e hora completas"
+                      title="Copiar data e hora completas"
+                      onClick={() => handleCopy(tooltip, e.id)}
+                    >
+                      {copiedId === e.id ? (
+                        <Check className="h-3 w-3 text-green-600" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </Button>
                   </p>
                   {showDual && (
                     <p className="text-[11px] text-muted-foreground/80 mt-0.5">
