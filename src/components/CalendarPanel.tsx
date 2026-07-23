@@ -188,6 +188,43 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
     setBookingToReschedule(null);
   };
 
+  const buildTimeTooltip = (iso: string) => {
+    const d = parseISO(iso);
+    const makeFull = (tz: string) =>
+      new Intl.DateTimeFormat('pt-PT', {
+        timeZone: tz,
+        dateStyle: 'full',
+        timeStyle: 'long',
+      }).format(d);
+    const makeOffset = (tz: string) =>
+      new Intl.DateTimeFormat('pt-PT', { timeZone: tz, timeZoneName: 'shortOffset' })
+        .formatToParts(d)
+        .find((p) => p.type === 'timeZoneName')?.value ?? '';
+
+    const selectedFull = `${makeFull(timeZone)} (${makeOffset(timeZone)})`;
+    if (timeZone === localTimeZone) return selectedFull;
+    const localFull = `${makeFull(localTimeZone)} (${makeOffset(localTimeZone)})`;
+    return `Selecionado (${timeZone}): ${selectedFull}\nLocal (${localTimeZone}): ${localFull}`;
+  };
+
+  const handleCopyTime = async (text: string, bookingId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedBookingId(bookingId);
+      toast({
+        title: 'Copiado',
+        description: 'Data e hora copiadas para a área de transferência.',
+      });
+      setTimeout(() => setCopiedBookingId((prev) => (prev === bookingId ? null : prev)), 2000);
+    } catch {
+      toast({
+        title: 'Erro ao copiar',
+        description: 'Não foi possível aceder à área de transferência.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   useEffect(() => {
     if (!user) return;
 
