@@ -1,17 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Check,
-  XCircle,
-  Ban,
-  Send,
-  RefreshCw,
-  Circle,
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  Check as CheckIcon,
-} from 'lucide-react';
+import { Check, XCircle, Ban, Send, RefreshCw, Circle, ChevronDown, ChevronUp, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { useUserTimeZone } from '@/hooks/useUserTimeZone';
