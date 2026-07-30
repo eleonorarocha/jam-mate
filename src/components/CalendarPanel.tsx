@@ -202,10 +202,10 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         .formatToParts(d)
         .find((p) => p.type === 'timeZoneName')?.value ?? '';
 
-    const selectedFull = `${makeFull(timeZone)} (${makeOffset(timeZone)})`;
+    const selectedFull = `Fuso selecionado (${timeZone}): ${makeFull(timeZone)} (${makeOffset(timeZone)})`;
     if (timeZone === localTimeZone) return selectedFull;
-    const localFull = `${makeFull(localTimeZone)} (${makeOffset(localTimeZone)})`;
-    return `Selecionado (${timeZone}): ${selectedFull}\nLocal (${localTimeZone}): ${localFull}`;
+    const localFull = `Hora local (${localTimeZone}): ${makeFull(localTimeZone)} (${makeOffset(localTimeZone)})`;
+    return `${selectedFull}\n${localFull}`;
   };
 
   const handleCopyTime = async (text: string, bookingId: string) => {
@@ -386,7 +386,12 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
-            <time dateTime={booking.scheduled_date} title={timeTooltip}>
+            <time
+              dateTime={booking.scheduled_date}
+              title={timeTooltip}
+              aria-label={timeTooltip}
+              className="cursor-help"
+            >
               {timeParts.join(' · ')}
             </time>
             <Button
