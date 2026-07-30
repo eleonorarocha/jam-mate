@@ -25,6 +25,7 @@ import RescheduleBookingDialog from './RescheduleBookingDialog';
 import CancelBookingDialog from './CancelBookingDialog';
 import BookingHistory from './BookingHistory';
 import { useUserTimeZone } from '@/hooks/useUserTimeZone';
+import { buildIcsCalendar, downloadIcs } from '@/lib/ics';
 
 const formatBookingTime = (iso: string, timeZone: string) => {
   const d = parseISO(iso);
@@ -220,6 +221,47 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
       toast({
         title: 'Erro ao copiar',
         description: 'Não foi possível aceder à área de transferência.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleExportIcs = (booking: Booking) => {
+    try {
+      const start = parseISO(booking.scheduled_date);
+      const end = new Date(start.getTime() + booking.duration_hours * 60 * 60 * 1000);
+      const partner = booking.profiles.full_name || booking.profiles.username;
+      const ics = buildIcsCalendar([
+        {
+          uid: `booking-${booking.id}@jammate`,
+          start,
+          end,
+          title: `Jam session com ${partner}`,
+          description: [
+            `Músico: ${partner} (${booking.profiles.instrument})`,
+            `Estado: ${getStatusLabel(booking.status)}`,
+            booking.message ? `Mensagem: ${booking.message}` : null,
+          ]
+            .filter(Boolean)
+            .join('\n'),
+          url: `${window.location.origin}/calendar`,
+          status:
+            booking.status === 'accepted'
+              ? 'CONFIRMED'
+              : booking.status === 'pending'
+              ? 'TENTATIVE'
+              : 'CANCELLED',
+        },
+      ]);
+      downloadIcs(`jam-session-${format(start, 'yyyy-MM-dd-HHmm')}.ics`, ics);
+      toast({
+        title: 'Ficheiro .ics criado',
+        description: 'Importa-o no Google Calendar ou Apple Calendar.',
+      });
+    } catch {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível gerar o ficheiro .ics.',
         variant: 'destructive',
       });
     }
