@@ -202,10 +202,10 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
         .formatToParts(d)
         .find((p) => p.type === 'timeZoneName')?.value ?? '';
 
-    const selectedFull = `${makeFull(timeZone)} (${makeOffset(timeZone)})`;
+    const selectedFull = `Fuso selecionado (${timeZone}): ${makeFull(timeZone)} (${makeOffset(timeZone)})`;
     if (timeZone === localTimeZone) return selectedFull;
-    const localFull = `${makeFull(localTimeZone)} (${makeOffset(localTimeZone)})`;
-    return `Selecionado (${timeZone}): ${selectedFull}\nLocal (${localTimeZone}): ${localFull}`;
+    const localFull = `Hora local (${localTimeZone}): ${makeFull(localTimeZone)} (${makeOffset(localTimeZone)})`;
+    return `${selectedFull}\n${localFull}`;
   };
 
   const handleCopyTime = async (text: string, bookingId: string) => {
