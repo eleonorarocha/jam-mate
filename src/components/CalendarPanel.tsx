@@ -404,6 +404,17 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
                 <Copy className="h-3 w-3" />
               )}
             </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+              aria-label="Exportar para calendário (.ics)"
+              title="Exportar para calendário (.ics)"
+              onClick={() => handleExportIcs(booking)}
+            >
+              <CalendarPlus className="h-3 w-3" />
+            </Button>
           </div>
           {booking.message && (
             <p className="text-sm text-muted-foreground border-l-2 border-primary pl-2">{booking.message}</p>
