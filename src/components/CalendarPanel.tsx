@@ -3,7 +3,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { X, Clock, User, Check, XCircle, RefreshCw, Ban, Copy } from 'lucide-react';
+import { X, Clock, User, Check, XCircle, RefreshCw, Ban, Copy, CalendarPlus } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,7 @@ import RescheduleBookingDialog from './RescheduleBookingDialog';
 import CancelBookingDialog from './CancelBookingDialog';
 import BookingHistory from './BookingHistory';
 import { useUserTimeZone } from '@/hooks/useUserTimeZone';
+import { buildIcsCalendar, downloadIcs } from '@/lib/ics';
 
 const formatBookingTime = (iso: string, timeZone: string) => {
   const d = parseISO(iso);
@@ -225,6 +226,47 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
     }
   };
 
+  const handleExportIcs = (booking: Booking) => {
+    try {
+      const start = parseISO(booking.scheduled_date);
+      const end = new Date(start.getTime() + booking.duration_hours * 60 * 60 * 1000);
+      const partner = booking.profiles.full_name || booking.profiles.username;
+      const ics = buildIcsCalendar([
+        {
+          uid: `booking-${booking.id}@jammate`,
+          start,
+          end,
+          title: `Jam session com ${partner}`,
+          description: [
+            `Músico: ${partner} (${booking.profiles.instrument})`,
+            `Estado: ${getStatusLabel(booking.status)}`,
+            booking.message ? `Mensagem: ${booking.message}` : null,
+          ]
+            .filter(Boolean)
+            .join('\n'),
+          url: `${window.location.origin}/calendar`,
+          status:
+            booking.status === 'accepted'
+              ? 'CONFIRMED'
+              : booking.status === 'pending'
+              ? 'TENTATIVE'
+              : 'CANCELLED',
+        },
+      ]);
+      downloadIcs(`jam-session-${format(start, 'yyyy-MM-dd-HHmm')}.ics`, ics);
+      toast({
+        title: 'Ficheiro .ics criado',
+        description: 'Importa-o no Google Calendar ou Apple Calendar.',
+      });
+    } catch {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível gerar o ficheiro .ics.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   useEffect(() => {
     if (!user) return;
 
@@ -361,6 +403,17 @@ const CalendarPanel = ({ onClose, embedded = false }: CalendarPanelProps) => {
               ) : (
                 <Copy className="h-3 w-3" />
               )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5 p-0 text-muted-foreground hover:text-foreground"
+              aria-label="Exportar para calendário (.ics)"
+              title="Exportar para calendário (.ics)"
+              onClick={() => handleExportIcs(booking)}
+            >
+              <CalendarPlus className="h-3 w-3" />
             </Button>
           </div>
           {booking.message && (
