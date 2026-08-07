@@ -4,43 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, ExternalLink, Loader2 } from 'lucide-react';
 import { usePro } from '@/hooks/usePro';
+import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 import UpgradeProDialog from '@/components/UpgradeProDialog';
-import { supabase } from '@/integrations/supabase/client';
-import { getStripeEnvironment, isPaymentsConfigured } from '@/lib/stripe';
-import { useToast } from '@/hooks/use-toast';
 
 const formatDate = (value: string | null) =>
   value ? new Date(value).toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
 
 const SubscriptionSettings = () => {
   const { isPro, loading, subscription } = usePro();
-  const { toast } = useToast();
+  const { openPortal, opening } = useCustomerPortal();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [opening, setOpening] = useState(false);
 
   const planLabel = subscription?.price_id === 'pro_yearly' ? 'Anual (39,99 €/ano)' : 'Mensal (4,99 €/mês)';
 
-  const openPortal = async () => {
-    if (!isPaymentsConfigured()) {
-      toast({ title: 'Pagamentos indisponíveis', description: 'A configuração de pagamentos ainda não está concluída.', variant: 'destructive' });
-      return;
-    }
-    setOpening(true);
-    const { data, error } = await supabase.functions.invoke('customer-portal', {
-      body: { environment: getStripeEnvironment(), returnUrl: window.location.href },
-    });
-    setOpening(false);
-
-    if (error || !data?.url) {
-      toast({
-        title: 'Erro',
-        description: data?.error || error?.message || 'Não foi possível abrir o portal de subscrição.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    window.open(data.url as string, '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <Card>
