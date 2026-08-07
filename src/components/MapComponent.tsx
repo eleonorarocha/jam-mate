@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Supercluster from 'supercluster';
+import { isProUntil } from '@/components/ProBadge';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -33,6 +34,7 @@ interface Musician {
   skill_level?: string;
   gender?: string;
   genres?: string[] | null;
+  pro_until?: string | null;
 }
 
 interface MapComponentProps {
@@ -59,6 +61,7 @@ interface Musician {
   avatar_url: string | null;
   skill_level?: string;
   gender?: string;
+  pro_until?: string | null;
 }
 
 interface UserPreferences {
@@ -210,7 +213,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     if (isAuthenticated) {
       const { data } = await supabase
         .from('profiles')
-        .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender, genres')
+        .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender, genres, pro_until')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null);
       if (data) {
@@ -220,7 +223,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       // Non-authenticated: use public_profiles with approximate coordinates
       const { data } = await supabase
         .from('public_profiles')
-        .select('id, username, instrument, city, country, approx_latitude, approx_longitude, average_rating, total_ratings, avatar_url, skill_level, gender')
+        .select('id, username, instrument, city, country, approx_latitude, approx_longitude, average_rating, total_ratings, avatar_url, skill_level, gender, pro_until')
         .not('approx_latitude', 'is', null)
         .not('approx_longitude', 'is', null);
       if (data) {
@@ -319,6 +322,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     const isMatch = isCompatibleMatch(musician);
     const isFav = isFavorite(musician.id);
     const isHighlighted = highlightedMusicianId === musician.id;
+    const isProMember = isProUntil(musician.pro_until);
 
     const el = document.createElement('div');
     el.className = 'musician-marker';
@@ -335,8 +339,18 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     pill.style.borderRadius = '9999px';
     pill.style.background = isHighlighted ? '#222' : '#fff';
     pill.style.color = isHighlighted ? '#fff' : '#222';
-    pill.style.border = isMatch ? '2px solid hsl(142, 76%, 36%)' : '1px solid rgba(0,0,0,0.08)';
-    pill.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)';
+    pill.style.border = isMatch
+      ? '2px solid hsl(142, 76%, 36%)'
+      : isProMember
+        ? '2px solid hsl(42, 90%, 45%)'
+        : '1px solid rgba(0,0,0,0.08)';
+    pill.style.boxShadow = isProMember
+      ? '0 0 0 3px hsla(42, 96%, 50%, 0.28), 0 4px 10px rgba(0,0,0,0.22)'
+      : '0 2px 6px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.1)';
+    if (isProMember) {
+      pill.style.padding = '7px 12px 7px 7px';
+      el.style.zIndex = '800';
+    }
     pill.style.font = '600 13px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     pill.style.whiteSpace = 'nowrap';
 
@@ -366,6 +380,14 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
 
     if (isMatch) el.style.animation = 'jm-pulse 2s infinite';
 
+    if (isProMember) {
+      const proBadge = document.createElement('div');
+      proBadge.title = 'Membro JamMate Pro';
+      proBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="hsl(30,45%,12%)"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>`;
+      proBadge.style.cssText = 'position:absolute;top:-7px;left:-7px;background:hsl(42,96%,50%);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.3);';
+      el.appendChild(proBadge);
+    }
+
     if (isFav) {
       const heartBadge = document.createElement('div');
       heartBadge.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
@@ -390,14 +412,26 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     lng: number,
     lat: number,
     clusterId: number,
+    hasPro = false,
   ): HTMLDivElement => {
     const el = document.createElement('div');
     el.style.cssText = 'cursor:pointer;transition:transform 0.15s ease;';
     const size = count < 10 ? 36 : count < 50 ? 44 : count < 200 ? 52 : 60;
     const circle = document.createElement('div');
-    circle.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;background:#fff;border:2px solid hsl(142, 76%, 36%);display:flex;align-items:center;justify-content:center;font:700 ${Math.max(13, size / 3)}px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;color:#222;box-shadow:0 2px 8px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.12);`;
+    const border = hasPro ? 'hsl(42, 90%, 45%)' : 'hsl(142, 76%, 36%)';
+    const glow = hasPro ? '0 0 0 4px hsla(42, 96%, 50%, 0.25), ' : '';
+    circle.style.cssText = `width:${size}px;height:${size}px;border-radius:50%;background:#fff;border:${hasPro ? '3px' : '2px'} solid ${border};display:flex;align-items:center;justify-content:center;font:700 ${Math.max(13, size / 3)}px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;color:#222;box-shadow:${glow}0 2px 8px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.12);`;
     circle.textContent = String(count);
+    el.style.position = 'relative';
     el.appendChild(circle);
+    if (hasPro) {
+      el.style.zIndex = '850';
+      const proDot = document.createElement('div');
+      proDot.title = 'Inclui membros Pro';
+      proDot.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="hsl(30,45%,12%)"><path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/></svg>`;
+      proDot.style.cssText = 'position:absolute;top:-2px;right:-2px;background:hsl(42,96%,50%);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.3);';
+      el.appendChild(proDot);
+    }
     el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.08)'; });
     el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
     el.addEventListener('click', (ev) => {
@@ -455,10 +489,10 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
 
     clusters.forEach((c) => {
       const [lng, lat] = c.geometry.coordinates;
-      const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number; musicianId?: string };
+      const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number; musicianId?: string; proCount?: number };
       if (props.cluster) {
         const expansionZoom = clusterRef.current!.getClusterExpansionZoom(props.cluster_id!);
-        const el = buildClusterMarker(props.point_count!, expansionZoom, lng, lat, props.cluster_id!);
+        const el = buildClusterMarker(props.point_count!, expansionZoom, lng, lat, props.cluster_id!, (props.proCount ?? 0) > 0);
         const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
           .setLngLat([lng, lat])
           .addTo(map.current!);
@@ -571,11 +605,13 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       radius: 60,
       maxZoom: 16,
       minPoints: 2,
+      map: (props) => ({ proCount: props.isProMember ? 1 : 0 }),
+      reduce: (acc, props) => { acc.proCount += props.proCount; },
     });
     index.load(
       filteredMusicians.map((m) => ({
         type: 'Feature' as const,
-        properties: { musicianId: m.id },
+        properties: { musicianId: m.id, isProMember: isProUntil(m.pro_until) },
         geometry: {
           type: 'Point' as const,
           coordinates: [approximateCoord(m.longitude), approximateCoord(m.latitude)],
