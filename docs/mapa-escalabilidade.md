@@ -122,3 +122,34 @@ Casos a tratar:
 | Paginação simples | Não resolve nada num mapa: o utilizador quer os pontos da área, não "a página 2" |
 
 Ordem natural de adopção quando crescer: **bounding box → GeoJSON/WebGL → PostGIS**.
+
+---
+
+## 6. Protótipo PostGIS (já existe na base de dados, inactivo no frontend)
+
+Implementado a 2026-08-07 como preparação. **Não está ligado ao `MapComponent.tsx`** — só se adopta
+se os perfis com coordenadas ultrapassarem a ordem das dezenas de milhares.
+
+Base de dados:
+
+- Extensão `postgis` activada (schema `extensions`).
+- `public.profiles.approx_geom` — coluna `geometry(Point,4326)` **GENERATED ALWAYS ... STORED**,
+  derivada de `approx_longitude`/`approx_latitude` (coordenadas aproximadas, nunca as exactas).
+- Índice `profiles_approx_geom_gist` (GiST) para filtragem por área.
+- `public.get_map_clusters(_min_lng, _min_lat, _max_lng, _max_lat, _zoom)` — SECURITY DEFINER,
+  `EXECUTE` apenas para `authenticated`. Filtra por `onboarding_completed`, por bounding box
+  (`&&` sobre `ST_MakeEnvelope`) e exclui utilizadores bloqueados (`has_block_between`).
+  Agrega com `ST_SnapToGrid` numa grelha de `360 / 2^zoom / 4` graus e devolve por célula:
+  `cluster_key`, `lng`, `lat`, `point_count`, `pro_count` e `profile_id` (só quando a célula tem 1 ponto).
+
+Frontend:
+
+- `src/lib/mapClustersRpc.ts` — `fetchMapClusters(bounds, zoom, signal)` e `clustersToGeoJSON()`.
+  Nenhum componente o importa ainda.
+
+Resultado do teste com os dados actuais (mundo inteiro, zoom 4): 6 células, a maior com 6 perfis
+na zona de Lisboa, as restantes com 1 ponto e `profile_id` preenchido — comportamento esperado.
+
+Para adoptar no futuro: substituir o Supercluster no browser por `fetchMapClusters` em `moveend`/
+`zoomend` (mesmo debounce e cache da secção 4) e desenhar os clusters como camada GeoJSON em vez de
+marcadores DOM.
