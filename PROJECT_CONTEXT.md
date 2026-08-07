@@ -560,7 +560,7 @@ significa que não existam — significa que não há uma lista rastreada.
 | Sincronização com Lovable | Lovable → GitHub confirmado: alterações feitas no editor do Lovable são enviadas para o GitHub. GitHub → Lovable (alterações feitas diretamente no GitHub refletidas no editor do Lovable): **não identificado**. |
 | Data da ligação | 2026-08-07 |
 | CI / GitHub Actions | `.github/workflows/phone-privacy-test.yml` — testes SQL de privacidade do número de telefone. |
-| Estado do sync neste ambiente | O remote `origin` local aponta para o storage privado do Lovable. O push para o GitHub é executado pelo serviço server-side do Lovable, não por este sandbox. [...]
+| Estado do sync neste ambiente | O remote `origin` local aponta para o storage privado do Lovable. O push para o GitHub é executado pelo serviço server-side do Lovable, não por este sandbox.
 
 ### Histórico Git (factos concretos)
 
