@@ -239,8 +239,11 @@ Dimensão total de `src/pages` + `src/components`: ~12 400 linhas de TSX.
 **Mensagens** — *funcional*: chat em tempo real, indicador de escrita, recibos de leitura, contagem
 de não lidas.
 
-**Notificações** — *funcional*: centro de notificações com histórico, notificações em tempo real,
-som, preferências, e toggle de push (`usePushNotifications` + service worker).
+**Notificações** — *parcial*: centro de notificações com histórico, notificações em tempo real,
+som e preferências estão funcionais. O "push" (`usePushNotifications`) **não é push real**: usa
+apenas a API `Notification` do browser em conjunto com um listener Realtime, sem Web Push nem
+subscrição no servidor. **Não existe service worker em `public/`**, pelo que os avisos só aparecem
+com a aplicação aberta, nunca em background.
 
 **Email transacional** — *funcional*: pedido, aceitação, recusa, lembrete agendado e aviso de
 feedback, via Resend.
