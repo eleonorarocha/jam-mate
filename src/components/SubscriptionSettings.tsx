@@ -46,7 +46,7 @@ const SubscriptionSettings = () => {
                 {formatDate(subscription?.current_period_end ?? null)}
               </div>
             </div>
-            <Button onClick={openPortal} disabled={opening} variant="outline">
+            <Button onClick={() => openPortal()} disabled={opening} variant="outline">
               {opening ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ExternalLink className="w-4 h-4 mr-2" />}
               Gerir subscrição
             </Button>
