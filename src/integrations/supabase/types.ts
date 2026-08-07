@@ -427,6 +427,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approx_geom: unknown
           approx_latitude: number | null
           approx_longitude: number | null
           avatar_url: string | null
@@ -460,6 +461,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          approx_geom?: unknown
           approx_latitude?: number | null
           approx_longitude?: number | null
           avatar_url?: string | null
@@ -493,6 +495,7 @@ export type Database = {
           username: string
         }
         Update: {
+          approx_geom?: unknown
           approx_latitude?: number | null
           approx_longitude?: number | null
           avatar_url?: string | null
@@ -836,6 +839,23 @@ export type Database = {
       can_view_sensitive_profile: {
         Args: { _profile_id: string; _viewer_id: string }
         Returns: boolean
+      }
+      get_map_clusters: {
+        Args: {
+          _max_lat: number
+          _max_lng: number
+          _min_lat: number
+          _min_lng: number
+          _zoom: number
+        }
+        Returns: {
+          cluster_key: string
+          lat: number
+          lng: number
+          point_count: number
+          pro_count: number
+          profile_id: string
+        }[]
       }
       get_musician_busy_slots: {
         Args: { _musician_id: string }
