@@ -56,7 +56,7 @@ Percorrer o fluxo completo em modo teste com cartão de teste: checkout mensal �
 
 ## Notas técnicas
 
-- Nomes: função `paddle-webhook`; coluna `profiles.pro_until`; triggers `sync_pro_until`.
+- Nomes: função `paddle-webhook`; coluna `profiles.pro_until`; trigger `sync_pro_until`.
 - O webhook corre sem verificação de JWT (é chamado pelo Paddle) e valida a assinatura em código.
 - Nenhum preço fica hardcoded na lógica de negócio — o código refere apenas os identificadores de preço; os valores mudam no painel Paddle.
 - Nada é publicado; tudo permanece em ambiente de teste.
