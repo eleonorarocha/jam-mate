@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
 import PartnerPreferences from '@/components/PartnerPreferences';
 import BlockedUsersList from '@/components/BlockedUsersList';
+import SubscriptionSettings from '@/components/SubscriptionSettings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -139,6 +140,11 @@ const Settings = () => {
           </motion.div>
 
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+            {/* Subscription */}
+            <motion.div variants={itemVariants}>
+              <SubscriptionSettings />
+            </motion.div>
+
             {/* Account Security */}
             <motion.div variants={itemVariants}>
               <Card>
