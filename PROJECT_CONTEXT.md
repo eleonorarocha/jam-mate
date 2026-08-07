@@ -4,7 +4,7 @@
 > Escrito a partir do estado real do código e do esquema de base de dados. Onde não foi possível
 > confirmar algo, está explicitamente marcado como **não identificado**.
 
-Última atualização: 2026-08-06
+Última atualização: 2026-08-07
 
 ---
 

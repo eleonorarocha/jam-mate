@@ -1,24 +1,27 @@
-# JAM MATE
+# JamMate
 
-Quero fazer uma app internacional para músicos se encontrares e fazerem uma jam.  Tipo Airbnb. Com registo, mapa onde se vêm os músicos registados com janela pop up com a informação geral do utilizador (zona aproximada e instrumento que toca e grau e avaliação global do utilizador.
+JamMate é uma aplicação web que funciona como um **"Airbnb para músicos"**: um mapa interativo onde músicos descobrem outros músicos perto de si e agendam jam sessions presenciais.
 
-This project was built with [Lovable](https://lovable.dev).
+Este projeto é desenvolvido no [Lovable](https://lovable.dev) e sincronizado em tempo real com o GitHub.
 
-## Build with Lovable
+## Repositório
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/825cf83b-d7be-4ec7-a41b-2380bfc09a97).
+- **GitHub**: https://github.com/eleonorarocha/JAMMATE
+- **Visibilidade**: privado
+- **Sincronização**: bidirecional — alterações no Lovable são enviadas para o GitHub, e alterações feitas no GitHub são sincronizadas de volta para o Lovable.
+- **CI**: `.github/workflows/phone-privacy-test.yml` — testes SQL de privacidade do número de telefone.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Desenvolver no Lovable
 
-## Development
+Abre o projeto no [editor Lovable](https://lovable.dev/projects/825cf83b-d7be-4ec7-a41b-2380bfc09a97) e descreve as alterações que queres ver. O Lovable escreve o código e sincroniza-o automaticamente com este repositório.
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Desenvolver localmente
+
+Precisas do Node.js e npm — [instalar com nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
+git clone https://github.com/eleonorarocha/JAMMATE.git
+cd JAMMATE
 npm i
 npm run dev
 ```
