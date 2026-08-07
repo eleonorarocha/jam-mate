@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 import { getStripe, getStripeEnvironment } from '@/lib/stripe';
 import { supabase } from '@/integrations/supabase/client';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 
 interface Props {
   priceId: string;
