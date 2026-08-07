@@ -7,15 +7,21 @@ interface Props {
   priceId: string;
   returnUrl: string;
   onError?: (message: string) => void;
+  /** Called when the server refuses checkout because a Pro subscription already exists. */
+  onAlreadyPro?: (portalUrl: string) => void;
 }
 
-const StripeEmbeddedCheckout = ({ priceId, returnUrl, onError }: Props) => {
+const StripeEmbeddedCheckout = ({ priceId, returnUrl, onError, onAlreadyPro }: Props) => {
   const options = useMemo(
     () => ({
       fetchClientSecret: async (): Promise<string> => {
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: { priceId, returnUrl, environment: getStripeEnvironment() },
         });
+        if (data?.portalUrl) {
+          onAlreadyPro?.(data.portalUrl as string);
+          throw new Error('already_pro');
+        }
         if (error || !data?.clientSecret) {
           const message = data?.error || error?.message || 'Não foi possível iniciar o pagamento.';
           onError?.(message);
@@ -29,6 +35,7 @@ const StripeEmbeddedCheckout = ({ priceId, returnUrl, onError }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [priceId, returnUrl]
   );
+
 
   return (
     <div id="checkout" className="max-h-[65vh] overflow-y-auto">
