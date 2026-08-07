@@ -1,6 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "../_shared/stripe.ts";
+import { createPortalUrl, findActiveSubscription } from "../_shared/portal.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
