@@ -490,11 +490,8 @@ significa que não existam — significa que não há uma lista rastreada.
   `service_role` numa Edge Function.
 - A aplicação depende inteiramente de RLS: um erro numa política é imediatamente uma falha de segurança.
 - Chaves i18n em falta nas quatro línguas fazem falhar o build de produção (por desenho).
-- O `README.md` na raiz (73 linhas) permanece o template genérico inicial do Lovable ("Welcome to your Lovable project")
-- O `README.md` na raiz (73 linhas) permanece o template genérico inicial do Lovable ("Welcome to your Lovable project")
-  e não descreve o JamMate, a arquitetura real nem os scripts e fluxos específicos do projecto
-  (geração de sitemap, auditoria i18n, testes Playwright/Vitest). Fica desatualizado ao lado do
-  `PROJECT_CONTEXT.md` e deve ser actualizado para reflectir a realidade do repositório.
+- O `README.md` foi reescrito em 2026-08-07 (descrição do produto, repositório, gestor de pacotes Bun e
+  instruções locais); continua menos detalhado do que este `PROJECT_CONTEXT.md`.
 
 ### Dependências externas
 
