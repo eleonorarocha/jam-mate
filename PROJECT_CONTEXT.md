@@ -347,12 +347,10 @@ auth.users ──< user_roles / subscriptions / music_snippets / feedback
 - `normalize_profile_language` — valida e normaliza o idioma para `pt|en|es|fr`.
 - `update_updated_at_column` — mantém `updated_at`.
 
-- Cron job `send-booking-reminders` está activo na base de dados (jobid 1, agendamento `*/5 * * * *`) e
-  invoca a função via `net.http_post` com header `Authorization: Bearer <anon key>`. Este job foi criado
-  diretamente na base de dados **fora** dos ficheiros de migração em `supabase/migrations/` — a
-  migração `20260309045448` apenas activa as extensões `pg_cron` e `pg_net`, não cria o job em si.
-  Consequência: se a base de dados for recriada, clonada ou remixada sem recriar explicitamente este
-  job, os lembretes de booking deixam de ser enviados sem erro visível.
+- Cron job `send-booking-reminders` está activo na base de dados (jobid 2, agendamento `*/5 * * * *`) e
+  invoca a função via `net.http_post` com header `Authorization: Bearer <anon key>`. Desde 2026-08-07 o
+  job está **versionado** na migração `20260807005549_...sql`, que activa `pg_cron`/`pg_net` e recria o
+  job de forma idempotente (`cron.unschedule` seguido de `cron.schedule`).
 
 ### Regras de privacidade impostas por RLS
 
@@ -460,6 +458,9 @@ Resumo cronológico aproximado das grandes fases:
 - Painel de administração com estatísticas e moderação.
 - Base SEO e primeira camada de testes automatizados.
 - RLS em todas as tabelas e regras de negócio impostas na base de dados.
+- **2026-08-07 — riscos técnicos resolvidos**: (1) o cron job `send-booking-reminders` passou a estar
+  versionado numa migração idempotente em `supabase/migrations/`; (2) os lockfiles duplicados foram
+  removidos — o gestor de pacotes oficial é o **Bun** (`bun.lock`), documentado no `README.md`.
 
 ### Por desenvolver
 
@@ -489,10 +490,7 @@ significa que não existam — significa que não há uma lista rastreada.
   `service_role` numa Edge Function.
 - A aplicação depende inteiramente de RLS: um erro numa política é imediatamente uma falha de segurança.
 - Chaves i18n em falta nas quatro línguas fazem falhar o build de produção (por desenho).
-- Na raiz do repositório existem três lockfiles simultâneos: `bun.lock`, `bun.lockb` e `package-lock.json`.
-  Isto cria ambiguidade sobre qual gestor de pacotes (bun ou npm) é o oficial do projeto e implica risco
-  de instalações inconsistentes entre ambientes/máquinas diferentes. Recomenda-se decidir um gestor único
-  e remover os lockfiles redundantes.
+- O `README.md` na raiz (73 linhas) permanece o template genérico inicial do Lovable ("Welcome to your Lovable project")
 - O `README.md` na raiz (73 linhas) permanece o template genérico inicial do Lovable ("Welcome to your Lovable project")
   e não descreve o JamMate, a arquitetura real nem os scripts e fluxos específicos do projecto
   (geração de sitemap, auditoria i18n, testes Playwright/Vitest). Fica desatualizado ao lado do
