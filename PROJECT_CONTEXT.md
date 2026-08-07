@@ -533,7 +533,6 @@ significa que não existam — significa que não há uma lista rastreada.
 | Custos do Mapbox | Financeiro | Token restrito, caching, limites de utilização |
 | Carga do mapa com muitos utilizadores | Desempenho | Clustering server-side |
 | Entregabilidade de email | Fluxos de reserva falham silenciosamente | Domínio próprio no Resend e monitorização |
-| Cron job `send-booking-reminders` não versionado (criado directamente na base de dados) | Lembretes deixam de ser enviados silenciosamente se a base de dados for recriada/clonada/remixada; risco operacional e perda de confiança nos lembretes | Versionar a criação do job em `supabase/migrations/` ou documentação/automação explícita da provisão do job; evitar uso de `anon key` em chamadas agendadas e considerar execução via role de serviço/Edge Function |
 
 ### Roadmap sugerido
 
@@ -619,8 +618,7 @@ no topo. Usa-o para te orientares depressa, mas trata o código e o esquema da b
 10. **Antes de mexer no `MapComponent`**, lê-o por inteiro: a interação entre Supercluster, popups
     nativos e `fitBounds` com padding é sensível e já foi origem de vários bugs de comportamento.
 
-11. **Nota operacional sobre o cron de lembretes**: o job `send-booking-reminders` existe apenas como
-    objecto na base de dados (não está versionado por migração). Se a infraestrutura for recriada,
-    documentar/automatizar a recriação do job em `supabase/migrations/` é essencial para evitar a
-    perda silenciosa de lembretes.
+11. **Cron de lembretes versionado (2026-08-07)**: o job `send-booking-reminders` é recriado de forma
+    idempotente pela migração `20260807005549_...sql`. Qualquer alteração ao agendamento deve ser feita
+    por nova migração, não directamente na base de dados.
 
