@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Check, Loader2, ArrowLeft, PartyPopper } from 'lucide-react';
+import { Sparkles, Check, Loader2, ArrowLeft, PartyPopper, ExternalLink } from 'lucide-react';
 import { FREE_LIMITS, PRO_LIMITS, usePro } from '@/hooks/usePro';
 import { PRO_PLANS, isPaymentsConfigured, isTestMode } from '@/lib/stripe';
 import StripeEmbeddedCheckout from '@/components/StripeEmbeddedCheckout';
+import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 import { useToast } from '@/hooks/use-toast';
 
 interface Props {
@@ -12,14 +13,17 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-type Stage = 'plans' | 'checkout' | 'activating' | 'done';
+type Stage = 'plans' | 'checkout' | 'activating' | 'done' | 'already-pro';
 
 const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
-  const { isPro, refresh } = usePro();
+  const { isPro, loading, refresh } = usePro();
+  const { openPortal, opening } = useCustomerPortal();
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>('plans');
   const [priceId, setPriceId] = useState<string | null>(null);
+  const [portalUrl, setPortalUrl] = useState<string | null>(null);
   const [slow, setSlow] = useState(false);
+
 
   useEffect(() => {
     if (!open) {
