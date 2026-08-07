@@ -30,7 +30,6 @@ Uma migração com:
 - `profiles.pro_until timestamptz` — campo público de leitura, usado para o selo e o destaque no mapa (evita expor a tabela de subscrições).
 - Índice para ordenar por Pro no mapa.
 - Trigger em `subscriptions` que sincroniza `profiles.pro_until` sempre que a subscrição muda.
-- Trigger em `subscriptions` que sincroniza `profiles.pro_until` sempre que a subscrição muda.
 
 ### 3. Backend — webhook
 Edge function `paddle-webhook`:
