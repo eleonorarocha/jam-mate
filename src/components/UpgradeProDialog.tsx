@@ -174,6 +174,23 @@ const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
           </>
         )}
 
+        {stage === 'already-pro' && (
+          <div className="py-6 text-center space-y-3">
+            <Sparkles className="w-8 h-8 mx-auto text-primary" />
+            <p className="text-sm font-medium">Já tens o JamMate Pro ativo.</p>
+            <p className="text-xs text-muted-foreground">
+              Para mudar de plano, atualizar o pagamento ou cancelar, usa o portal do cliente.
+            </p>
+            <Button onClick={() => openPortal(portalUrl ?? undefined)} disabled={opening}>
+              {opening ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ExternalLink className="w-4 h-4 mr-2" />}
+              Gerir subscrição
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              O portal abre num separador novo.
+            </p>
+          </div>
+        )}
+
         {stage === 'checkout' && priceId && (
           <div className="space-y-3">
             {isTestMode() && (
@@ -185,6 +202,10 @@ const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
             <StripeEmbeddedCheckout
               priceId={priceId}
               returnUrl={returnUrl}
+              onAlreadyPro={(url) => {
+                setPortalUrl(url);
+                setStage('already-pro');
+              }}
               onError={(message) => {
                 toast({ title: 'Erro no pagamento', description: message, variant: 'destructive' });
                 setStage('plans');
@@ -196,6 +217,7 @@ const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
             </Button>
           </div>
         )}
+
 
         {stage === 'activating' && (
           <div className="py-8 text-center space-y-3">
