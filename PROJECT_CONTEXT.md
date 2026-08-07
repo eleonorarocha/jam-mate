@@ -518,8 +518,10 @@ significa que não existam — significa que não há uma lista rastreada.
 
 ### Melhorias necessárias
 
-- Filtragem geográfica server-side (por exemplo com PostGIS ou bounding box) quando o número de
-  perfis crescer.
+- Filtragem geográfica server-side no mapa. Critério explícito: **bounding box a implementar quando
+  perfis com coordenadas > 300; PostGIS quando > 10.000**. Plano detalhado (query por viewport,
+  debounce, cache) em `docs/mapa-escalabilidade.md`. A contagem actual está visível no `/admin` →
+  Estatísticas, no card "Escala do mapa", que avisa a partir de 250.
 - Uniformizar o acesso a dados com TanStack Query (cache, revalidação, estados de erro).
 - Fluxo real de verificação de email/telefone/identidade, para dar sentido aos badges de confiança.
 - Auditoria de acessibilidade das restantes páginas, ao nível do que já existe no lightbox.
@@ -531,7 +533,7 @@ significa que não existam — significa que não há uma lista rastreada.
 | Erro numa política RLS | Fuga de PII | Testes SQL por política, além do teste de telefone já em CI |
 | Encontros presenciais entre desconhecidos | Segurança das pessoas | Verificações, denúncias e moderação |
 | Custos do Mapbox | Financeiro | Token restrito, caching, limites de utilização |
-| Carga do mapa com muitos utilizadores | Desempenho | Clustering server-side |
+| Carga do mapa com muitos utilizadores | Desempenho | Bounding box quando perfis com coordenadas > 300; PostGIS quando > 10.000. Plano em `docs/mapa-escalabilidade.md`; contagem monitorizada no card "Escala do mapa" em `/admin` |
 | Entregabilidade de email | Fluxos de reserva falham silenciosamente | Domínio próprio no Resend e monitorização |
 
 ### Roadmap sugerido

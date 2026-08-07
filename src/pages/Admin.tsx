@@ -5,6 +5,8 @@ import { Shield, MessageSquare, Trash2, CheckCircle, Clock, Eye, Filter, Users, 
 import { downloadCSV } from '@/lib/csv-export';
 import AdminUsers from '@/components/AdminUsers';
 import AdminStats from '@/components/AdminStats';
+import MapScaleCard from '@/components/admin/MapScaleCard';
+
 import Header from '@/components/Header';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -215,9 +217,13 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="stats">
+          <TabsContent value="stats" className="space-y-6">
             <AdminStats />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <MapScaleCard />
+            </div>
           </TabsContent>
+
 
           <TabsContent value="feedback" className="space-y-6">
 
