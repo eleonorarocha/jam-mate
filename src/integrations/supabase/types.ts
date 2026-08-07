@@ -421,6 +421,7 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
+          genres: string[]
           id: string
           identity_verified: boolean | null
           instrument: string
@@ -453,6 +454,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
+          genres?: string[]
           id: string
           identity_verified?: boolean | null
           instrument: string
@@ -485,6 +487,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
+          genres?: string[]
           id?: string
           identity_verified?: boolean | null
           instrument?: string
