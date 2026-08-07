@@ -555,9 +555,9 @@ significa que não existam — significa que não há uma lista rastreada.
 
 | Item | Valor / Estado |
 |---|---|
-| URL do repositório | https://github.com/eleonorarocha/JAMMATE |
-| Visibilidade | Privado (não confirmado via API pública; estado declarado pelo utilizador) |
-| Sincronização com Lovable | Bidirecional. Alterações no Lovable enviam para o GitHub; pushes para `main` no GitHub sincronizam de volta para o Lovable. |
+| URL do repositório | https://github.com/eleonorarocha/jam-mate |
+| Visibilidade | Público |
+| Sincronização com Lovable | Lovable → GitHub confirmado: alterações feitas no editor do Lovable são enviadas para o GitHub. GitHub → Lovable (alterações feitas diretamente no GitHub refletidas no editor do Lovable): **não identificado**. |
 | Data da ligação | 2026-08-07 |
 | CI / GitHub Actions | `.github/workflows/phone-privacy-test.yml` — testes SQL de privacidade do número de telefone. |
 | Estado do sync neste ambiente | O remote `origin` local aponta para o storage privado do Lovable. O push para o GitHub é executado pelo serviço server-side do Lovable, não por este sandbox. [...]
