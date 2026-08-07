@@ -28,6 +28,7 @@ import BookingDialog from '@/components/BookingDialog';
 import BlockUserButton from '@/components/BlockUserButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import JsonLd from '@/components/JsonLd';
+import ProBadge, { isProUntil } from '@/components/ProBadge';
 import PublicMusicSnippet from '@/components/PublicMusicSnippet';
 import PhotoLightbox from '@/components/PhotoLightbox';
 
@@ -41,6 +42,7 @@ interface ProfileData {
   city: string | null;
   country: string | null;
   average_rating: number | null;
+  pro_until?: string | null;
   total_ratings: number | null;
   avatar_url: string | null;
   gender: string | null;
@@ -118,7 +120,7 @@ const PublicProfile = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, username, first_name, bio, instrument, skill_level, city, country, average_rating, total_ratings, avatar_url, gender')
+      .select('id, username, first_name, bio, instrument, skill_level, city, country, average_rating, total_ratings, avatar_url, gender, pro_until')
       .eq('id', id)
       .maybeSingle();
 
@@ -318,6 +320,7 @@ const PublicProfile = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <CardTitle className="text-2xl">{profile.first_name || profile.username}</CardTitle>
+                    {isProUntil(profile.pro_until) && <ProBadge size="md" />}
                     {isVerified && (
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <CheckCircle className="h-3 w-3" />

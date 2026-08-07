@@ -775,6 +775,7 @@ export type Database = {
           phone_verified: boolean | null
           preferred_instruments: string[] | null
           preferred_skill_levels: string[] | null
+          pro_until: string | null
           skill_level: Database["public"]["Enums"]["skill_level"] | null
           total_ratings: number | null
           updated_at: string | null
@@ -798,6 +799,7 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_instruments?: string[] | null
           preferred_skill_levels?: string[] | null
+          pro_until?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"] | null
           total_ratings?: number | null
           updated_at?: string | null
@@ -821,6 +823,7 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_instruments?: string[] | null
           preferred_skill_levels?: string[] | null
+          pro_until?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"] | null
           total_ratings?: number | null
           updated_at?: string | null

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import MusicianCard from './MusicianCard';
+import { isProUntil } from '@/components/ProBadge';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -13,6 +14,7 @@ interface Musician {
   latitude: number;
   longitude: number;
   average_rating: number | null;
+  pro_until?: string | null;
   total_ratings: number | null;
   avatar_url: string | null;
   skill_level?: string;
@@ -63,11 +65,15 @@ const MusiciansList = ({
         : null,
       isCompatible: compatibleIds.has(m.id),
       isFav: isFavorite(m.id),
+      isProMember: isProUntil(m.pro_until),
     }))
     .sort((a, b) => {
       // Favorites first
       if (a.isFav && !b.isFav) return -1;
       if (!a.isFav && b.isFav) return 1;
+      // Then Pro members
+      if (a.isProMember && !b.isProMember) return -1;
+      if (!a.isProMember && b.isProMember) return 1;
       // Then compatible
       if (a.isCompatible && !b.isCompatible) return -1;
       if (!a.isCompatible && b.isCompatible) return 1;

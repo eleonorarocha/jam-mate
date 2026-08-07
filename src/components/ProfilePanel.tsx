@@ -9,6 +9,8 @@ import { X, CheckCircle, AlertCircle, Camera, Music, MapPin, Shield, Loader2, Mu
 import AvatarCropper from '@/components/AvatarCropper';
 import MusicSnippetSection from '@/components/MusicSnippetSection';
 import { supabase } from '@/integrations/supabase/client';
+import ProBadge from '@/components/ProBadge';
+import { usePro } from '@/hooks/usePro';
 import GenreSelector from '@/components/GenreSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +26,7 @@ interface ProfilePanelProps {
 const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isPro } = usePro();
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropperImage, setCropperImage] = useState<string | null>(null);
@@ -236,8 +239,9 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           </button>
         </div>
         <div className="space-y-1">
-          <p className="text-lg font-semibold text-foreground">
-            {profile.first_name || profile.last_name ? `${profile.first_name} ${profile.last_name}` : 'Novo Músico'}
+          <p className="text-lg font-semibold text-foreground flex items-center justify-center gap-2">
+            <span>{profile.first_name || profile.last_name ? `${profile.first_name} ${profile.last_name}` : 'Novo Músico'}</span>
+            {isPro && <ProBadge size="sm" />}
           </p>
           {profile.instrument && (
             <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
