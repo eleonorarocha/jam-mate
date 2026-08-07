@@ -14,7 +14,7 @@ Recomendo este caminho em vez de conta manual + chaves coladas à mão. O resto 
 ## Verificações já feitas no código atual
 
 - Snippets: limites Free 1/30s e Pro 5/60s continuam corretos, aplicados no cliente (`usePro`) e reforçados por trigger na base de dados (`enforce_snippet_limits` + `is_pro`). Nada a mudar.
-- Reservas pendentes: **não existe hoje qualquer limite** de pedidos pendentes para utilizadores Free — nem no código nem na base de dados. Ou seja, "sem limite para Pro" já é o comportamento atual. Proposta: introduzir um limite de 3 pedidos pendentes simultâneos para Free, e ilimitado para Pro, para a vantagem passar a existir de facto. Se preferires não limitar ninguém, retiramos este ponto.
+- Vantagens Pro: três — snippets (já existente), destaque no mapa, selo Pro. Não há limites de reservas para ninguém.
 - Escrita em `subscriptions`: as regras de acesso atuais já bloqueiam qualquer criação/alteração pelo cliente; só o utilizador consegue ler a sua própria linha. Mantém-se assim — só a função de servidor escreve.
 - Estado Pro de *outros* utilizadores não é legível pelo cliente hoje, por isso o destaque no mapa precisa de um campo público novo (ver abaixo).
 
