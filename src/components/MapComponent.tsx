@@ -14,6 +14,13 @@ import MusicianPopup from './MusicianPopup';
 import BookingDialog from './BookingDialog';
 import { MapFiltersState } from './MapFilters';
 
+/**
+ * Safety net: PostgREST silently caps rows (~1000) by default, which would make
+ * the map quietly incomplete. An explicit limit keeps that ceiling visible.
+ */
+const MAP_PROFILE_LIMIT = 2000;
+
+
 interface ExtendedFilters extends MapFiltersState {
   searchQuery?: string;
   city?: string;
@@ -219,7 +226,8 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         .from('profiles')
         .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender, genres, pro_until')
         .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+        .not('longitude', 'is', null)
+        .limit(MAP_PROFILE_LIMIT);
       if (data) {
         setMusicians(data as Musician[]);
       }
@@ -229,7 +237,8 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
         .from('public_profiles')
         .select('id, username, instrument, city, country, approx_latitude, approx_longitude, average_rating, total_ratings, avatar_url, skill_level, gender, pro_until')
         .not('approx_latitude', 'is', null)
-        .not('approx_longitude', 'is', null);
+        .not('approx_longitude', 'is', null)
+        .limit(MAP_PROFILE_LIMIT);
       if (data) {
         setMusicians(data.map(m => ({
           ...m,
