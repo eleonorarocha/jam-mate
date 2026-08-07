@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Check, Loader2, ArrowLeft, PartyPopper } from 'lucide-react';
+import { Sparkles, Check, Loader2, ArrowLeft, PartyPopper, ExternalLink } from 'lucide-react';
 import { FREE_LIMITS, PRO_LIMITS, usePro } from '@/hooks/usePro';
 import { PRO_PLANS, isPaymentsConfigured, isTestMode } from '@/lib/stripe';
 import StripeEmbeddedCheckout from '@/components/StripeEmbeddedCheckout';
+import { useCustomerPortal } from '@/hooks/useCustomerPortal';
 import { useToast } from '@/hooks/use-toast';
 
 interface Props {
@@ -12,22 +13,32 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-type Stage = 'plans' | 'checkout' | 'activating' | 'done';
+type Stage = 'plans' | 'checkout' | 'activating' | 'done' | 'already-pro';
 
 const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
-  const { isPro, refresh } = usePro();
+  const { isPro, loading, refresh } = usePro();
+  const { openPortal, opening } = useCustomerPortal();
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>('plans');
   const [priceId, setPriceId] = useState<string | null>(null);
+  const [portalUrl, setPortalUrl] = useState<string | null>(null);
   const [slow, setSlow] = useState(false);
+
 
   useEffect(() => {
     if (!open) {
       setStage('plans');
       setPriceId(null);
+      setPortalUrl(null);
       setSlow(false);
     }
   }, [open]);
+
+  // Frontend guard: an existing Pro user never sees the checkout plans.
+  useEffect(() => {
+    if (open && !loading && isPro && stage === 'plans') setStage('already-pro');
+  }, [open, loading, isPro, stage]);
+
 
   // Stripe redirects the embedded checkout to the return URL; we detect the
   // payment on the way back and wait for the webhook to activate Pro.
@@ -163,6 +174,23 @@ const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
           </>
         )}
 
+        {stage === 'already-pro' && (
+          <div className="py-6 text-center space-y-3">
+            <Sparkles className="w-8 h-8 mx-auto text-primary" />
+            <p className="text-sm font-medium">Já tens o JamMate Pro ativo.</p>
+            <p className="text-xs text-muted-foreground">
+              Para mudar de plano, atualizar o pagamento ou cancelar, usa o portal do cliente.
+            </p>
+            <Button onClick={() => openPortal(portalUrl ?? undefined)} disabled={opening}>
+              {opening ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ExternalLink className="w-4 h-4 mr-2" />}
+              Gerir subscrição
+            </Button>
+            <p className="text-[11px] text-muted-foreground">
+              O portal abre num separador novo.
+            </p>
+          </div>
+        )}
+
         {stage === 'checkout' && priceId && (
           <div className="space-y-3">
             {isTestMode() && (
@@ -174,6 +202,10 @@ const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
             <StripeEmbeddedCheckout
               priceId={priceId}
               returnUrl={returnUrl}
+              onAlreadyPro={(url) => {
+                setPortalUrl(url);
+                setStage('already-pro');
+              }}
               onError={(message) => {
                 toast({ title: 'Erro no pagamento', description: message, variant: 'destructive' });
                 setStage('plans');
@@ -185,6 +217,7 @@ const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
             </Button>
           </div>
         )}
+
 
         {stage === 'activating' && (
           <div className="py-8 text-center space-y-3">

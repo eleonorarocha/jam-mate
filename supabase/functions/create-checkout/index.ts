@@ -1,6 +1,7 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { type StripeEnv, createStripeClient, getStripeErrorMessage } from "../_shared/stripe.ts";
+import { createPortalUrl, findActiveSubscription } from "../_shared/portal.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -65,7 +66,24 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) return json({ error: "Unauthorized" }, 401);
 
+    // Guard: never create a second checkout for a user who already has an
+    // active Pro subscription — send them to the customer portal instead.
+    const active = await findActiveSubscription(supabase, user.id, environment);
+    if (active?.stripe_customer_id) {
+      const portalUrl = await createPortalUrl({
+        customerId: active.stripe_customer_id,
+        environment,
+        returnUrl,
+      });
+      return json(
+        { error: "Já tens uma subscrição Pro ativa. Gere o teu plano no portal do cliente.", portalUrl },
+        409,
+      );
+    }
+
     const stripe = createStripeClient(environment);
+
+
 
     const prices = await stripe.prices.list({ lookup_keys: [priceId] });
     if (!prices.data.length) return json({ error: "Price not found" }, 404);
