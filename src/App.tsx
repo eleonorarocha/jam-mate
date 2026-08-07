@@ -15,6 +15,7 @@ import Messages from "./pages/Messages";
 import CalendarPage from "./pages/CalendarPage";
 import Ratings from "./pages/Ratings";
 import Settings from "./pages/Settings";
+import CheckoutReturn from "./pages/CheckoutReturn";
 import Gallery from "./pages/Gallery";
 import Favorites from "./pages/Favorites";
 import ResetPassword from "./pages/ResetPassword";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/ratings" element={<Ratings />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/checkout/return" element={<CheckoutReturn />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/about" element={<About />} />
