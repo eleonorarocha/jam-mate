@@ -325,9 +325,18 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           </div>
 
           <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Géneros musicais</Label>
+            <GenreSelector
+              value={profile.genres}
+              onChange={(genres) => setProfile({ ...profile, genres })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor="bio" className="text-xs font-medium">Bio</Label>
             <Textarea id="bio" value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} rows={3} placeholder="Conte um pouco sobre si e o seu estilo musical..." className="resize-none" />
           </div>
+
         </div>
       </motion.div>
 
