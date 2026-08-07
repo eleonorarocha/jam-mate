@@ -448,7 +448,7 @@ Resumo cronológico aproximado das grandes fases:
 - Descoberta no mapa com clustering, filtros, pesquisa e popups acionáveis.
 - Perfis públicos com media, excertos e avaliações.
 - Ciclo completo de reservas com histórico, fusos horários e export `.ics`.
-- Mensagens, notificações (in-app, som, push) e emails transacionais.
+- Mensagens, notificações (in-app, som; "push" é apenas em contexto ativo, não em background) e emails transacionais.
 - Avaliações, favoritos, bloqueios, galeria.
 - Painel de administração com estatísticas e moderação.
 - Base SEO e primeira camada de testes automatizados.
