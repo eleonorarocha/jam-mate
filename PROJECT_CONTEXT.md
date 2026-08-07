@@ -4,7 +4,7 @@
 > Escrito a partir do estado real do código e do esquema de base de dados. Onde não foi possível
 > confirmar algo, está explicitamente marcado como **não identificado**.
 
-Última atualização: 2026-08-06
+Última atualização: 2026-08-07
 
 ---
 
@@ -529,6 +529,25 @@ significa que não existam — significa que não há uma lista rastreada.
   (por exemplo destaque no mapa, mais media).
 - **Fase 3 — confiança e escala**: verificações, denúncias, moderação, descoberta server-side.
 - **Fase 4 — crescimento**: eventos/jams em grupo, aplicação móvel ou PWA, recomendações.
+
+---
+
+## 9. Repositório e sincronização
+
+| Item | Valor / Estado |
+|---|---|
+| URL do repositório | https://github.com/eleonorarocha/JAMMATE |
+| Visibilidade | Privado (não confirmado via API pública; estado declarado pelo utilizador) |
+| Sincronização com Lovable | Bidirecional. Alterações no Lovable enviam para o GitHub; pushes para `main` no GitHub sincronizam de volta para o Lovable. |
+| Data da ligação | 2026-08-07 |
+| CI / GitHub Actions | `.github/workflows/phone-privacy-test.yml` — testes SQL de privacidade do número de telefone. |
+| Estado do sync neste ambiente | O remote `origin` local aponta para o storage privado do Lovable. O push para o GitHub é executado pelo serviço server-side do Lovable, não por este sandbox. |
+
+### Notas para o próximo agente
+
+- Não editar directamente o repositório GitHub esperando que o Lovable absorva tudo sem conflitos: o sync é bidirecional, mas alterações simultâneas em ambos os lados podem precisar de resolução manual.
+- Para confirmar o estado do sync, verificar o repositório GitHub diretamente ou pedir ao utilizador para confirmar a UI do Lovable (Plus (+) → GitHub).
+- A integração GitHub só pode ser ligada/desligada pela UI do Lovable; não existe comando git neste ambiente que a crie ou remova.
 
 ---
 
