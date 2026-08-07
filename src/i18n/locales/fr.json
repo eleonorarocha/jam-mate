@@ -135,7 +135,29 @@
       "message_sent_desc": "Votre message a été envoyé avec succès.",
       "error_title": "Erreur",
       "error_desc": "Impossible d'envoyer le message."
-    }
+    },
+    "genres": {
+      "rock": "Rock",
+      "pop": "Pop",
+      "jazz": "Jazz",
+      "blues": "Blues",
+      "funk": "Funk",
+      "soul": "Soul",
+      "classica": "Classique",
+      "folk": "Folk",
+      "eletronica": "Électronique",
+      "hiphop": "Hip-Hop",
+      "reggae": "Reggae",
+      "metal": "Metal",
+      "punk": "Punk",
+      "latina": "Latine",
+      "country": "Country",
+      "world": "Musiques du Monde"
+    },
+    "music_genre": "Genre musical",
+    "all_genres": "Tous les genres musicaux",
+    "genres_label": "Genres musicaux",
+    "genres_required": "Sélectionnez au moins un genre musical"
   },
   "public_profile": {
     "about_me": "À propos de moi",

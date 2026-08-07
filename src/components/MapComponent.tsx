@@ -32,6 +32,7 @@ interface Musician {
   avatar_url: string | null;
   skill_level?: string;
   gender?: string;
+  genres?: string[] | null;
 }
 
 interface MapComponentProps {
@@ -209,7 +210,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     if (isAuthenticated) {
       const { data } = await supabase
         .from('profiles')
-        .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender')
+        .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender, genres')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null);
       if (data) {
@@ -372,28 +373,16 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       el.appendChild(heartBadge);
     }
 
-    el.addEventListener('click', () => {
-      if (onMusicianSelect) {
-        onMusicianSelect(musician);
-      } else {
-        setSelectedMusician(musician);
-        if (userLocation) {
-          const dist = calculateDistance(
-            userLocation.lat, userLocation.lng,
-            approximateCoord(musician.latitude), approximateCoord(musician.longitude)
-          );
-          setSelectedMusicianDistance(dist);
-        } else {
-          setSelectedMusicianDistance(null);
-        }
-      }
-    });
+    // NOTE: no click handler here on purpose. The marker already has a native
+    // Mapbox popup attached via `marker.setPopup(...)`. Opening the React
+    // <MusicianPopup/> card from the same click showed two profile boxes at
+    // once. The React card is now only used for clicks in the side list.
 
     el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.08)'; el.style.zIndex = '900'; });
     el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; el.style.zIndex = ''; });
 
     return el;
-  }, [isCompatibleMatch, isFavorite, highlightedMusicianId, onMusicianSelect, userLocation]);
+  }, [isCompatibleMatch, isFavorite, highlightedMusicianId]);
 
   const buildClusterMarker = useCallback((
     count: number,
@@ -558,6 +547,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       if (filters?.favoritesOnly && !isFavorite(musician.id)) return false;
       if (filters?.instrument && musician.instrument !== filters.instrument) return false;
       if (filters?.skillLevel && musician.skill_level !== filters.skillLevel) return false;
+      if (filters?.musicGenre && !(musician.genres || []).includes(filters.musicGenre)) return false;
       if (filters?.gender && musician.gender !== filters.gender) return false;
       if (filters?.maxDistance && filters.maxDistance > 0 && userLocation) {
         const distance = calculateDistance(

@@ -20,11 +20,13 @@ import {
 import { Filter, X, MapPin, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { MUSIC_GENRES } from '@/lib/genres';
 
 export interface MapFiltersState {
   instrument: string;
   skillLevel: string;
   gender: string;
+  musicGenre?: string;
   maxDistance: number; // in km, 0 means no limit
   favoritesOnly: boolean;
 }
@@ -48,6 +50,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
   const activeFiltersCount = [
     filters.instrument,
     filters.skillLevel,
+    filters.musicGenre,
     filters.maxDistance > 0,
     filters.favoritesOnly,
   ].filter(Boolean).length;
@@ -57,6 +60,7 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
       instrument: '',
       skillLevel: '',
       gender: '',
+      musicGenre: '',
       maxDistance: 0,
       favoritesOnly: false,
     });
@@ -178,6 +182,26 @@ const MapFilters = ({ filters, onFiltersChange }: MapFiltersProps) => {
                 {SKILL_LEVEL_KEYS.map((level) => (
                   <SelectItem key={level} value={level}>
                     {t(`map.skill.${level}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t('map.music_genre')}</Label>
+            <Select
+              value={filters.musicGenre || 'all'}
+              onValueChange={(value) => handleFilterChange('musicGenre', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t('map.all_genres')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('map.all_genres')}</SelectItem>
+                {MUSIC_GENRES.map((genre) => (
+                  <SelectItem key={genre} value={genre}>
+                    {t(`map.genres.${genre}`)}
                   </SelectItem>
                 ))}
               </SelectContent>

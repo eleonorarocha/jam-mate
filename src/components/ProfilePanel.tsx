@@ -9,6 +9,7 @@ import { X, CheckCircle, AlertCircle, Camera, Music, MapPin, Shield, Loader2, Mu
 import AvatarCropper from '@/components/AvatarCropper';
 import MusicSnippetSection from '@/components/MusicSnippetSection';
 import { supabase } from '@/integrations/supabase/client';
+import GenreSelector from '@/components/GenreSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
@@ -42,6 +43,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
     gender: '' as 'male' | 'female' | '',
     avatar_url: '' as string | null,
     time_zone: AUTO_TZ as string,
+    genres: [] as string[],
   });
 
   useEffect(() => {
@@ -52,7 +54,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
     if (!user) return;
     const { data } = await supabase
       .from('profiles')
-      .select('username, first_name, bio, instrument, skill_level, city, country, gender, avatar_url, time_zone')
+      .select('username, first_name, bio, instrument, skill_level, city, country, gender, avatar_url, time_zone, genres')
       .eq('id', user.id)
       .single();
     const { data: sensitive } = await supabase.rpc('get_profile_sensitive', { _profile_id: user.id });
@@ -73,6 +75,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
         gender: data.gender || '',
         avatar_url: data.avatar_url || null,
         time_zone: (data as any).time_zone || AUTO_TZ,
+        genres: ((data as any).genres as string[]) || [],
       });
       setUserTimeZonePref((data as any).time_zone || null);
     }
@@ -109,6 +112,7 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           phone: profile.phone,
           gender: profile.gender || null,
           time_zone: profile.time_zone === AUTO_TZ ? null : profile.time_zone,
+          genres: profile.genres,
         } as any)
         .eq('id', user.id);
 
@@ -322,9 +326,18 @@ const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
           </div>
 
           <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Géneros musicais</Label>
+            <GenreSelector
+              value={profile.genres}
+              onChange={(genres) => setProfile({ ...profile, genres })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
             <Label htmlFor="bio" className="text-xs font-medium">Bio</Label>
             <Textarea id="bio" value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} rows={3} placeholder="Conte um pouco sobre si e o seu estilo musical..." className="resize-none" />
           </div>
+
         </div>
       </motion.div>
 

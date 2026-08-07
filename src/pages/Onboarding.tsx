@@ -8,13 +8,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Music, MapPin, User, ChevronRight, ChevronLeft, Loader2, CheckCircle } from 'lucide-react';
+import { Camera, Music, MapPin, User, ChevronRight, ChevronLeft, Loader2, CheckCircle, Disc3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AvatarCropper from '@/components/AvatarCropper';
+import GenreSelector from '@/components/GenreSelector';
 
 const STEPS = [
   { id: 'photo', title: 'Foto de Perfil', subtitle: 'Adicione uma foto para que outros músicos o reconheçam', icon: Camera },
   { id: 'music', title: 'Perfil Musical', subtitle: 'Diga-nos que instrumento toca e o seu nível', icon: Music },
+  { id: 'genres', title: 'Géneros Musicais', subtitle: 'Escolha os estilos que toca ou gosta de tocar', icon: Disc3 },
   { id: 'location', title: 'Localização', subtitle: 'Para encontrar músicos perto de si', icon: MapPin },
   { id: 'bio', title: 'Sobre Si', subtitle: 'Conte um pouco sobre si e o seu estilo', icon: User },
 ];
@@ -37,6 +39,7 @@ const Onboarding = () => {
     country: '',
     bio: '',
     gender: '' as 'male' | 'female' | '',
+    genres: [] as string[],
   });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +96,12 @@ const Onboarding = () => {
       return;
     }
 
+    if (form.genres.length === 0) {
+      toast({ title: 'Género musical obrigatório', description: 'Selecione pelo menos um género musical.', variant: 'destructive' });
+      setStep(2);
+      return;
+    }
+
     setSaving(true);
     try {
       const { error } = await supabase.from('profiles').update({
@@ -102,6 +111,7 @@ const Onboarding = () => {
         country: form.country,
         bio: form.bio,
         gender: form.gender || null,
+        genres: form.genres,
         onboarding_completed: true,
       }).eq('id', user.id);
 
@@ -115,7 +125,13 @@ const Onboarding = () => {
     }
   };
 
-  const next = () => setStep(s => Math.min(s + 1, STEPS.length - 1));
+  const next = () => {
+    if (step === 2 && form.genres.length === 0) {
+      toast({ title: 'Género musical obrigatório', description: 'Selecione pelo menos um género musical.', variant: 'destructive' });
+      return;
+    }
+    setStep(s => Math.min(s + 1, STEPS.length - 1));
+  };
   const prev = () => setStep(s => Math.max(s - 1, 0));
   const isLast = step === STEPS.length - 1;
 
@@ -194,6 +210,18 @@ const Onboarding = () => {
         );
       case 2:
         return (
+          <div className="space-y-4">
+            <GenreSelector
+              value={form.genres}
+              onChange={(genres) => setForm(prev => ({ ...prev, genres }))}
+            />
+            <p className="text-xs text-muted-foreground">
+              Selecione pelo menos um género. Pode alterar mais tarde no seu perfil.
+            </p>
+          </div>
+        );
+      case 3:
+        return (
           <div className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -222,7 +250,7 @@ const Onboarding = () => {
             </div>
           </div>
         );
-      case 3:
+      case 4:
         return (
           <div className="space-y-5">
             <div className="space-y-1.5">
@@ -339,7 +367,7 @@ const Onboarding = () => {
         </div>
 
         {/* Skip for photo/bio steps */}
-        {(step === 0 || step === 3) && (
+        {(step === 0 || step === 4) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

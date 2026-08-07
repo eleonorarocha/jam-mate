@@ -407,6 +407,24 @@ export type Database = {
           },
         ]
       }
+      processed_stripe_events: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_type: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_type: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_type?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approx_latitude: number | null
@@ -421,6 +439,7 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
+          genres: string[]
           id: string
           identity_verified: boolean | null
           instrument: string
@@ -453,6 +472,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
+          genres?: string[]
           id: string
           identity_verified?: boolean | null
           instrument: string
@@ -485,6 +505,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
+          genres?: string[]
           id?: string
           identity_verified?: boolean | null
           instrument?: string
