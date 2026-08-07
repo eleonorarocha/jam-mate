@@ -29,9 +29,16 @@ const UpgradeProDialog = ({ open, onOpenChange }: Props) => {
     if (!open) {
       setStage('plans');
       setPriceId(null);
+      setPortalUrl(null);
       setSlow(false);
     }
   }, [open]);
+
+  // Frontend guard: an existing Pro user never sees the checkout plans.
+  useEffect(() => {
+    if (open && !loading && isPro && stage === 'plans') setStage('already-pro');
+  }, [open, loading, isPro, stage]);
+
 
   // Stripe redirects the embedded checkout to the return URL; we detect the
   // payment on the way back and wait for the webhook to activate Pro.
