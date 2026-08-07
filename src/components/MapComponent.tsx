@@ -114,7 +114,11 @@ const buildMapPopupHTML = (
 
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:4px;min-width:200px;">
-      <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:#111;">${musician.username}</div>
+      <div style="font-weight:600;font-size:14px;margin-bottom:6px;color:#111;display:flex;align-items:center;gap:6px;"><span>${musician.username}</span>${
+        isProUntil(musician.pro_until)
+          ? '<span style="background:hsl(42,96%,50%);color:hsl(30,45%,12%);border-radius:9999px;padding:1px 7px;font:700 10px/1.6 inherit;">PRO</span>'
+          : ''
+      }</div>
       <div style="font-size:12px;color:#444;line-height:1.6;">
         <div><strong>${translate('map.instrument')}:</strong> ${instrument}</div>
         <div><strong>${translate('map.level')}:</strong> ${skillLevel}</div>
@@ -401,7 +405,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     // once. The React card is now only used for clicks in the side list.
 
     el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.08)'; el.style.zIndex = '900'; });
-    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; el.style.zIndex = ''; });
+    el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; el.style.zIndex = isProMember ? '800' : ''; });
 
     return el;
   }, [isCompatibleMatch, isFavorite, highlightedMusicianId]);
