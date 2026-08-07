@@ -18,17 +18,26 @@ const StripeEmbeddedCheckout = ({ priceId, returnUrl, onError, onAlreadyPro }: P
         const { data, error } = await supabase.functions.invoke('create-checkout', {
           body: { priceId, returnUrl, environment: getStripeEnvironment() },
         });
-        if (data?.portalUrl) {
-          onAlreadyPro?.(data.portalUrl as string);
+
+        // Non-2xx responses (e.g. the 409 "already Pro" guard) arrive as an
+        // error with the JSON body in error.context — parse it before failing.
+        let payload: any = data;
+        if (error && error instanceof FunctionsHttpError) {
+          payload = await error.context.json().catch(() => null);
+        }
+
+        if (payload?.portalUrl) {
+          onAlreadyPro?.(payload.portalUrl as string);
           throw new Error('already_pro');
         }
-        if (error || !data?.clientSecret) {
-          const message = data?.error || error?.message || 'Não foi possível iniciar o pagamento.';
+        if (error || !payload?.clientSecret) {
+          const message = payload?.error || error?.message || 'Não foi possível iniciar o pagamento.';
           onError?.(message);
           throw new Error(message);
         }
-        return data.clientSecret as string;
+        return payload.clientSecret as string;
       },
+
     }),
     // Intentionally created once per priceId: changing the options object
     // remounts the provider and Stripe throws on client-secret changes.
