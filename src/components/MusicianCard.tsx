@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Star, MapPin, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import ProBadge, { isProUntil } from '@/components/ProBadge';
 
 interface MusicianCardProps {
   musician: {
@@ -15,6 +16,7 @@ interface MusicianCardProps {
     average_rating: number | null;
     total_ratings: number | null;
     skill_level?: string;
+    pro_until?: string | null;
   };
   distance: number | null;
   isHighlighted?: boolean;
@@ -47,7 +49,8 @@ const MusicianCard = ({
       className={cn(
         'p-4 cursor-pointer transition-all duration-200 hover:shadow-md',
         isHighlighted && 'ring-2 ring-primary shadow-lg',
-        isCompatible && 'border-lime-500 bg-lime-50/50 dark:bg-lime-950/20'
+        isCompatible && 'border-lime-500 bg-lime-50/50 dark:bg-lime-950/20',
+        isProUntil(musician.pro_until) && 'ring-1 ring-pro-ring/60'
       )}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
@@ -70,8 +73,11 @@ const MusicianCard = ({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <div>
-              <h3 className="font-semibold text-foreground truncate">{musician.username}</h3>
+            <div className="min-w-0">
+              <h3 className="font-semibold text-foreground truncate flex items-center gap-1.5">
+                <span className="truncate">{musician.username}</span>
+                {isProUntil(musician.pro_until) && <ProBadge size="sm" />}
+              </h3>
               <p className="text-sm text-muted-foreground">{musician.instrument}</p>
             </div>
             {musician.average_rating != null && musician.average_rating > 0 && (

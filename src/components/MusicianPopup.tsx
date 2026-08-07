@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import BookingDialog from './BookingDialog';
+import ProBadge, { isProUntil } from '@/components/ProBadge';
 
 interface MusicianPopupProps {
   musician: {
@@ -21,6 +22,7 @@ interface MusicianPopupProps {
     total_ratings: number | null;
     avatar_url: string | null;
     skill_level?: string;
+    pro_until?: string | null;
   };
   distance?: number | null;
   onClose: () => void;
@@ -98,7 +100,10 @@ const MusicianPopup = ({ musician, distance, onClose, isAuthenticated = true }: 
                   onClick={handleViewProfile}
                   className="text-left hover:underline"
                 >
-                  <CardTitle className="text-lg">{musician.username}</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {musician.username}
+                    {isProUntil(musician.pro_until) && <ProBadge size="sm" />}
+                  </CardTitle>
                 </button>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="h-3 w-3" />
