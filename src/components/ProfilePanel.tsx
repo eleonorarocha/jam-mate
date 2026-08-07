@@ -9,6 +9,7 @@ import { X, CheckCircle, AlertCircle, Camera, Music, MapPin, Shield, Loader2, Mu
 import AvatarCropper from '@/components/AvatarCropper';
 import MusicSnippetSection from '@/components/MusicSnippetSection';
 import { supabase } from '@/integrations/supabase/client';
+import GenreSelector from '@/components/GenreSelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
