@@ -32,6 +32,7 @@ interface Musician {
   avatar_url: string | null;
   skill_level?: string;
   gender?: string;
+  genres?: string[] | null;
 }
 
 interface MapComponentProps {
@@ -209,7 +210,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
     if (isAuthenticated) {
       const { data } = await supabase
         .from('profiles')
-        .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender')
+        .select('id, username, instrument, city, country, latitude, longitude, average_rating, total_ratings, avatar_url, skill_level, gender, genres')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null);
       if (data) {
@@ -546,6 +547,7 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       if (filters?.favoritesOnly && !isFavorite(musician.id)) return false;
       if (filters?.instrument && musician.instrument !== filters.instrument) return false;
       if (filters?.skillLevel && musician.skill_level !== filters.skillLevel) return false;
+      if (filters?.musicGenre && !(musician.genres || []).includes(filters.musicGenre)) return false;
       if (filters?.gender && musician.gender !== filters.gender) return false;
       if (filters?.maxDistance && filters.maxDistance > 0 && userLocation) {
         const distance = calculateDistance(

@@ -14,6 +14,7 @@ import { format, type Locale } from 'date-fns';
 import { pt, enUS, es, fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { MapFiltersState } from './MapFilters';
+import { MUSIC_GENRES } from '@/lib/genres';
 
 const dateLocales: Record<string, Locale> = { pt, en: enUS, es, fr };
 
@@ -48,6 +49,7 @@ const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
       instrument: '',
       skillLevel: '',
       gender: '',
+      musicGenre: '',
       maxDistance: 0,
       favoritesOnly: false,
       searchQuery: '',
@@ -59,6 +61,7 @@ const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
   const activeFiltersCount = [
     filters.instrument,
     filters.skillLevel,
+    filters.musicGenre,
     filters.maxDistance > 0,
     filters.favoritesOnly,
     filters.availabilityDate,
@@ -101,6 +104,22 @@ const MapFiltersBar = ({ filters, onFiltersChange }: MapFiltersBarProps) => {
           <SelectItem value="all">{t('map.all')}</SelectItem>
           {INSTRUMENT_KEYS.map((inst) => (
             <SelectItem key={inst} value={inst}>{t(`map.instruments.${inst}`)}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Music genre quick filter */}
+      <Select
+        value={filters.musicGenre || 'all'}
+        onValueChange={(v) => updateFilter('musicGenre', v === 'all' ? '' : v)}
+      >
+        <SelectTrigger className="w-[150px]">
+          <SelectValue placeholder={t('map.music_genre')} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{t('map.all_genres')}</SelectItem>
+          {MUSIC_GENRES.map((g) => (
+            <SelectItem key={g} value={g}>{t(`map.genres.${g}`)}</SelectItem>
           ))}
         </SelectContent>
       </Select>
