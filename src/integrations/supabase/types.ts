@@ -433,6 +433,7 @@ export type Database = {
           phone_verified: boolean | null
           preferred_instruments: string[] | null
           preferred_skill_levels: string[] | null
+          pro_until: string | null
           skill_level: Database["public"]["Enums"]["skill_level"]
           time_zone: string | null
           total_ratings: number | null
@@ -464,6 +465,7 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_instruments?: string[] | null
           preferred_skill_levels?: string[] | null
+          pro_until?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           time_zone?: string | null
           total_ratings?: number | null
@@ -495,6 +497,7 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_instruments?: string[] | null
           preferred_skill_levels?: string[] | null
+          pro_until?: string | null
           skill_level?: Database["public"]["Enums"]["skill_level"]
           time_zone?: string | null
           total_ratings?: number | null
@@ -597,34 +600,46 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          cancel_at_period_end: boolean
           created_at: string
           current_period_end: string | null
+          environment: string
           id: string
+          price_id: string | null
           provider: string | null
           provider_subscription_id: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id: string | null
           tier: Database["public"]["Enums"]["subscription_tier"]
           updated_at: string
           user_id: string
         }
         Insert: {
+          cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          environment?: string
           id?: string
+          price_id?: string | null
           provider?: string | null
           provider_subscription_id?: string | null
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
           user_id: string
         }
         Update: {
+          cancel_at_period_end?: boolean
           created_at?: string
           current_period_end?: string | null
+          environment?: string
           id?: string
+          price_id?: string | null
           provider?: string | null
           provider_subscription_id?: string | null
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
           tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
           user_id?: string
