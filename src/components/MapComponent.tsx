@@ -14,6 +14,13 @@ import MusicianPopup from './MusicianPopup';
 import BookingDialog from './BookingDialog';
 import { MapFiltersState } from './MapFilters';
 
+/**
+ * Safety net: PostgREST silently caps rows (~1000) by default, which would make
+ * the map quietly incomplete. An explicit limit keeps that ceiling visible.
+ */
+const MAP_PROFILE_LIMIT = 2000;
+
+
 interface ExtendedFilters extends MapFiltersState {
   searchQuery?: string;
   city?: string;
