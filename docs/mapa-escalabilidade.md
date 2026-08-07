@@ -125,31 +125,27 @@ Ordem natural de adopção quando crescer: **bounding box → GeoJSON/WebGL → 
 
 ---
 
-## 6. Protótipo PostGIS (já existe na base de dados, inactivo no frontend)
+## 6. Desenho proposto para clustering server-side (PostGIS) — apenas plano
 
-Implementado a 2026-08-07 como preparação. **Não está ligado ao `MapComponent.tsx`** — só se adopta
-se os perfis com coordenadas ultrapassarem a ordem das dezenas de milhares.
+**Nada disto está implementado.** Só se adopta se os perfis com coordenadas ultrapassarem a ordem
+das dezenas de milhares (critério da secção 3). Um protótipo chegou a ser criado a 2026-08-07 e foi
+revertido no mesmo dia por contrariar esse critério.
 
-Base de dados:
+Desenho proposto, quando chegar a altura:
 
-- Extensão `postgis` activada (schema `extensions`).
-- `public.profiles.approx_geom` — coluna `geometry(Point,4326)` **GENERATED ALWAYS ... STORED**,
-  derivada de `approx_longitude`/`approx_latitude` (coordenadas aproximadas, nunca as exactas).
-- Índice `profiles_approx_geom_gist` (GiST) para filtragem por área.
-- `public.get_map_clusters(_min_lng, _min_lat, _max_lng, _max_lat, _zoom)` — SECURITY DEFINER,
-  `EXECUTE` apenas para `authenticated`. Filtra por `onboarding_completed`, por bounding box
-  (`&&` sobre `ST_MakeEnvelope`) e exclui utilizadores bloqueados (`has_block_between`).
-  Agrega com `ST_SnapToGrid` numa grelha de `360 / 2^zoom / 4` graus e devolve por célula:
-  `cluster_key`, `lng`, `lat`, `point_count`, `pro_count` e `profile_id` (só quando a célula tem 1 ponto).
+- Activar a extensão `postgis` (schema `extensions`).
+- Acrescentar a `public.profiles` uma coluna de geometria (`geometry(Point,4326)`) gerada a partir de
+  `approx_longitude`/`approx_latitude` — **nunca** das coordenadas exactas, para manter a privacidade.
+- Criar um índice GiST sobre essa coluna para filtragem por área.
+- Criar uma função RPC `get_map_clusters(min_lng, min_lat, max_lng, max_lat, zoom)`, SECURITY DEFINER,
+  com `EXECUTE` apenas para `authenticated`, que:
+  - filtra por `onboarding_completed`;
+  - filtra por bounding box (operador `&&` sobre `ST_MakeEnvelope`);
+  - exclui utilizadores bloqueados (`has_block_between`);
+  - agrega com `ST_SnapToGrid` numa grelha de `360 / 2^zoom / 4` graus;
+  - devolve por célula: chave da célula, centro (lng/lat), número de perfis, número de Pro e o id do
+    perfil apenas quando a célula tem exactamente 1 ponto.
+- No frontend, substituir o Supercluster por chamadas a esse RPC em `moveend`/`zoomend` (mesmo
+  debounce e cache por viewport da secção 4) e desenhar os clusters como camada GeoJSON em vez de
+  marcadores DOM.
 
-Frontend:
-
-- `src/lib/mapClustersRpc.ts` — `fetchMapClusters(bounds, zoom, signal)` e `clustersToGeoJSON()`.
-  Nenhum componente o importa ainda.
-
-Resultado do teste com os dados actuais (mundo inteiro, zoom 4): 6 células, a maior com 6 perfis
-na zona de Lisboa, as restantes com 1 ponto e `profile_id` preenchido — comportamento esperado.
-
-Para adoptar no futuro: substituir o Supercluster no browser por `fetchMapClusters` em `moveend`/
-`zoomend` (mesmo debounce e cache da secção 4) e desenhar os clusters como camada GeoJSON em vez de
-marcadores DOM.
