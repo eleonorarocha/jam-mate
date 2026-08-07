@@ -34,6 +34,11 @@
     --input: 0 0% 88%;
     --ring: 82 89% 50%;
 
+    /* Pro tier accent (gold) */
+    --pro: 42 96% 50%;
+    --pro-foreground: 30 45% 12%;
+    --pro-ring: 42 90% 38%;
+
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 97%;
@@ -84,6 +89,10 @@
     --border: 0 0% 18%;
     --input: 0 0% 18%;
     --ring: 82 89% 50%;
+
+    --pro: 42 96% 55%;
+    --pro-foreground: 30 45% 10%;
+    --pro-ring: 42 85% 45%;
 
     --sidebar-background: 0 0% 9%;
     --sidebar-foreground: 0 0% 85%;
