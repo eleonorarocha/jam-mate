@@ -372,28 +372,16 @@ const MapComponent = ({ token, filters, onFilteredCountChange, onMusiciansChange
       el.appendChild(heartBadge);
     }
 
-    el.addEventListener('click', () => {
-      if (onMusicianSelect) {
-        onMusicianSelect(musician);
-      } else {
-        setSelectedMusician(musician);
-        if (userLocation) {
-          const dist = calculateDistance(
-            userLocation.lat, userLocation.lng,
-            approximateCoord(musician.latitude), approximateCoord(musician.longitude)
-          );
-          setSelectedMusicianDistance(dist);
-        } else {
-          setSelectedMusicianDistance(null);
-        }
-      }
-    });
+    // NOTE: no click handler here on purpose. The marker already has a native
+    // Mapbox popup attached via `marker.setPopup(...)`. Opening the React
+    // <MusicianPopup/> card from the same click showed two profile boxes at
+    // once. The React card is now only used for clicks in the side list.
 
     el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.08)'; el.style.zIndex = '900'; });
     el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; el.style.zIndex = ''; });
 
     return el;
-  }, [isCompatibleMatch, isFavorite, highlightedMusicianId, onMusicianSelect, userLocation]);
+  }, [isCompatibleMatch, isFavorite, highlightedMusicianId]);
 
   const buildClusterMarker = useCallback((
     count: number,
