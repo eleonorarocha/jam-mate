@@ -67,10 +67,10 @@ o cliente JavaScript oficial. A segurança dos dados vive na base de dados, em p
  │  react-router-dom  ·  TanStack Query  ·  i18next  ·  Tailwind + shadcn/ui   │
  │                                                                            │
  │   Mapbox GL JS ── Supercluster (clustering client-side dos marcadores)      │
- └──────┬───────────────────────────────────────────────┬─────────────────────┘
+ └──────┬───────────────────────────────────────────────┬─────────[...]
         │ supabase-js (anon key + JWT do utilizador)     │ supabase.functions.invoke
         ▼                                                ▼
- ┌────────────────────────────────┐          ┌──────────────────────────────┐
+ ┌────────────────────────────────┐          ┌──────────────────────────��[...]
  │ Postgres + RLS                 │          │ Edge Functions (Deno)        │
  │  · tabelas public.*            │          │  send-booking-notification   │
  │  · funções SECURITY DEFINER    │          │  send-booking-accepted       │
@@ -289,7 +289,7 @@ Todas as tabelas vivem no esquema `public`, com RLS ativo.
 
 | Tabela | Papel | Notas-chave |
 |---|---|---|
-| `profiles` | Perfil do músico (PK = `auth.users.id`) | `username`, `instrument`, `skill_level`, `bio`, `avatar_url`, `city`/`country`, `latitude`/`longitude` (privadas) e `approx_latitude`/`approx_longitude` (públicas), `average_rating`, `total_ratings`, `phone`, `gender`, `preferred_instruments`, `preferred_skill_levels`, `onboarding_completed`, `language`, `time_zone` |
+| `profiles` | Perfil do músico (PK = `auth.users.id`) | `username`, `instrument`, `skill_level`, `bio`, `avatar_url`, `city`/`country`, `latitude`/`longitude` (privadas) e `approx_latitude`/`ap[...]
 | `bookings` | Pedido/reserva de jam session | `requester_id`, `musician_id`, `status`, `scheduled_date`, `duration_hours`, `message`, `cancellation_reason`, `reminder_sent` |
 | `booking_events` | Timeline auditável das reservas | Escrito só por trigger; sem INSERT/UPDATE/DELETE pelo cliente |
 | `messages` | Chat 1-para-1 | Opcionalmente ligado a `booking_id`; `read` |
@@ -346,6 +346,13 @@ auth.users ──< user_roles / subscriptions / music_snippets / feedback
 - `update_average_rating` — recalcula `average_rating` e `total_ratings` no perfil avaliado.
 - `normalize_profile_language` — valida e normaliza o idioma para `pt|en|es|fr`.
 - `update_updated_at_column` — mantém `updated_at`.
+
+- Cron job `send-booking-reminders` está activo na base de dados (jobid 1, agendamento `*/5 * * * *`) e
+  invoca a função via `net.http_post` com header `Authorization: Bearer <anon key>`. Este job foi criado
+  diretamente na base de dados **fora** dos ficheiros de migração em `supabase/migrations/` — a
+  migração `20260309045448` apenas activa as extensões `pg_cron` e `pg_net`, não cria o job em si.
+  Consequência: se a base de dados for recriada, clonada ou remixada sem recriar explicitamente este
+  job, os lembretes de booking deixam de ser enviados sem erro visível.
 
 ### Regras de privacidade impostas por RLS
 
@@ -475,13 +482,21 @@ significa que não existam — significa que não há uma lista rastreada.
 - O token do Mapbox é fornecido pelo utilizador e guardado em `localStorage`; sem token não há mapa.
 - O clustering é client-side: todos os perfis visíveis são carregados no browser, o que não escala
   para dezenas de milhares de utilizadores.
-- Existem ~20 perfis fictícios na base de dados, criados para avaliação visual; devem ser removidos
+- Existem ~20 perfis fictícios na base de dados, criados para avaliação visual do mapa; devem ser removidos
   antes de produção.
 - O tier Pro só pode ser atribuído por escrita no servidor.
 - `subscriptions` não tem políticas de escrita — qualquer integração de pagamentos terá de usar
   `service_role` numa Edge Function.
 - A aplicação depende inteiramente de RLS: um erro numa política é imediatamente uma falha de segurança.
 - Chaves i18n em falta nas quatro línguas fazem falhar o build de produção (por desenho).
+- Na raiz do repositório existem três lockfiles simultâneos: `bun.lock`, `bun.lockb` e `package-lock.json`.
+  Isto cria ambiguidade sobre qual gestor de pacotes (bun ou npm) é o oficial do projeto e implica risco
+  de instalações inconsistentes entre ambientes/máquinas diferentes. Recomenda-se decidir um gestor único
+  e remover os lockfiles redundantes.
+- O `README.md` na raiz (73 linhas) permanece o template genérico inicial do Lovable ("Welcome to your Lovable project")
+  e não descreve o JamMate, a arquitetura real nem os scripts e fluxos específicos do projecto
+  (geração de sitemap, auditoria i18n, testes Playwright/Vitest). Fica desatualizado ao lado do
+  `PROJECT_CONTEXT.md` e deve ser actualizado para reflectir a realidade do repositório.
 
 ### Dependências externas
 
@@ -490,7 +505,7 @@ significa que não existam — significa que não há uma lista rastreada.
 | Supabase (via Lovable Cloud) | BD, auth, storage, realtime, funções | gerido pela plataforma |
 | Mapbox GL JS | Mapa e geocoding | token do utilizador em `localStorage` |
 | Resend | Email transacional | `RESEND_API_KEY` |
-| Lovable AI Gateway | `LOVABLE_API_KEY` presente; **utilização atual não identificada** | `LOVABLE_API_KEY` |
+| Lovable AI Gateway | `LOVABLE_API_KEY` presente como secret do projecto (provisionado automaticamente pela plataforma Lovable) mas **não é referenciado em nenhum ficheiro de código do repositório** (nem no frontend nem nas Edge Functions). | `LOVABLE_API_KEY` |
 
 ---
 
@@ -523,6 +538,7 @@ significa que não existam — significa que não há uma lista rastreada.
 | Custos do Mapbox | Financeiro | Token restrito, caching, limites de utilização |
 | Carga do mapa com muitos utilizadores | Desempenho | Clustering server-side |
 | Entregabilidade de email | Fluxos de reserva falham silenciosamente | Domínio próprio no Resend e monitorização |
+| Cron job `send-booking-reminders` não versionado (criado directamente na base de dados) | Lembretes deixam de ser enviados silenciosamente se a base de dados for recriada/clonada/remixada; risco operacional e perda de confiança nos lembretes | Versionar a criação do job em `supabase/migrations/` ou documentação/automação explícita da provisão do job; evitar uso de `anon key` em chamadas agendadas e considerar execução via role de serviço/Edge Function |
 
 ### Roadmap sugerido
 
@@ -544,11 +560,17 @@ significa que não existam — significa que não há uma lista rastreada.
 | Sincronização com Lovable | Bidirecional. Alterações no Lovable enviam para o GitHub; pushes para `main` no GitHub sincronizam de volta para o Lovable. |
 | Data da ligação | 2026-08-07 |
 | CI / GitHub Actions | `.github/workflows/phone-privacy-test.yml` — testes SQL de privacidade do número de telefone. |
-| Estado do sync neste ambiente | O remote `origin` local aponta para o storage privado do Lovable. O push para o GitHub é executado pelo serviço server-side do Lovable, não por este sandbox. |
+| Estado do sync neste ambiente | O remote `origin` local aponta para o storage privado do Lovable. O push para o GitHub é executado pelo serviço server-side do Lovable, não por este sandbox. [...]
+
+### Histórico Git (factos concretos)
+
+- Primeiro commit: `c172396` — 2025-11-17T20:27:49Z — mensagem: "Initial commit from template vite_react_shadcn_ts...".
+- Total de commits no repositório até 2026-08-06: 664 commits.
+- Tempo desde o primeiro commit até 2026-08-06: aproximadamente 8,7 meses.
 
 ### Notas para o próximo agente
 
-- Não editar directamente o repositório GitHub esperando que o Lovable absorva tudo sem conflitos: o sync é bidirecional, mas alterações simultâneas em ambos os lados podem precisar de resolução manual.
+- Não editar directamente o repositório GitHub esperando que o Lovable absorva tudo sem conflitos: o sync é bidirecional, mas alterações simultâneas em ambos os lados podem precisar de reso[...]
 - Para confirmar o estado do sync, verificar o repositório GitHub diretamente ou pedir ao utilizador para confirmar a UI do Lovable (Plus (+) → GitHub).
 - A integração GitHub só pode ser ligada/desligada pela UI do Lovable; não existe comando git neste ambiente que a crie ou remova.
 
@@ -562,7 +584,7 @@ significa que não existam — significa que não há uma lista rastreada.
 no topo. Usa-o para te orientares depressa, mas trata o código e o esquema da base de dados como a
 única fonte de verdade.
 
-### Factos confirmados (lidos diretamente do projeto)
+### Factos confirmados (lidos diretamente do projecto)
 
 - Stack, versões e dependências — de `package.json`, `vite.config.ts`, `tailwind.config.ts`.
 - Lista de rotas, páginas, componentes e hooks — da árvore de ficheiros e de `src/App.tsx`.
@@ -574,21 +596,21 @@ no topo. Usa-o para te orientares depressa, mas trata o código e o esquema da b
 ### A validar antes de alterar
 
 - **Histórico de desenvolvimento (secção 6)**: reconstruído a partir do histórico de conversa, não do
-  git. Trata-o como narrativa, não como registo exato.
+  git. Trata-o como narrativa, não como registo exacto.
 - **Estado "funcional" de cada funcionalidade**: significa "implementada e ligada a dados reais", não
   "testada de ponta a ponta em produção". Verifica no browser antes de assumir.
-- **Ausência de bugs**: não há lista rastreada. Não concluas que não existem problemas.
+- **Ausência de bugs**: não há lista rastreada. Não concluas que não existam problemas.
 - **Tudo o que está marcado "não identificado"**: investiga antes de agir.
 
-### Cuidados antes de modificar arquitetura ou código
+### Cuidados antes de modificar arquitectura ou código
 
 1. **Nunca editar** `src/integrations/supabase/client.ts`, `src/integrations/supabase/types.ts`,
    `.env` nem `supabase/config.toml` — são auto-gerados.
 2. **Nunca guardar papéis em `profiles`.** Papéis vivem em `user_roles` e verificam-se com
    `has_role()`. Guardá-los no perfil abre escalada de privilégios.
-3. **Toda a tabela nova em `public` precisa de RLS ativo, políticas e `GRANT` explícitos** para
+3. **Toda a tabela nova em `public` precisa de RLS activo, políticas e `GRANT` explícitos** para
    `authenticated` e `service_role`. Sem `GRANT` a tabela é inacessível em runtime.
-4. **Não expor coordenadas exatas nem PII no cliente.** O mapa usa `approx_latitude`/
+4. **Nunca expor coordenadas exatas nem PII no cliente.** O mapa usa `approx_latitude`/
    `approx_longitude`; dados sensíveis só através de `get_profile_sensitive()`.
 5. **As regras de negócio das reservas estão em triggers.** Alterar transições de estado no frontend
    sem alterar `validate_booking_update` resulta em erros de base de dados.
@@ -601,3 +623,9 @@ no topo. Usa-o para te orientares depressa, mas trata o código e o esquema da b
    acompanhadas das políticas correspondentes.
 10. **Antes de mexer no `MapComponent`**, lê-o por inteiro: a interação entre Supercluster, popups
     nativos e `fitBounds` com padding é sensível e já foi origem de vários bugs de comportamento.
+
+11. **Nota operacional sobre o cron de lembretes**: o job `send-booking-reminders` existe apenas como
+    objecto na base de dados (não está versionado por migração). Se a infraestrutura for recriada,
+    documentar/automatizar a recriação do job em `supabase/migrations/` é essencial para evitar a
+    perda silenciosa de lembretes.
+
