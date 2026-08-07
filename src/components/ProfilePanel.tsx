@@ -26,6 +26,7 @@ interface ProfilePanelProps {
 const ProfilePanel = ({ onClose, embedded = false }: ProfilePanelProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isPro } = usePro();
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [cropperImage, setCropperImage] = useState<string | null>(null);
