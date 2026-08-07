@@ -34,7 +34,16 @@ export function isTestMode(): boolean {
   return !!clientToken?.startsWith('pk_test_');
 }
 
-export const PRO_PLANS = [
+export interface ProPlan {
+  priceId: string;
+  label: string;
+  price: string;
+  period: string;
+  note: string;
+  highlight?: boolean;
+}
+
+export const PRO_PLANS: ProPlan[] = [
   {
     priceId: 'pro_monthly',
     label: 'Mensal',
@@ -50,4 +59,4 @@ export const PRO_PLANS = [
     note: 'Poupa ~33% — equivale a 3,33 €/mês',
     highlight: true,
   },
-] as const;
+];
