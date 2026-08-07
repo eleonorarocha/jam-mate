@@ -570,7 +570,7 @@ significa que não existam — significa que não há uma lista rastreada.
 
 ### Notas para o próximo agente
 
-- Não editar directamente o repositório GitHub esperando que o Lovable absorva tudo sem conflitos: o sync é bidirecional, mas alterações simultâneas em ambos os lados podem precisar de reso[...]
+- Não editar directamente o repositório GitHub esperando que o Lovable absorva alterações sem conflitos: o sync confirmado é apenas Lovable → GitHub. O sentido inverso está **não identificado**.
 - Para confirmar o estado do sync, verificar o repositório GitHub diretamente ou pedir ao utilizador para confirmar a UI do Lovable (Plus (+) → GitHub).
 - A integração GitHub só pode ser ligada/desligada pela UI do Lovable; não existe comando git neste ambiente que a crie ou remova.
 
